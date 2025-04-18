@@ -1,4 +1,5 @@
-import Image from "next/image";
+import { MasterCard, Visa } from '@/assets/icons/index'
+import Image from 'next/image'
 
 export default function FooterBottom() {
   return (
@@ -11,14 +12,14 @@ export default function FooterBottom() {
         <div className="flex items-center gap-2">
           <span className="text-[var(--darkGray4)]">Métodos de Pagamento:</span>
           <Image
-            src="/icons/mastercard.png"
+            src={MasterCard}
             alt="MasterCard"
             width={100}
             height={100}
             className="h-10 w-auto"
           />
           <Image
-            src="/icons/visa.png"
+            src={Visa}
             alt="Visa"
             width={50}
             height={50}
@@ -27,5 +28,5 @@ export default function FooterBottom() {
         </div>
       </div>
     </div>
-  );
+  )
 }

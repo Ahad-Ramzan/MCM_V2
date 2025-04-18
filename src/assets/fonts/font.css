@@ -1,0 +1,136 @@
+@layer utilities {
+  .font-reem {
+    font-family: 'Reem Kufi', sans-serif;
+  }
+
+  .font-glacial {
+    font-family: 'Glacial Indifference', sans-serif;
+  }
+
+  .font-neutra {
+    font-family: 'Neutraface Text', serif;
+  }
+}
+
+/* Reem Kufi Fonts (TTF) */
+@font-face {
+  font-family: 'Reem Kufi';
+  src: url('/fonts/ReemKufi-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Reem Kufi';
+  src: url('/fonts/ReemKufi-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Reem Kufi';
+  src: url('/fonts/ReemKufi-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Reem Kufi';
+  src: url('/fonts/ReemKufi-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Reem Kufi Variable';
+  src: url('/fonts/ReemKufi-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Glacial Indifference Fonts (OTF) */
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('/fonts/GlacialIndifference-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('/fonts/GlacialIndifference-Bold (1).otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Neutraface Text Fonts (OTF) */
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Book Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Demi.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Demi Italic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Light Italic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutraface Text';
+  src: url('/fonts/Neutraface Text Bold Italic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

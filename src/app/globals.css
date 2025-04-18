@@ -1,5 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 /* @plugin "daisyui" */
+
+/* Import your font-face rules */
+@import '../assets/fonts/font.css';
 
 :root {
   /* --primary: #09387a;
