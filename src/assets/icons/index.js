@@ -4,5 +4,14 @@ import MCMLogoWhite from './Logo_white_header.png'
 import MCMLogoBlue from './Logo_footer.png'
 import MasterCard from './mastercard.png'
 import Visa from './visa.png'
+import Mcmfavicon from './mcmfavicon.ico'
 
-export { USflag, PTflag, MCMLogoWhite, MCMLogoBlue, MasterCard, Visa }
+export {
+  USflag,
+  PTflag,
+  MCMLogoWhite,
+  MCMLogoBlue,
+  MasterCard,
+  Visa,
+  Mcmfavicon,
+}

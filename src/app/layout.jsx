@@ -6,6 +6,7 @@ import FooterLinks from '@/components/Footer/FooterLinks'
 import MobileTopbar from '@/components/Navbar/mobile/MobileTopbar'
 import MobileBottombar from '@/components/Navbar/MobileBottombar'
 import localFont from 'next/font/local'
+import { mcmfavicon } from '@/assets/icons/index'
 
 // const geistSans = localFont({
 //   src: [
