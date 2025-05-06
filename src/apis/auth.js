@@ -1,6 +1,6 @@
 import axios from "../../node_modules/axios/index";
 
-const API_URL ="http://127.0.0.1:8001/api/user/";
+const API_URL ="http://127.0.0.1:8000/api/user/";
 
 // export const registerUser = async (email,password,fullname,role )=>{
 //     try{

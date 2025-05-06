@@ -6,9 +6,13 @@ import TableProjectItems from '@/components/SuperAdmin/shared/tables/TableProjec
 import { Select } from 'antd';
 import Link from 'next/link';
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard';
+import { getAllProducts } from '@/apis/products';
 
 const { Option } = Select;
 const ProductPage = () => {
+
+    const products=getAllProducts()
+    console.log(products,"data")
     return (
         <ContainerDefault title="Products">
             <HeaderDashboard
