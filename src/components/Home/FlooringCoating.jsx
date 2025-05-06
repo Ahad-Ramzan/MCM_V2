@@ -82,16 +82,16 @@ const FlooringCoatingSection = () => {
           Pavimentos e Revestimentos
         </h2>
         <div className="flex flex-wrap text-nowrap gap-4 items-center text-sm text-[var(--darkGray4)]">
-          <Link href="#" className>
+          <Link href="#" >
             Novos
           </Link>
-          <Link href="#" className>
+          <Link href="#" >
             Mais Vendidos
           </Link>
-          <Link href="#" className>
+          <Link href="#">
             Populares
           </Link>
-          <Link href="#" className>
+          <Link href="#" >
             Ver todos
           </Link>
         </div>

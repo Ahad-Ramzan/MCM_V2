@@ -10,7 +10,7 @@ const NewArrivals = () => {
       <div className="w-full flex justify-between bg-gray-100 p-4 my-12">
         <h2 className="text-xl font-normal">Novas Chegadas</h2>
         <div className="flex gap-4 items-center text-sm text-[var(--darkGray4)]">
-          <Link href="#" className>
+          <Link href="#">
             Ver todos
           </Link>
         </div>

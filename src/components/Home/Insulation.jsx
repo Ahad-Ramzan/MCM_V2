@@ -80,16 +80,16 @@ const InsulationSection = () => {
       <div className="w-full flex justify-between flex-wrap bg-gray-100 p-4 my-12">
         <h2 className="text-xl font-normal">Isolamentos e ETICS</h2>
         <div className="flex gap-4 flex-wrap items-center text-sm text-[var(--darkGray4)] text-nowrap">
-          <Link href="#" className>
+          <Link href="#" >
             Novos
           </Link>
-          <Link href="#" className>
+          <Link href="#" >
             Mais Vendidos
           </Link>
-          <Link href="#" className>
+          <Link href="#" >
             Populares
           </Link>
-          <Link href="#" className>
+          <Link href="#" >
             Ver todos
           </Link>
         </div>
