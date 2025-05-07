@@ -1,16 +1,21 @@
-// apis/estoreApi.js
+
 import axios from 'axios';
 
 const ESTORE_API = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/estore/',
+  baseURL: 'http://127.0.0.1:8001/api/estore/',
   withCredentials: true,
 });
 
-// Optionally add token to headers (if needed)
+
 ESTORE_API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('access_token') || "2f845a19f899034bba9a49419e58b575e8fb3418";
+    // const username = localStorage.getItem('username') || 'admin@example.com';
+    //   const password = localStorage.getItem('password') || 'Password';;
+
+// const token = btoa(`${username}:${password}`); 
   if (token) {
-    config.headers.Authorization = `Token ${token}`;
+    config.headers.Authorization = `token ${token}`;
+    config.headers.user
   }
   return config;
 });

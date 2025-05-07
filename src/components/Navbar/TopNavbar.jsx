@@ -54,7 +54,9 @@ export default function TopNavbar() {
             />
           </Link>
           <div className="flex items-center gap-2">
+            <Link href="/profile" >
             <FaRegUser size={25} />
+            </Link> 
             <a
               href="https://adminmcm.estelatechnologies.com/"
               target="_blank"
