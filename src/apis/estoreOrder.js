@@ -1,13 +1,13 @@
 
 import axios from 'axios';
 
-const ESTORE_API = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/estore/',
+const ORDERS_API = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/orders/',
   withCredentials: true,
 });
 
 
-ESTORE_API.interceptors.request.use((config) => {
+ORDERS_API.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token') || "2f845a19f899034bba9a49419e58b575e8fb3418";
     // const username = localStorage.getItem('username') || 'admin@example.com';
     //   const password = localStorage.getItem('password') || 'Password';;
@@ -20,4 +20,4 @@ ESTORE_API.interceptors.request.use((config) => {
   return config;
 });
 
-export default ESTORE_API;
+export default ORDERS_API;

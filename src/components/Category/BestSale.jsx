@@ -1,52 +1,51 @@
-"use client";
-import React, { useState } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import ProductCardStar from "@/ui/ProductCardStar";
+'use client'
 
-const productData = [
-  {
-    title: "Produto 1",
-  },
-  {
-    title: "Produto 2",
-  },
-  {
-    title: "Produto 3",
-  },
-  {
-    title: "Produto 4",
-  },
-  {
-    title: "Produto 5",
-  },
-  {
-    title: "Produto 6",
-  },
-  {
-    title: "Produto 7",
-  },
-];
+import React, { useEffect, useState } from 'react'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import ProductCardStar from '@/ui/ProductCardStar'
+import { getAllProducts } from '@/apis/products'
 
 const BestSale = () => {
-  const [startIndex, setStartIndex] = useState(0);
-  const itemsPerPage = 5;
+  const [startIndex, setStartIndex] = useState(0)
+
+  const [productsData, setProductsData] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+  console.log(productsData, 'final products')
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getAllProducts()
+        setProductsData(response)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      }
+    }
+
+    fetchProducts()
+  }, [])
+  const itemsPerPage = 5
 
   const handlePrev = () => {
     if (startIndex > 0) {
-      setStartIndex(startIndex - 1);
+      setStartIndex(startIndex - 1)
     }
-  };
+  }
 
   const handleNext = () => {
-    if (startIndex + itemsPerPage < productData.length) {
-      setStartIndex(startIndex + 1);
+    if (startIndex + itemsPerPage < productsData.results.length) {
+      setStartIndex(startIndex + 1)
     }
-  };
+  }
 
-  const visibleProducts = productData.slice(
+  const visibleProducts = productsData.results.slice(
     startIndex,
     startIndex + itemsPerPage
-  );
+  )
 
   return (
     <div className="hidden xl:block w-full ml-4 py-5">
@@ -67,7 +66,7 @@ const BestSale = () => {
           </button>
           <button
             onClick={handleNext}
-            disabled={startIndex + itemsPerPage >= productData.length}
+            disabled={startIndex + itemsPerPage >= productsData.results.length}
             className=" p-2 rounded-full disabled:opacity-50"
           >
             <FaChevronRight />
@@ -78,11 +77,31 @@ const BestSale = () => {
       {/* Product grid */}
       <div className="grid grid-cols-5 gap-4">
         {visibleProducts.map((product, index) => (
-          <ProductCardStar key={index} {...product} />
+          <ProductCardStar
+            key={product.id || index}
+            productId={product.id}
+            image={product.product_thumbnail}
+            brand={product.brand}
+            title={product.product_name}
+            price={product.regular_price + '€'}
+            sold={product.sold_items}
+            discount={calculateDiscount(
+              product.regular_price,
+              product.sale_price
+            )}
+          />
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BestSale;
+// Discount helper
+function calculateDiscount(original, sale) {
+  const originalPrice = parseFloat(original)
+  const salePrice = parseFloat(sale)
+  if (!originalPrice || !salePrice || salePrice >= originalPrice) return null
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+}
+
+export default BestSale

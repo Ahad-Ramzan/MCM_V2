@@ -1,10 +1,7 @@
 'use client'
-import React from "react";
+import React from 'react'
 
-const CategoryCard = ({
-  title = "Category",
-  items = ["Item 1", "Item 2", "Item 3"],
-}) => {
+const CategoryCard = ({ title, items }) => {
   return (
     <div className="border border-[var(--lightGray4)] flex gap-3 p-3 w-full items-start max-w-md">
       {/* Square Gray Placeholder */}
@@ -22,7 +19,7 @@ const CategoryCard = ({
         </ul>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CategoryCard;
+export default CategoryCard

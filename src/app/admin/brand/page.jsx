@@ -2,42 +2,74 @@
 import React, { useEffect, useState } from 'react'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import Pagination from '@/components/SuperAdmin/elements/basic/Pagination'
-import TableProjectItems from '@/components/SuperAdmin/shared/tables/TableProjectItems'
+// import TableProjectItems from '@/components/SuperAdmin/shared/tables/TableProjectItems';
 import { Select } from 'antd'
 import Link from 'next/link'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
-import { deleteProduct, getAllProducts } from '@/apis/products'
+import { deleteBrand, getAllBrands, getAllProducts } from '@/apis/products'
+import TableBrandName from '@/components/SuperAdmin/shared/tables/TableBrandName'
 import toast, { Toaster } from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 
 const { Option } = Select
-
-const ProductPage = () => {
+const BrandPage = () => {
   const [productsData, setProductsData] = useState({
     count: 0,
     next: null,
     previous: null,
     results: [],
   })
+
   const [currentPage, setCurrentPage] = useState(1)
+  console.log(productsData, 'products---')
+
+  // const handleDeleteBrand = async (id) => {
+  //         if (confirm('Are you sure you want to delete this brand?')) {
+  //             try {
+  //                 await deleteBrand(id);
+  //                 alert('Brand deleted successfully.');
+  //                 await fetchData()
+  //             } catch (error) {
+  //                 console.error('Delete failed:', error);
+  //                 alert('Failed to delete brand.');
+  //             }
+  //         }
+  //     };
+  // useEffect(() => {
+  //         const fetchData = async () => {
+  //             try {
+  //                 const response = await getAllBrands();
+  //                 console.log(response,"ressprod")
+  //                 setProductsData(response); // Store in state
+  //             } catch (error) {
+  //                 console.error('Failed to fetch categories:', error);
+  //             }
+  //         };
+
+  //         fetchData();
+  //     }, []);
 
   const fetchData = async (page = 1) => {
     try {
-      const response = await getAllProducts(page)
+      const response = await getAllBrands(page)
       setProductsData(response)
       setCurrentPage(page)
     } catch (error) {
-      toast.error('Failed to fetch products')
+      console.error('Failed to fetch brands:', error)
     }
   }
 
-  const handleDeleteProduct = async (id) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+  const handleDeleteBrand = async (id) => {
+    if (confirm('Are you sure you want to delete this brand?')) {
       try {
-        await deleteProduct(id)
-        toast.success('Product Deleted successfully!')
-        await fetchData(currentPage)
+        await deleteBrand(id)
+        // alert('Brand deleted successfully.');
+        toast.success('Brand Deleted successfully!')
+        await fetchData() // Refresh data after deletion
       } catch (error) {
-        toast.error('Failed to delete product')
+        console.error('Delete failed:', error)
+        // alert('Failed to delete brand.');
+        toast.error('Failed to Delete Brand.')
       }
     }
   }
@@ -46,31 +78,42 @@ const ProductPage = () => {
     fetchData(page)
   }
 
+  const router = useRouter()
+
+  const handleClick = () => {
+    router.push('/admin/brand/create-brand')
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
 
-  const totalPages = Math.ceil(productsData.count / 10) // Assuming 10 products per page
-
+  const totalPages = Math.ceil(productsData.count / 10)
   return (
-    <ContainerDefault title="Products">
-      <HeaderDashboard title="Produtos" description="Lista de Protudos " />
-      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
+    <ContainerDefault title="Brands">
+      <HeaderDashboard title="Brands" description="Lists of Brands " />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000, // default for all toasts
+        }}
+      />
       <section className="ps-items-listing">
         <div className="ps-section__actions">
-          <Link href="/admin/products/create-product" className="ps-btn ">
+          <button className="ps-btn" onClick={handleClick}>
             <i className="icon icon-plus mr-2" />
-            NOVO PRODUTO
-          </Link>
+            Add Brand
+          </button>
         </div>
         <div className="ps-section__header">
           <div className="ps-section__filter">
-            <form className="ps-form--filter" method="get">
+            <form className="ps-form--filter" action="index.html" method="get">
               <div className="ps-form__left">
                 <div className="form-group">
                   <Select
                     placeholder="Selecionar Categoria"
                     className="ps-ant-dropdown"
+                    listItemHeight={20}
                   >
                     <Option value="clothing-and-apparel">
                       Clothing & Apparel
@@ -80,15 +123,20 @@ const ProductPage = () => {
                 </div>
                 <div className="form-group">
                   <Select
-                    placeholder="Product Type"
+                    placeholder="Selecionar Categoria"
                     className="ps-ant-dropdown"
+                    listItemHeight={20}
                   >
                     <Option value="simple-product">Simple Product</Option>
-                    <Option value="groupped-product">Groupped Product</Option>
+                    <Option value="groupped-product">Groupped product</Option>
                   </Select>
                 </div>
                 <div className="form-group">
-                  <Select placeholder="Estado" className="ps-ant-dropdown">
+                  <Select
+                    placeholder="Estado"
+                    className="ps-ant-dropdown"
+                    listItemHeight={20}
+                  >
                     <Option value="active">Active</Option>
                     <Option value="in-active">InActive</Option>
                   </Select>
@@ -103,7 +151,11 @@ const ProductPage = () => {
             </form>
           </div>
           <div className="ps-section__search">
-            <form className="ps-form--search-simple" method="get">
+            <form
+              className="ps-form--search-simple"
+              action="index.html"
+              method="get"
+            >
               <input
                 className="form-control"
                 type="text"
@@ -115,14 +167,12 @@ const ProductPage = () => {
             </form>
           </div>
         </div>
-
         <div className="ps-section__content">
-          <TableProjectItems
+          <TableBrandName
             productsData={productsData.results}
-            onDelete={handleDeleteProduct}
+            onDelete={handleDeleteBrand}
           />
         </div>
-
         <div className="ps-section__footer">
           <p>
             Mostrar {productsData.results.length} de {productsData.count}{' '}
@@ -138,5 +188,4 @@ const ProductPage = () => {
     </ContainerDefault>
   )
 }
-
-export default ProductPage
+export default BrandPage

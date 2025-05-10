@@ -1,33 +1,36 @@
-"use client";
-import React from "react";
-import StarRating from "@/ui/StarRating";
-import Link from "next/link";
+'use client'
+import React from 'react'
+import StarRating from '@/ui/StarRating'
+import Link from 'next/link'
 
 const ProductCardStar = ({
-  image = "/globe.svg",
-  brand = "Marca Produto",
-  title = "Placas de Gesso",
-  price = "10.99€", // Use dot (.) for parsing
+  productId,
+  image = '/globe.svg',
+  brand = 'Marca Produto',
+  title = 'Placas de Gesso',
+  price = '10.99€', // Use dot (.) for parsing
   rating = 4,
   sold = 10,
   discount, // e.g., 20 means 20% off
 }) => {
-  const numericPrice = parseFloat(price.replace("€", "").replace(",", "."));
+  const numericPrice = parseFloat(price.replace('€', '').replace(',', '.'))
   const discountedPrice = discount
-    ? (numericPrice * (1 - discount / 100)).toFixed(2).replace(".", ",") + "€"
-    : price;
+    ? (numericPrice * (1 - discount / 100)).toFixed(2).replace('.', ',') + '€'
+    : price
 
-  const originalPriceFormatted =
-    numericPrice.toFixed(2).replace(".", ",") + "€";
+  const originalPriceFormatted = numericPrice.toFixed(2).replace('.', ',') + '€'
 
   return (
-    <Link href="/product" className="block">
+    <Link href={`product/${productId}`} className="block">
       <div className="border-[var(--lightGray4)] w-[160px] sm:w-[180px] flex flex-col gap-2 relative cursor-pointer">
+        {/* <img
+          src={image}
+          alt={product_name}
+          className="object-cover w-full h-full rounded"
+        /> */}
         {/* Product Image */}
         <div className="relative aspect-square w-full bg-gray-100 rounded mb-2 overflow-hidden">
-          {/* Placeholder - no image */}
-          <div className="w-full h-full bg-gray-100" />
-
+          <img src={image} alt={title} className="object-cover w-full h-full" />
           {/* Discount Badge */}
           {discount && (
             <div className="absolute top-1 right-1 bg-[var(--secondary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
@@ -66,7 +69,7 @@ const ProductCardStar = ({
         </div>
       </div>
     </Link>
-  );
-};
+  )
+}
 
-export default ProductCardStar;
+export default ProductCardStar

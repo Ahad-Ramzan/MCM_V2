@@ -1,79 +1,101 @@
-"use client";
+'use client'
 
-import React, { useRef, useEffect, useState } from "react";
-import CountdownTimer from "@/ui/CountdownTimer";
-import ProductCard from "@/ui/ProductCard";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import React, { useRef, useEffect, useState } from 'react'
+import CountdownTimer from '@/ui/CountdownTimer'
+import ProductCard from '@/ui/ProductCard'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { getAllProducts } from '@/apis/products'
 
 const products = Array(12).fill({
-  image: "/placeholder.png",
-  brand: "Marca Produto",
-  price: "10,99€",
-  title: "Placas de Gesso",
+  image: '/placeholder.png',
+  brand: 'Marca Produto',
+  price: '10,99€',
+  title: 'Placas de Gesso',
   rating: 4,
   sold: 73,
   soldRatio: 0.4,
-});
+})
 
 const PromotionSection = () => {
-  const scrollRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(0); // Start at 0 to delay dot rendering
+  const [productsData, setProductsData] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+  console.log(productsData, 'products---')
+
+  const fetchData = async () => {
+    try {
+      const response = await getAllProducts()
+      console.log(response, 'ressprod')
+      setProductsData(response) // Store in state
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+  const scrollRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [visibleCount, setVisibleCount] = useState(0) // Start at 0 to delay dot rendering
 
   const scroll = (offset) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({
         left: offset,
-        behavior: "smooth",
-      });
+        behavior: 'smooth',
+      })
     }
-  };
+  }
 
   const scrollToIndex = (index) => {
-    const container = scrollRef.current;
+    const container = scrollRef.current
     if (container) {
-      const itemWidth = container.children[0].offsetWidth + 16; // card width + gap
+      const itemWidth = container.children[0].offsetWidth + 16 // card width + gap
       container.scrollTo({
         left: index * itemWidth,
-        behavior: "smooth",
-      });
+        behavior: 'smooth',
+      })
     }
-  };
+  }
 
   // Update active dot on scroll
   useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
+    const container = scrollRef.current
+    if (!container) return
 
     const handleScroll = () => {
-      const scrollLeft = container.scrollLeft;
-      const itemWidth = container.children[0].offsetWidth + 16;
-      const index = Math.round(scrollLeft / itemWidth);
-      setActiveIndex(index);
-    };
+      const scrollLeft = container.scrollLeft
+      const itemWidth = container.children[0].offsetWidth + 16
+      const index = Math.round(scrollLeft / itemWidth)
+      setActiveIndex(index)
+    }
 
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Dynamically calculate how many cards fit in viewport
   useEffect(() => {
-    const container = scrollRef.current;
+    const container = scrollRef.current
 
     const updateVisibleCount = () => {
       if (container && container.children.length > 0) {
-        const containerWidth = container.offsetWidth;
-        const cardWidth = container.children[0].offsetWidth + 16; // 16px gap
-        const count = Math.floor(containerWidth / cardWidth);
-        setVisibleCount(count);
+        const containerWidth = container.offsetWidth
+        const cardWidth = container.children[0].offsetWidth + 16 // 16px gap
+        const count = Math.floor(containerWidth / cardWidth)
+        setVisibleCount(count)
       }
-    };
+    }
 
-    updateVisibleCount();
-    window.addEventListener("resize", updateVisibleCount);
+    updateVisibleCount()
+    window.addEventListener('resize', updateVisibleCount)
 
-    return () => window.removeEventListener("resize", updateVisibleCount);
-  }, []);
+    return () => window.removeEventListener('resize', updateVisibleCount)
+  }, [])
 
   return (
     <div className="Container mx-auto  py-6 my-8">
@@ -103,12 +125,24 @@ const PromotionSection = () => {
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto scroll-smooth scroll-pl-4 scroll-pr-4 snap-x snap-mandatory no-scrollbar px-8"
         >
-          {products.map((product, idx) => (
+          {productsData.results.map((product, idx) => (
             <div
               key={idx}
               className="snap-start shrink-0 w-[200px] sm:w-[220px] md:w-[240px]"
             >
-              <ProductCard {...product} />
+              <ProductCard
+                productId={product.id}
+                image={product.product_thumbnail}
+                brand={product.brand}
+                title={product.product_name}
+                price={product.regular_price + '€'}
+                rating={product.rating || 4}
+                sold={product.sold_items}
+                // discount={calculateDiscount(
+                //   product.regular_price,
+                //   product.sale_price
+                // )}
+              />
             </div>
           ))}
         </div>
@@ -128,21 +162,21 @@ const PromotionSection = () => {
           {Array.from({
             length: Math.ceil(products.length / visibleCount),
           }).map((_, idx) => {
-            const isActive = Math.floor(activeIndex / visibleCount) === idx;
+            const isActive = Math.floor(activeIndex / visibleCount) === idx
             return (
               <button
                 key={idx}
                 onClick={() => scrollToIndex(idx * visibleCount)}
                 className={`h-2 w-2 cursor-pointer rounded-full transition-all duration-300 ${
-                  isActive ? "bg-[var(--primary)] scale-125" : "bg-gray-300"
+                  isActive ? 'bg-[var(--primary)] scale-125' : 'bg-gray-300'
                 }`}
               />
-            );
+            )
           })}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PromotionSection;
+export default PromotionSection

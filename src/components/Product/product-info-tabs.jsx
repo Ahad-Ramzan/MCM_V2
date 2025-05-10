@@ -1,75 +1,19 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 
-export function ProductInfoTabs() {
-  const [activeTab, setActiveTab] = useState("description");
+export function ProductInfoTabs({ productData }) {
+  const [activeTab, setActiveTab] = useState('description')
 
   const tabs = [
-    { id: "description", label: "Descrição" },
-    { id: "details", label: "Detalhes" },
-    { id: "reviews", label: "Avaliações (1)" },
-    { id: "faq", label: "Perguntas Frequentes" },
-  ];
+    { id: 'description', label: 'Descrição' },
+    { id: 'details', label: 'Detalhes' },
+    { id: 'reviews', label: 'Avaliações (1)' },
+    { id: 'faq', label: 'Perguntas Frequentes' },
+  ]
 
   const tabContent = {
-    description: (
-      <div className="py-4">
-        <p className="mb-2">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit
-        </p>
-        <p className="mb-4 text-gray-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </p>
-        <p className="text-gray-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur.
-        </p>
-        <div className="w-full h-64 my-4 bg-gray-100"></div>
-        <p className="mb-2">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit
-        </p>
-        <p className="mb-4 text-gray-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </p>
-        <p className="text-gray-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur.
-        </p>
-        <ul>
-          <li className="flex items-start gap-2">
-            <span className=" font-bold">•</span>
-            <span>Lorem ipsum</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className=" font-bold">•</span>
-            <span>Lorem ipsum</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className=" font-bold">•</span>
-            <span>Lorem ipsum</span>
-          </li>
-        </ul>
-        <p className="text-gray-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur.
-        </p>
-      </div>
-    ),
+    description: <div className="py-4">{productData.product_description}</div>,
     details: (
       <div className="py-4">
         <h3 className="font-medium mb-2">Especificações do Produto</h3>
@@ -135,7 +79,7 @@ export function ProductInfoTabs() {
         </div>
       </div>
     ),
-  };
+  }
 
   return (
     <div className="  p-4">
@@ -147,8 +91,8 @@ export function ProductInfoTabs() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               {tab.label}
@@ -158,5 +102,5 @@ export function ProductInfoTabs() {
       </div>
       {tabContent[activeTab]}
     </div>
-  );
+  )
 }

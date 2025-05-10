@@ -66,3 +66,19 @@ export const getCurrentUser = async () => {
     throw new Error("Failed to fetch user data");
   }
 };
+
+export const deleteUser = async (userId) => {
+  try {
+    const response = await axiosInstance.delete(`user/users/${userId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting user:', error.response?.data || error.message);
+    throw new Error('Failed to delete user');
+  }
+};
+
+
+export const getUserdata = async(page=1)=>{
+  const response =await axiosInstance.get(`user/users/?page=${page}`)
+  return response.data
+} 
