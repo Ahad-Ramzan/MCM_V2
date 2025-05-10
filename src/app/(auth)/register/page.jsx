@@ -2,28 +2,26 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-// import { registerUser } from '@/apis/auth';
-import { registerUser } from '@/apis/auth';
+import { registerUser } from '@/apis/userApi';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState('');
+  const [address, setAddress] = useState('');
+  const [bio, setBio] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
-  const roles = ['Admin', 'User' ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    if (!email || !fullName || !password || !selectedRole) {
-      setError('All fields are required including role');
+    if (!email || !fullName || !password || !address || !bio || !displayName) {
+      setError('All fields are required');
       setIsLoading(false);
       return;
     }
@@ -33,9 +31,10 @@ export default function RegisterPage() {
         email,
         password,
         full_name: fullName,
-        role: selectedRole,
+        address,
+        bio,
+        display_name: displayName,
       });
-      
 
       alert('Registration successful');
       router.push('/login');
@@ -60,64 +59,18 @@ export default function RegisterPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
-          <div>
-            <label className="block text-gray-700 font-semibold">Email</label>
-            <input
-              type="email"
-              placeholder="name@email.com"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
+          <InputField label="Email" value={email} onChange={setEmail} type="email" />
+          <InputField label="Display Name" value={displayName} onChange={setDisplayName} />
 
-          <div>
-            <label className="block text-gray-700 font-semibold">Full Name</label>
-            <input
-              type="text"
-              placeholder="John Doe"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
+          <InputField label="Full Name" value={fullName} onChange={setFullName} />
+          <InputField label="Password" value={password} onChange={setPassword} type="password" />
+          
+          {/* Address Textarea */}
+          <TextareaField label="Address" value={address} onChange={setAddress} />
 
-          <div>
-            <label className="block text-gray-700 font-semibold">Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
+          {/* Bio Textarea */}
+          <TextareaField label="Bio" value={bio} onChange={setBio} />
 
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Select Role</label>
-            <div className="flex flex-col gap-2">
-              {roles.map((role) => (
-                <label key={role} className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="role"
-                    value={role}
-                    checked={selectedRole === role}
-                    onChange={() => setSelectedRole(role)}
-                    className="mr-2"
-                    disabled={isLoading}
-                  />
-                  {role}
-                </label>
-              ))}
-            </div>
-          </div>
 
           <button
             type="submit"
@@ -135,6 +88,38 @@ export default function RegisterPage() {
           </a>
         </p>
       </div>
+    </div>
+  );
+}
+
+function InputField({ label, value, onChange, type = 'text' }) {
+  return (
+    <div>
+      <label className="block text-gray-700 font-semibold">{label}</label>
+      <input
+        type={type}
+        placeholder={label}
+        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+      />
+    </div>
+  );
+}
+
+function TextareaField({ label, value, onChange }) {
+  return (
+    <div>
+      <label className="block text-gray-700 font-semibold">{label}</label>
+      <textarea
+        placeholder={label}
+        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+        rows="4" // Default height
+      />
     </div>
   );
 }

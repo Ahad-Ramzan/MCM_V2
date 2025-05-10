@@ -1,41 +1,65 @@
-"use client";
-import React, { useState } from "react";
+'use client'
+import { getAllBrands, getAllCategories } from '@/apis/products'
+import React, { useEffect, useState } from 'react'
 
-const categories = [
-  "Madeiras",
-  "Acrílicos",
-  "Construção",
-  "Ferragens",
-  "Ferramentas",
-  "Pavimentos",
-  "Revestimentos",
-  "Cimentos",
-  "Isolamentos",
-];
-
-const brands = [
-  "Marca 1",
-  "Marca 2",
-  "Marca 3",
-  "Marca 4",
-  "Marca 5",
-  "Marca 6",
-  "Marca 7",
-  "Marca 8",
-  "Marca 9",
-  "Marca 10",
-];
+// const categories = [
+//   'Madeiras',
+//   'Acrílicos',
+//   'Construção',
+//   'Ferragens',
+//   'Ferramentas',
+//   'Pavimentos',
+//   'Revestimentos',
+//   'Cimentos',
+//   'Isolamentos',
+// ]
 
 const SidebarFilter = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [price, setPrice] = useState([0, 2000]);
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [selectedBrand, setSelectedBrand] = useState(null)
+  const [price, setPrice] = useState([0, 2000])
+  const [categories, setcategories] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+  const [brandsdata, setBrandsData] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+  console.log(brandsdata, 'brandsdata ----')
 
   const handlePriceChange = (index, value) => {
-    const newPrice = [...price];
-    newPrice[index] = Number(value);
-    setPrice(newPrice);
-  };
+    const newPrice = [...price]
+    newPrice[index] = Number(value)
+    setPrice(newPrice)
+  }
+
+  const fetchData = async () => {
+    try {
+      const response = await getAllBrands()
+      setBrandsData(response)
+    } catch (error) {
+      console.error('Failed to fetch brands:', error)
+    }
+  }
+
+  const fetchCategoryData = async () => {
+    try {
+      const response = await getAllCategories()
+      setcategories(response)
+    } catch (error) {
+      console.error('Failed to fetch brands:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+    fetchCategoryData()
+  }, [])
 
   return (
     <div className="hidden  max-w-[250px] xl:flex xl:flex-col gap-6 p-2">
@@ -43,15 +67,15 @@ const SidebarFilter = () => {
       <div className="bg-gray-100 p-4">
         <h3 className="font-semibold mb-6 text-md uppercase">Categorias</h3>
         <ul className="space-y-2 text-sm text-[var(--darkGray4)]">
-          {categories.map((cat, i) => (
+          {categories.results.map((cat, i) => (
             <li
               key={i}
               className={`cursor-pointer hover:underline ${
-                selectedCategory === cat ? "font-bold text-black" : ""
+                selectedCategory === cat ? 'font-bold text-black' : ''
               }`}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => setSelectedCategory(cat.id)}
             >
-              {cat}
+              {cat.name}
             </li>
           ))}
         </ul>
@@ -61,15 +85,15 @@ const SidebarFilter = () => {
       <div className="bg-gray-100 p-4">
         <h3 className="font-semibold mb-3 text-md uppercase">Marcas</h3>
         <ul className="space-y-2 text-sm text-[var(--darkGray4)]">
-          {brands.map((brand, i) => (
+          {brandsdata.results.map((brand, i) => (
             <li
               key={i}
               className={`cursor-pointer hover:underline ${
-                selectedBrand === brand ? "font-bold text-black" : ""
+                selectedBrand === brand ? 'font-bold text-black' : ''
               }`}
-              onClick={() => setSelectedBrand(brand)}
+              onClick={() => setSelectedBrand(brand.id)}
             >
-              {brand}
+              {brand.brand_name}
             </li>
           ))}
         </ul>
@@ -103,7 +127,7 @@ const SidebarFilter = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SidebarFilter;
+export default SidebarFilter

@@ -1,10 +1,30 @@
 'use client'
-import ProductCardStar from "@/ui/ProductCardStar";
-import React from "react";
-import { ProductInfoTabs } from "./product-info-tabs";
-import ProductDetails from "./ProductDetails";
+import ProductCardStar from '@/ui/ProductCardStar'
+import React, { useEffect, useState } from 'react'
+import { ProductInfoTabs } from './product-info-tabs'
+import ProductDetails from './ProductDetails'
+import { getAllProducts } from '@/apis/products'
 
 const RightSideBar = () => {
+  const [productsData, setProductsData] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+
+  const fetchData = async () => {
+    try {
+      const response = await getAllProducts()
+      setProductsData(response)
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
   return (
     <aside className="hidden xl:block w-full lg:w-[280px] p-4  bg-white space-y-6">
       {/* Features List */}
@@ -34,13 +54,28 @@ const RightSideBar = () => {
 
         {/* Product Card */}
         <div className="p-4">
+          {productsData.results.map((product, index) => (
+            <ProductCardStar
+              key={product.id || index}
+              productId={product.id}
+              image={product.product_thumbnail}
+              brand={product.brand}
+              title={product.product_name}
+              price={product.regular_price + '€'}
+              sold={product.sold_items}
+              // discount={calculateDiscount(
+              //   product.regular_price,
+              //   product.sale_price
+              // )}
+            />
+          ))}
+          {/* <ProductCardStar />
           <ProductCardStar />
-          <ProductCardStar />
-          <ProductCardStar />
+          <ProductCardStar /> */}
         </div>
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default RightSideBar;
+export default RightSideBar

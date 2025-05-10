@@ -1,78 +1,99 @@
-"use client";
+'use client'
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from 'react'
 
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Link from "next/link";
-import ProductCardStar from "@/ui/ProductCardStar";
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import Link from 'next/link'
+import ProductCardStar from '@/ui/ProductCardStar'
+import { getAllProducts } from '@/apis/products'
 
 const products = Array(12).fill({
-  image: "/placeholder.png",
-  brand: "Marca Produto",
-  price: "10,99€",
-  title: "Placas de Gesso",
+  image: '/placeholder.png',
+  brand: 'Marca Produto',
+  price: '10,99€',
+  title: 'Placas de Gesso',
   rating: 4,
   sold: 73,
   soldRatio: 0.4,
-});
+})
 
 const FlooringCoatingSection = () => {
-  const scrollRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(1);
+  const scrollRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [visibleCount, setVisibleCount] = useState(1)
+
+  const [productsData, setProductsData] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+
+  const fetchData = async () => {
+    try {
+      const response = await getAllProducts()
+      setProductsData(response)
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   const scroll = (offset) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({
         left: offset,
-        behavior: "smooth",
-      });
+        behavior: 'smooth',
+      })
     }
-  };
+  }
 
   const scrollToIndex = (index) => {
-    const container = scrollRef.current;
+    const container = scrollRef.current
     if (container) {
-      const itemWidth = container.children[0].offsetWidth + 16; // card width + gap
+      const itemWidth = container.children[0].offsetWidth + 16 // card width + gap
       container.scrollTo({
         left: index * itemWidth,
-        behavior: "smooth",
-      });
+        behavior: 'smooth',
+      })
     }
-  };
+  }
 
   // Update active dot on scroll
   useEffect(() => {
-    const container = scrollRef.current;
+    const container = scrollRef.current
 
     const handleScroll = () => {
-      const scrollLeft = container.scrollLeft;
-      const itemWidth = container.children[0].offsetWidth + 16;
-      const index = Math.round(scrollLeft / itemWidth);
-      setActiveIndex(index);
-    };
+      const scrollLeft = container.scrollLeft
+      const itemWidth = container.children[0].offsetWidth + 16
+      const index = Math.round(scrollLeft / itemWidth)
+      setActiveIndex(index)
+    }
 
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Dynamically calculate how many cards fit in viewport
   useEffect(() => {
-    const container = scrollRef.current;
+    const container = scrollRef.current
 
     const updateVisibleCount = () => {
       if (container && container.children.length > 0) {
-        const containerWidth = container.offsetWidth;
-        const cardWidth = container.children[0].offsetWidth + 16; // 16px gap
-        setVisibleCount(Math.floor(containerWidth / cardWidth));
+        const containerWidth = container.offsetWidth
+        const cardWidth = container.children[0].offsetWidth + 16 // 16px gap
+        setVisibleCount(Math.floor(containerWidth / cardWidth))
       }
-    };
+    }
 
-    updateVisibleCount();
-    window.addEventListener("resize", updateVisibleCount);
+    updateVisibleCount()
+    window.addEventListener('resize', updateVisibleCount)
 
-    return () => window.removeEventListener("resize", updateVisibleCount);
-  }, []);
+    return () => window.removeEventListener('resize', updateVisibleCount)
+  }, [])
 
   return (
     <div className="Container px-4 py-6 my-8">
@@ -82,18 +103,10 @@ const FlooringCoatingSection = () => {
           Pavimentos e Revestimentos
         </h2>
         <div className="flex flex-wrap text-nowrap gap-4 items-center text-sm text-[var(--darkGray4)]">
-          <Link href="#" >
-            Novos
-          </Link>
-          <Link href="#" >
-            Mais Vendidos
-          </Link>
-          <Link href="#">
-            Populares
-          </Link>
-          <Link href="#" >
-            Ver todos
-          </Link>
+          <Link href="#">Novos</Link>
+          <Link href="#">Mais Vendidos</Link>
+          <Link href="#">Populares</Link>
+          <Link href="#">Ver todos</Link>
         </div>
       </div>
 
@@ -112,13 +125,20 @@ const FlooringCoatingSection = () => {
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto scroll-smooth scroll-pl-4 scroll-pr-4 snap-x snap-mandatory no-scrollbar px-8"
         >
-          {products.map((product, idx) => (
-            <div
-              key={idx}
-              className="snap-start shrink-0 w-[200px] sm:w-[220px] md:w-[240px]"
-            >
-              <ProductCardStar {...product} />
-            </div>
+          {productsData.results.map((product, index) => (
+            <ProductCardStar
+              key={product.id || index}
+              productId={product.id}
+              image={product.product_thumbnail}
+              brand={product.brand}
+              title={product.product_name}
+              price={product.regular_price + '€'}
+              sold={product.sold_items}
+              // discount={calculateDiscount(
+              //   product.regular_price,
+              //   product.sale_price
+              // )}
+            />
           ))}
         </div>
 
@@ -140,15 +160,15 @@ const FlooringCoatingSection = () => {
               onClick={() => scrollToIndex(idx * visibleCount)}
               className={`h-2 w-2 cursor-pointer rounded-full transition-all duration-300 ${
                 Math.floor(activeIndex / visibleCount) === idx
-                  ? "bg-[var(--primary)] scale-125"
-                  : "bg-gray-300"
+                  ? 'bg-[var(--primary)] scale-125'
+                  : 'bg-gray-300'
               }`}
             ></button>
           )
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FlooringCoatingSection;
+export default FlooringCoatingSection

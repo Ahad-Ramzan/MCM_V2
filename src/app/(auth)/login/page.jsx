@@ -1,51 +1,54 @@
-'use client';
+'use client'
 
-import { useState } from "react";
-import { loginUser } from "@/apis/auth";
-import { useRouter } from "next/navigation";
+import { useState } from 'react'
+// import { loginUser } from "@/apis/auth";
+import { loginUser } from '@/apis/userApi'
+import { useRouter } from 'next/navigation'
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
-    if (email === "" || password === "") {
-      setError("Please enter both email and password");
-      setIsLoading(false);
-      return;
+    if (email === '' || password === '') {
+      setError('Please enter both email and password')
+      setIsLoading(false)
+      return
     }
 
     try {
-      const response = await loginUser(email, password);
-      console.log(response,"response")
+      const response = await loginUser(email, password)
+      toast.success('Login Successfully successfully!')
       if (response.token) {
-        localStorage.setItem('access_token', response.token);
-        console.log('Redirecting...');
-        router.push('/'); // Redirect to home page
+        localStorage.setItem('access_token', response.token)
+        console.log('Redirecting...')
+        router.push('admin/') // Redirect to home page
       }
     } catch (error) {
-      setError("Invalid email or password");
-      console.error(error);
+      toast.error('Failed to Login.')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000, // default for all toasts
+        }}
+      />
       <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md text-center">
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="h-16 mx-auto mb-4"
-        />
+        <img src="/logo.png" alt="Logo" className="h-16 mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-4">Welcome back</h2>
         {error && (
           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md">
@@ -66,7 +69,9 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold">Password</label>
+            <label className="block text-gray-700 font-semibold">
+              Password
+            </label>
             <input
               type="password"
               placeholder="••••"
@@ -87,5 +92,5 @@ export default function Login() {
         </form>
       </div>
     </div>
-  );
-} 
+  )
+}

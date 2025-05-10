@@ -1,10 +1,11 @@
-"use client";
-import React from "react";
-import StarRating from "@/ui/StarRating";
+'use client'
+import React from 'react'
+import StarRating from '@/ui/StarRating'
 
 const ProductCardStarHorizontal = ({
-  title = "Placas de Gesso",
-  price = "10,99€",
+  image,
+  title = 'Placas de Gesso',
+  price = '10,99€',
   rating = 4,
 }) => {
   return (
@@ -12,6 +13,7 @@ const ProductCardStarHorizontal = ({
       {/* Product Image */}
       <div className="aspect-square w-full bg-gray-100">
         {/* <Image src={image} alt={title} fill className="object-cover rounded" /> */}
+        <img src={image} alt={title} className="object-cover w-full h-full" />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -31,7 +33,7 @@ const ProductCardStarHorizontal = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProductCardStarHorizontal;
+export default ProductCardStarHorizontal
