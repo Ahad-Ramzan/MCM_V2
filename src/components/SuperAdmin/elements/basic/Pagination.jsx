@@ -37,9 +37,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           //     backgroundColor: '#fff',
           //     cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
           //   }}
-        >
-          Previous
-        </button>
+        ></button>
       </li>
 
       {/* Page Numbers */}
@@ -77,9 +75,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           //     backgroundColor: '#fff',
           //     cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
           //   }}
-        >
-          Next
-        </button>
+        ></button>
       </li>
     </ul>
   )

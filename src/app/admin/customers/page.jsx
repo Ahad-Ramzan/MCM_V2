@@ -7,6 +7,7 @@ import FormSearchSimple from '@/components/SuperAdmin/shared/forms/FormSearchSim
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
 import { deleteUser, getUserdata } from '@/apis/userApi'
 import toast, { Toaster } from 'react-hot-toast'
+import Link from 'next/link'
 
 const CustomersPage = () => {
   const [userData, setUsersData] = useState({
@@ -67,9 +68,10 @@ const CustomersPage = () => {
             <FormSearchSimple />
           </div>
           <div className="ps-section__actions">
-            <a className="ps-btn " href="#">
-              <i className="icon icon-plus mr-2"></i>Adicionar cliente
-            </a>
+            <Link href="/admin/customers/create-client" className="ps-btn">
+              <i className="icon icon-plus mr-2" />
+              NOVO PRODUTO
+            </Link>
           </div>
         </div>
         <div className="ps-section__content">

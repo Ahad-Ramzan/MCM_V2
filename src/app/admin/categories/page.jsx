@@ -8,6 +8,7 @@ import FormSearchSimple from '@/components/SuperAdmin/shared/forms/FormSearchSim
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
 import { deletecategory, getAllCategories } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
+import debounce from 'lodash.debounce'
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState({
@@ -16,12 +17,13 @@ const CategoriesPage = () => {
     previous: null,
     results: [],
   })
+  const [searchTerm, setSearchTerm] = useState('')
   // console.log(categories, 'cat-----')
   const [currentPage, setCurrentPage] = useState(1)
 
-  const fetchData = async (page = 1) => {
+  const fetchData = async (page = 1, search = '') => {
     try {
-      const response = await getAllCategories(page)
+      const response = await getAllCategories(page, search)
       setCategories(response) // Store in state
       setCurrentPage(page)
     } catch (error) {
@@ -29,12 +31,22 @@ const CategoriesPage = () => {
     }
   }
 
+  // const fetchData = async (page = 1, search = '') => {
+  //     try {
+  //       const response = await getAllProducts(page, search)
+  //       setProductsData(response)
+  //       setCurrentPage(page)
+  //     } catch (error) {
+  //       toast.error('Failed to fetch products')
+  //     }
+  //   }
+
   const handleDeleteCategory = async (id) => {
     if (confirm('Are you sure you want to delete this brand?')) {
       try {
         await deletecategory(id)
         toast.success('Category Deleted successfully!')
-        await fetchData() // Refresh data after deletion
+        await fetchData(currentPage, searchTerm) // Refresh data after deletion
       } catch (error) {
         // console.error('Delete failed:', error)
         toast.error('Failed to Delete Category')
@@ -43,8 +55,18 @@ const CategoriesPage = () => {
   }
 
   const handlePageChange = (page) => {
-    fetchData(page)
+    fetchData(page, searchTerm)
   }
+
+  useEffect(() => {
+    const debouncedSearch = debounce(() => {
+      fetchData(1, searchTerm)
+    }, 500)
+
+    debouncedSearch()
+
+    return () => debouncedSearch.cancel()
+  }, [searchTerm])
 
   useEffect(() => {
     fetchData()
@@ -65,7 +87,9 @@ const CategoriesPage = () => {
       <section className="ps-dashboard ps-items-listing">
         <div className="ps-section__left">
           <div className="ps-section__header">
-            <FormSearchSimple />
+            <FormSearchSimple
+              onSearchChange={(value) => setSearchTerm(value)}
+            />
           </div>
           <div className="ps-section__content">
             <TableCategoryItems
