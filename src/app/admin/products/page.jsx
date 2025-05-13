@@ -1,12 +1,18 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import debounce from 'lodash.debounce'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import Pagination from '@/components/SuperAdmin/elements/basic/Pagination'
 import TableProjectItems from '@/components/SuperAdmin/shared/tables/TableProjectItems'
 import { Select } from 'antd'
 import Link from 'next/link'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
-import { deleteProduct, getAllProducts } from '@/apis/products'
+import {
+  deleteProduct,
+  getAllProducts,
+  getBrandAllData,
+  getCategoriesAllData,
+} from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 
 const { Option } = Select
@@ -18,11 +24,32 @@ const ProductPage = () => {
     previous: null,
     results: [],
   })
-  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('')
 
-  const fetchData = async (page = 1) => {
+  const [categories, setCategories] = useState([])
+  console.log(categories, 'cat-------------------------------')
+  const [brand, setBrandsData] = useState([])
+  console.log(brand, 'bar-------------------------------')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const fetchData = async (
+    page = 1,
+    search = '',
+    brand = '',
+    category = '',
+    status = ''
+  ) => {
     try {
-      const response = await getAllProducts(page)
+      const response = await getAllProducts(
+        page,
+        search,
+        brand,
+        category,
+        status
+      )
       setProductsData(response)
       setCurrentPage(page)
     } catch (error) {
@@ -35,7 +62,7 @@ const ProductPage = () => {
       try {
         await deleteProduct(id)
         toast.success('Product Deleted successfully!')
-        await fetchData(currentPage)
+        await fetchData(currentPage, searchTerm)
       } catch (error) {
         toast.error('Failed to delete product')
       }
@@ -43,14 +70,48 @@ const ProductPage = () => {
   }
 
   const handlePageChange = (page) => {
-    fetchData(page)
+    fetchData(page, searchTerm)
   }
 
+  useEffect(() => {
+    const debouncedSearch = debounce(() => {
+      fetchData(1, searchTerm)
+    }, 500)
+
+    debouncedSearch()
+
+    return () => debouncedSearch.cancel()
+  }, [searchTerm])
+
+  // Initial Load
   useEffect(() => {
     fetchData()
   }, [])
 
-  const totalPages = Math.ceil(productsData.count / 10) // Assuming 10 products per page
+  const fetchBrandsData = async () => {
+    try {
+      const response = await getBrandAllData()
+      setBrandsData(response)
+    } catch (error) {
+      throw new Error('failed to fetch the data')
+    }
+  }
+
+  const fetchAllCategories = async () => {
+    try {
+      const response = await getCategoriesAllData()
+      setCategories(response)
+    } catch (error) {
+      throw new Error('failed to fetch data')
+    }
+  }
+
+  useEffect(() => {
+    fetchAllCategories()
+    fetchBrandsData()
+  }, [])
+
+  const totalPages = Math.ceil(productsData.count / 10)
 
   return (
     <ContainerDefault title="Products">
@@ -58,69 +119,107 @@ const ProductPage = () => {
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <section className="ps-items-listing">
         <div className="ps-section__actions">
-          <Link href="/admin/products/create-product" className="ps-btn ">
+          <Link href="/admin/products/create-product" className="ps-btn">
             <i className="icon icon-plus mr-2" />
             NOVO PRODUTO
           </Link>
         </div>
         <div className="ps-section__header">
           <div className="ps-section__filter">
-            <form className="ps-form--filter" method="get">
+            <form className="ps-form--filter">
               <div className="ps-form__left">
                 <div className="form-group">
                   <Select
                     placeholder="Selecionar Categoria"
                     className="ps-ant-dropdown"
+                    value={selectedCategory}
+                    onChange={(value) => {
+                      setSelectedCategory(value)
+                      fetchData(1, searchTerm, selectedBrand, value)
+                    }}
                   >
-                    <Option value="clothing-and-apparel">
-                      Clothing & Apparel
-                    </Option>
-                    <Option value="garden-and-kitchen">Garden & Kitchen</Option>
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <Option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </Option>
+                    ))}
                   </Select>
                 </div>
                 <div className="form-group">
                   <Select
                     placeholder="Product Type"
                     className="ps-ant-dropdown"
+                    value={selectedBrand}
+                    onChange={(value) => {
+                      setSelectedBrand(value)
+                      fetchData(1, searchTerm, value, selectedCategory)
+                    }}
                   >
-                    <Option value="simple-product">Simple Product</Option>
-                    <Option value="groupped-product">Groupped Product</Option>
+                    <option value="">Select Brand</option>
+                    {brand.map((b) => (
+                      <Option key={b.id} value={b.id}>
+                        {b.brand_name}
+                      </Option>
+                    ))}
                   </Select>
                 </div>
                 <div className="form-group">
-                  <Select placeholder="Estado" className="ps-ant-dropdown">
+                  <Select
+                    placeholder="Estado"
+                    className="ps-ant-dropdown"
+                    value={selectedStatus}
+                    onChange={(value) => {
+                      setSelectedStatus(value)
+                      fetchData(
+                        1,
+                        searchTerm,
+                        selectedBrand,
+                        selectedCategory,
+                        value
+                      )
+                    }}
+                  >
+                    <Option value="">All</Option>
                     <Option value="active">Active</Option>
-                    <Option value="in-active">InActive</Option>
+                    <Option value="inactive">Inactive</Option>
                   </Select>
                 </div>
               </div>
               <div className="ps-form__right">
-                <button className="ps-btn ps-btn--gray">
+                <button type="button" className="ps-btn ps-btn--gray">
                   <i className="icon icon-funnel mr-2"></i>
                   Filtros
                 </button>
               </div>
             </form>
           </div>
+
           <div className="ps-section__search">
-            <form className="ps-form--search-simple" method="get">
+            <div className="ps-form--search-simple">
               <input
                 className="form-control"
                 type="text"
                 placeholder="Search product"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button>
+              <button type="button">
                 <i className="icon icon-magnifier"></i>
               </button>
-            </form>
+            </div>
           </div>
         </div>
 
         <div className="ps-section__content">
-          <TableProjectItems
-            productsData={productsData.results}
-            onDelete={handleDeleteProduct}
-          />
+          {productsData.results.length > 0 ? (
+            <TableProjectItems
+              productsData={productsData.results}
+              onDelete={handleDeleteProduct}
+            />
+          ) : (
+            <p style={{ padding: '1rem' }}>No products found.</p>
+          )}
         </div>
 
         <div className="ps-section__footer">

@@ -14,11 +14,88 @@ export const getProductById = async (id) => {
 
 
 
-export const getAllCategories = async (page = 1) => {
+// export const getAllCategories = async (page = 1) => {
+//   try {
+//     const response = await ESTORE_API.get(`categories/?page=${page}`);
+//     // alert("data")
+//     console.log("Fetched categories:", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching categories:', error.response?.data || error.message);
+//     throw new Error('Failed to fetch categories');
+//   }
+// };
+
+
+export const getCategoriesAllData = async ()=>{
+  try{
+    const response = await ESTORE_API.get(`categories/?all_data=true`)
+    return response.data
+  }
+  catch(error) {
+    throw new Error ("Fetch to fetch ALl Categories")
+  }
+}
+
+
+
+export const getBrandAllData = async()=>{
+  try{
+    const response = await ESTORE_API.get("brands/?all_data=true")
+    return response.data
+  }catch(error){
+    throw new Error("failed to fetch the brands")
+  }
+}
+
+// apis/products.js
+// export const getAllProducts = async (page = 1, search = '') => {
+//   try {
+//     const response = await ESTORE_API.get(`products/`, {
+//       params: {
+//         page,
+//         search,
+//       },
+//     });
+//     return response.data;
+//   } catch (error) {
+//     throw new Error('Failed to fetch products');
+//   }
+// };
+
+
+export const getAllProducts = async (
+  page = 1,
+  search = '',
+  brand = '',
+  category = '',
+  status = ''
+) => {
   try {
-    const response = await ESTORE_API.get(`categories/?page=${page}`);
-    // alert("data")
-    console.log("Fetched categories:", response.data);
+    const response = await ESTORE_API.get(`products/`, {
+      params: {
+        page,
+        search,
+        brand,
+        category,
+        status, // ✅ Add status here
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products:', error.response?.data || error.message);
+    throw new Error('Failed to fetch products');
+  }
+};
+
+
+
+
+export const getAllCategories = async (page = 1, search = '') => {
+  try {
+    const response = await ESTORE_API.get(`categories/`, {
+      params: { page, search },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching categories:', error.response?.data || error.message);
@@ -27,26 +104,19 @@ export const getAllCategories = async (page = 1) => {
 };
 
 
-export const getAllProducts = async (page = 1) => {
+
+export const getAllBrands = async (page = 1, search = '') => {
   try {
-    const response = await ESTORE_API.get(`products/?page=${page}`);
-    console.log(response, "response data----");
+    const response = await ESTORE_API.get('brands/', {
+      params: { page, search },
+    });
     return response.data;
   } catch (error) {
-    throw new Error('Failed to fetch products');
+    console.error('Error fetching brands:', error.response?.data || error.message);
+    throw new Error('Failed to fetch brands');
   }
 };
 
-
-export const getAllBrands = async (page=1) => {
-  try {
-    const response = await ESTORE_API.get(`brands/?page=${page}`);
-    console.log(response,"response data----")
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to fetch products');
-  }
-};
 
 
 export const getAllOrders = async (page =1) => {
@@ -155,8 +225,6 @@ export const createOrder = async (orderPayload) => {
     throw new Error('Failed to create order');
   }
 };
-
-
 
 
 

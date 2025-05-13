@@ -48,7 +48,7 @@ export default function Login() {
         }}
       />
       <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md text-center">
-        <img src="/logo.png" alt="Logo" className="h-16 mx-auto mb-4" />
+        <img src="/img/logo.png" alt="Logo" className="h-16 mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-4">Welcome back</h2>
         {error && (
           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md">
@@ -89,6 +89,17 @@ export default function Login() {
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
+          {/* <div className="mt-4 text-center">
+            <p className="text-sm">
+              Don't have an account?{' '}
+              <button
+                onClick={() => router.push('/register')}
+                className="text-blue-600 hover:underline font-medium"
+              >
+                Register
+              </button>
+            </p>
+          </div> */}
         </form>
       </div>
     </div>

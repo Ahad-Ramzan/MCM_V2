@@ -28,7 +28,7 @@ const OrdersPage = () => {
 
       // Store in state
     } catch (error) {
-      toast.error('Failed to delete order.')
+      // toast.error('Failed to delete order.')
     }
   }
 
@@ -36,11 +36,13 @@ const OrdersPage = () => {
     if (confirm('Are you sure you want to delete this brand?')) {
       try {
         await deleteOrder(id)
-        alert('Brand deleted successfully.')
+        // alert('Brand deleted successfully.')
+        toast.success('Order Deleted successfully!')
         await fetchData() // Refresh data after deletion
       } catch (error) {
         console.error('Delete failed:', error)
-        alert('Failed to delete brand.')
+        // alert('Failed to delete brand.')
+        toast.error('Failed to delete order.')
       }
     }
   }
@@ -96,7 +98,7 @@ const OrdersPage = () => {
             </form>
           </div>
           <div className="ps-section__actions">
-            <Link href="/admin/products/create-product" className="ps-btn ">
+            <Link href="/admin/orders/create-orders" className="ps-btn ">
               <i className="icon icon-plus mr-2"></i>Nova Encomenda
             </Link>
             <a className="ps-btn ps-btn--gray" href="new-order.html">

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import ProductCardStar from '@/ui/ProductCardStar'
 import { getAllProducts } from '@/apis/products'
+import Pagination from '../SuperAdmin/elements/basic/Pagination'
 
 const Recomended = () => {
   const [startIndex, setStartIndex] = useState(0)
@@ -12,6 +13,7 @@ const Recomended = () => {
     previous: null,
     results: [],
   })
+  const [currentPage, setCurrentPage] = useState(1)
 
   const itemsPerPage = 5
 
@@ -27,14 +29,40 @@ const Recomended = () => {
     }
   }
 
-  const fetchData = async () => {
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await getAllProducts()
+  //     setProductsData(response)
+  //   } catch (error) {
+  //     console.error('Failed to fetch products:', error)
+  //   }
+  // }
+
+  const fetchData = async (
+    page = 1,
+    search = '',
+    brand = '',
+    category = '',
+    status = ''
+  ) => {
     try {
-      const response = await getAllProducts()
+      const response = await getAllProducts(
+        page,
+        search,
+        brand,
+        category,
+        status
+      )
       setProductsData(response)
+      setCurrentPage(page)
     } catch (error) {
-      console.error('Failed to fetch products:', error)
+      toast.error('Failed to fetch products')
     }
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -46,6 +74,15 @@ const Recomended = () => {
     startIndex + itemsPerPage
   )
   console.log(visibleProducts, 'visible products ----')
+  const handlePageChange = (page) => {
+    fetchData(page)
+  }
+
+  const totalPages = Math.ceil(productsData.count / 10)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   return (
     <div className="hidden xl:block w-full ml-4 py-5">
@@ -91,6 +128,17 @@ const Recomended = () => {
             )}
           />
         ))}
+      </div>
+      <div className="ps-section__footer">
+        {/* <p>
+          Mostrar {productsData.results.length} de {productsData.count}{' '}
+          Produtos.
+        </p> */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   )

@@ -91,7 +91,15 @@ const TableOrdersItems = ({ orders, onDelete }) => {
         <td>{item.id}</td>
         <td>
           <Link href="/orders/order-detail">
-            <strong>{item.products}</strong>
+            {/* <strong>{item.products}</strong> */}
+            {item.products && item.products.length > 0
+              ? item.products.map((product, index) => (
+                  <span key={product.id || index}>
+                    {product.product_name}
+                    {index !== item.products.length - 1 && ', '}
+                  </span>
+                ))
+              : 'No Products'}
           </Link>
         </td>
         <td>

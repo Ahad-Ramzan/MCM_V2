@@ -6,6 +6,7 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import Link from 'next/link'
 import ProductCardStar from '@/ui/ProductCardStar'
 import { getAllProducts } from '@/apis/products'
+import Pagination from '../SuperAdmin/elements/basic/Pagination'
 
 const products = Array(12).fill({
   image: '/placeholder.png',
@@ -41,6 +42,7 @@ const InsulationSection = () => {
       })
     }
   }
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Update active dot on scroll
   useEffect(() => {
@@ -64,12 +66,25 @@ const InsulationSection = () => {
     results: [],
   })
 
-  const fetchData = async () => {
+  const fetchData = async (
+    page = 1,
+    search = '',
+    brand = '',
+    category = '',
+    status = ''
+  ) => {
     try {
-      const response = await getAllProducts()
+      const response = await getAllProducts(
+        page,
+        search,
+        brand,
+        category,
+        status
+      )
       setProductsData(response)
+      setCurrentPage(page)
     } catch (error) {
-      console.error('Failed to fetch products:', error)
+      toast.error('Failed to fetch products')
     }
   }
 
@@ -93,6 +108,16 @@ const InsulationSection = () => {
     window.addEventListener('resize', updateVisibleCount)
 
     return () => window.removeEventListener('resize', updateVisibleCount)
+  }, [])
+
+  const handlePageChange = (page) => {
+    fetchData(page)
+  }
+
+  const totalPages = Math.ceil(productsData.count / 10)
+
+  useEffect(() => {
+    fetchData()
   }, [])
 
   return (
@@ -132,10 +157,10 @@ const InsulationSection = () => {
               title={product.product_name}
               price={product.regular_price + '€'}
               sold={product.sold_items}
-              // discount={calculateDiscount(
-              //   product.regular_price,
-              //   product.sale_price
-              // )}
+              discount={calculateDiscount(
+                product.regular_price,
+                product.sale_price
+              )}
             />
           ))}
         </div>
@@ -165,8 +190,26 @@ const InsulationSection = () => {
           )
         )}
       </div>
+      <div className="ps-section__footer">
+        {/* <p>
+          Mostrar {productsData.results.length} de {productsData.count}{' '}
+          Produtos.
+        </p> */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   )
+}
+
+function calculateDiscount(original, sale) {
+  const originalPrice = parseFloat(original)
+  const salePrice = parseFloat(sale)
+  if (!originalPrice || !salePrice || salePrice >= originalPrice) return null
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
 }
 
 export default InsulationSection

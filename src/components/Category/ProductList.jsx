@@ -3,11 +3,14 @@ import React, { useEffect, useState } from 'react'
 import ProductCardStar from '@/ui/ProductCardStar'
 import { FaTh, FaBars } from 'react-icons/fa'
 import { getAllProducts } from '@/apis/products'
+import Pagination from '../SuperAdmin/elements/basic/Pagination'
 
 const itemsPerPage = 15
 
 const ProductListPage = () => {
+  const [currentPages, setCurrentPages] = useState(1)
   const [currentPage, setCurrentPage] = useState(1)
+
   const [productsData, setProductsData] = useState({
     count: 0,
     next: null,
@@ -15,30 +18,53 @@ const ProductListPage = () => {
     results: [],
   })
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await getAllProducts()
-        setProductsData(response)
-      } catch (error) {
-        console.error('Error fetching products:', error)
-      }
+  const fetchData = async (
+    page = 1,
+    search = '',
+    brand = '',
+    category = '',
+    status = ''
+  ) => {
+    try {
+      const response = await getAllProducts(
+        page,
+        search,
+        brand,
+        category,
+        status
+      )
+      setProductsData(response)
+      setCurrentPage(page)
+    } catch (error) {
+      toast.error('Failed to fetch products')
     }
+  }
 
-    fetchProducts()
+  useEffect(() => {
+    fetchData()
   }, [])
 
-  const totalPages = Math.ceil(productsData.results.length / itemsPerPage)
-
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
+    fetchData(page)
+  }
+
+  const totalPages = Math.ceil(productsData.count / 10)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const totalPage = Math.ceil(productsData.results.length / itemsPerPage)
+
+  const handlePageChanges = (page) => {
+    if (page >= 1 && page <= totalPage) {
+      setCurrentPages(page)
     }
   }
 
   const visibleProducts = productsData.results.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    (currentPages - 1) * itemsPerPage,
+    currentPages * itemsPerPage
   )
   console.log(visibleProducts, 'visible product brands')
   useEffect(() => {
@@ -87,37 +113,49 @@ const ProductListPage = () => {
         ))}
       </div>
 
+      <div className="ps-section__footer">
+        {/* <p>
+          Mostrar {productsData.results.length} de {productsData.count}{' '}
+          Produtos.
+        </p> */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+
       {/* Pagination */}
       <div className="flex justify-center items-center mt-6 gap-2 flex-wrap">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
+        {/* <button
+          onClick={() => handlePageChanges(currentPages - 1)}
+          disabled={currentPages === 1}
           className="px-3 py-1 text-sm  disabled:opacity-50"
         >
           &lt;
-        </button>
+        </button> */}
 
-        {Array.from({ length: totalPages }, (_, i) => (
+        {/* {Array.from({ length: totalPage }, (_, i) => (
           <button
             key={i}
-            onClick={() => handlePageChange(i + 1)}
+            onClick={() => handlePageChanges(i + 1)}
             className={`px-3 py-1 text-sm ${
-              currentPage === i + 1
+              currentPages === i + 1
                 ? 'text-black'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
             {i + 1}
           </button>
-        ))}
+        ))} */}
 
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
+        {/* <button
+          onClick={() => handlePageChanges(currentPages + 1)}
+          disabled={currentPages === totalPage}
           className="px-3 py-1 text-sm  disabled:opacity-50"
         >
           &gt;
-        </button>
+        </button> */}
       </div>
     </div>
   )

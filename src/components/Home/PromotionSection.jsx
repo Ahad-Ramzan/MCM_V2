@@ -138,10 +138,10 @@ const PromotionSection = () => {
                 price={product.regular_price + '€'}
                 rating={product.rating || 4}
                 sold={product.sold_items}
-                // discount={calculateDiscount(
-                //   product.regular_price,
-                //   product.sale_price
-                // )}
+                discount={calculateDiscount(
+                  product.regular_price,
+                  product.sale_price
+                )}
               />
             </div>
           ))}
@@ -177,6 +177,13 @@ const PromotionSection = () => {
       )}
     </div>
   )
+}
+
+function calculateDiscount(original, sale) {
+  const originalPrice = parseFloat(original)
+  const salePrice = parseFloat(sale)
+  if (!originalPrice || !salePrice || salePrice >= originalPrice) return null
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
 }
 
 export default PromotionSection

@@ -25,9 +25,9 @@ const TableCustomerItems = ({ userData, onDelete }) => {
         <td>{item.is_active ? 'Active' : 'Inactive'}</td>
         <td>
           {/* <DropdownAction /> */}
-          <Link href="#" className="ps-btn ps-btn--sm">
+          {/* <Link href="#" className="ps-btn ps-btn--sm">
             Edit
-          </Link>
+          </Link> */}
           <button
             className="ps-btn ps-btn--sm ps-btn--danger ml-2"
             onClick={() => onDelete(item.id)}

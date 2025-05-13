@@ -4,9 +4,12 @@ import React, { useEffect, useState } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import ProductCardStar from '@/ui/ProductCardStar'
 import { getAllProducts } from '@/apis/products'
+import Pagination from '../SuperAdmin/elements/basic/Pagination'
 
 const BestSale = () => {
   const [startIndex, setStartIndex] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
+  
 
   const [productsData, setProductsData] = useState({
     count: 0,
@@ -16,18 +19,44 @@ const BestSale = () => {
   })
   console.log(productsData, 'final products')
 
-  useEffect(() => {
-    const fetchProducts = async () => {
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const response = await getAllProducts()
+  //       setProductsData(response)
+  //     } catch (error) {
+  //       console.error('Error fetching products:', error)
+  //     }
+  //   }
+
+  //   fetchProducts()
+  // }, [])
+
+  const fetchData = async (
+      page = 1,
+      search = '',
+      brand = '',
+      category = '',
+      status = ''
+    ) => {
       try {
-        const response = await getAllProducts()
+        const response = await getAllProducts(
+          page,
+          search,
+          brand,
+          category,
+          status
+        )
         setProductsData(response)
+        setCurrentPage(page)
       } catch (error) {
-        console.error('Error fetching products:', error)
+        toast.error('Failed to fetch products')
       }
     }
-
-    fetchProducts()
-  }, [])
+  
+    useEffect(() => {
+      fetchData()
+    }, [])
   const itemsPerPage = 5
 
   const handlePrev = () => {
@@ -46,6 +75,15 @@ const BestSale = () => {
     startIndex,
     startIndex + itemsPerPage
   )
+  const handlePageChange = (page) => {
+      fetchData(page)
+    }
+  
+    const totalPages = Math.ceil(productsData.count / 10)
+  
+    useEffect(() => {
+      fetchData()
+    }, [])
 
   return (
     <div className="hidden xl:block w-full ml-4 py-5">
@@ -91,6 +129,17 @@ const BestSale = () => {
             )}
           />
         ))}
+      </div>
+      <div className="ps-section__footer">
+        {/* <p>
+          Mostrar {productsData.results.length} de {productsData.count}{' '}
+          Produtos.
+        </p> */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   )

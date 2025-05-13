@@ -6,6 +6,7 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import Link from 'next/link'
 import ProductCardStar from '@/ui/ProductCardStar'
 import { getAllProducts } from '@/apis/products'
+import Pagination from '../SuperAdmin/elements/basic/Pagination'
 
 const products = Array(12).fill({
   image: '/placeholder.png',
@@ -21,6 +22,7 @@ const ConstructionMaterials = () => {
   const scrollRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const [productsData, setProductsData] = useState({
     count: 0,
@@ -29,12 +31,25 @@ const ConstructionMaterials = () => {
     results: [],
   })
 
-  const fetchData = async () => {
+  const fetchData = async (
+    page = 1,
+    search = '',
+    brand = '',
+    category = '',
+    status = ''
+  ) => {
     try {
-      const response = await getAllProducts()
+      const response = await getAllProducts(
+        page,
+        search,
+        brand,
+        category,
+        status
+      )
       setProductsData(response)
+      setCurrentPage(page)
     } catch (error) {
-      console.error('Failed to fetch products:', error)
+      toast.error('Failed to fetch products')
     }
   }
 
@@ -95,6 +110,16 @@ const ConstructionMaterials = () => {
     return () => window.removeEventListener('resize', updateVisibleCount)
   }, [])
 
+  const handlePageChange = (page) => {
+    fetchData(page)
+  }
+
+  const totalPages = Math.ceil(productsData.count / 10)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
   return (
     <div className="Container py-6 my-8">
       {/* Menu Bar  */}
@@ -132,12 +157,24 @@ const ConstructionMaterials = () => {
               title={product.product_name}
               price={product.regular_price + '€'}
               sold={product.sold_items}
-              // discount={calculateDiscount(
-              //   product.regular_price,
-              //   product.sale_price
-              // )}
+              discount={calculateDiscount(
+                product.regular_price,
+                product.sale_price
+              )}
             />
           ))}
+        </div>
+
+        <div className="ps-section__footer">
+          {/* <p>
+          Mostrar {productsData.results.length} de {productsData.count}{' '}
+          Produtos.
+        </p> */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
 
         {/* Right Arrow */}
@@ -167,6 +204,13 @@ const ConstructionMaterials = () => {
       </div>
     </div>
   )
+}
+
+function calculateDiscount(original, sale) {
+  const originalPrice = parseFloat(original)
+  const salePrice = parseFloat(sale)
+  if (!originalPrice || !salePrice || salePrice >= originalPrice) return null
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
 }
 
 export default ConstructionMaterials

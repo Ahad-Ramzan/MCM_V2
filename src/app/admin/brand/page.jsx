@@ -10,6 +10,8 @@ import { deleteBrand, getAllBrands, getAllProducts } from '@/apis/products'
 import TableBrandName from '@/components/SuperAdmin/shared/tables/TableBrandName'
 import toast, { Toaster } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+import debounce from 'lodash.debounce'
+import FormSearchSimple from '@/components/SuperAdmin/shared/forms/FormSearchSimple'
 
 const { Option } = Select
 const BrandPage = () => {
@@ -19,6 +21,7 @@ const BrandPage = () => {
     previous: null,
     results: [],
   })
+  const [searchTerm, setSearchTerm] = useState('')
 
   const [currentPage, setCurrentPage] = useState(1)
   console.log(productsData, 'products---')
@@ -49,9 +52,9 @@ const BrandPage = () => {
   //         fetchData();
   //     }, []);
 
-  const fetchData = async (page = 1) => {
+  const fetchData = async (page = 1, search = '') => {
     try {
-      const response = await getAllBrands(page)
+      const response = await getAllBrands(page, search)
       setProductsData(response)
       setCurrentPage(page)
     } catch (error) {
@@ -75,8 +78,18 @@ const BrandPage = () => {
   }
 
   const handlePageChange = (page) => {
-    fetchData(page)
+    fetchData(page, searchTerm)
   }
+
+  useEffect(() => {
+    const debouncedSearch = debounce(() => {
+      fetchData(1, searchTerm)
+    }, 500)
+
+    debouncedSearch()
+
+    return () => debouncedSearch.cancel()
+  }, [searchTerm])
 
   const router = useRouter()
 
@@ -106,7 +119,12 @@ const BrandPage = () => {
           </button>
         </div>
         <div className="ps-section__header">
-          <div className="ps-section__filter">
+          <div className="ps-section__header">
+            <FormSearchSimple
+              onSearchChange={(value) => setSearchTerm(value)}
+            />
+          </div>
+          {/* <div className="ps-section__filter">
             <form className="ps-form--filter" action="index.html" method="get">
               <div className="ps-form__left">
                 <div className="form-group">
@@ -149,23 +167,21 @@ const BrandPage = () => {
                 </button>
               </div>
             </form>
-          </div>
-          <div className="ps-section__search">
-            <form
-              className="ps-form--search-simple"
-              action="index.html"
-              method="get"
-            >
+          </div> */}
+          {/* <div className="ps-section__search">
+            <div className="ps-form--search-simple">
               <input
                 className="form-control"
                 type="text"
                 placeholder="Search product"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button>
+              <button type="button">
                 <i className="icon icon-magnifier"></i>
               </button>
-            </form>
-          </div>
+            </div>
+          </div> */}
         </div>
         <div className="ps-section__content">
           <TableBrandName
