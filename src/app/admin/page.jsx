@@ -7,6 +7,7 @@ import CardStatics from '@/components/SuperAdmin/shared/cards/CardStatics'
 import ContainerDashboard from '@/components/SuperAdmin/layouts/ContainerDashboard'
 import CardTopCountries from '@/components/SuperAdmin/shared/cards/CardTopCountries'
 import { getDashboardAnalytics } from '@/apis/userApi'
+import ProtectedRoute from '@/components/ProtectedRoute'
 
 export default function Page() {
   const [analytics, setAnalyticsData] = useState({
@@ -30,7 +31,7 @@ export default function Page() {
       const response = await getDashboardAnalytics() // API call
       setAnalyticsData(response) // State update
     } catch (error) {
-      toast.error('Failed to fetch analytics data')
+      // toast.error('Failed to fetch analytics data')
     }
   }
 
@@ -38,29 +39,31 @@ export default function Page() {
     fetchAnalyticsData()
   }, [])
   return (
-    <ContainerDashboard title="Dashboard">
-      <section className="ps-dashboard" id="homepage">
-        <div className="ps-section__left">
-          <div className="row">
-            <div className="col-xl-8 col-12">
-              <CardSaleReport weekly_sales={analytics.weekly_sales} />
+    <ProtectedRoute adminOnly={true}>
+      <ContainerDashboard title="Dashboard">
+        <section className="ps-dashboard" id="homepage">
+          <div className="ps-section__left">
+            <div className="row">
+              <div className="col-xl-8 col-12">
+                <CardSaleReport weekly_sales={analytics.weekly_sales} />
+              </div>
+              <div className="col-xl-4 col-12">
+                <CardEarning daily_sales={analytics.daily_sales} />
+              </div>
             </div>
-            <div className="col-xl-4 col-12">
-              <CardEarning daily_sales={analytics.daily_sales} />
-            </div>
+            <CardRecentOrders analytics={analytics.daily_orders} />
           </div>
-          <CardRecentOrders analytics={analytics.daily_orders} />
-        </div>
-        <div className="ps-section__right">
-          {analytics && (
-            <CardStatics
-              active_clients={analytics.active_clients}
-              daily_sales={analytics.daily_sales}
-            />
-          )}
-          <CardTopCountries top_4_brands={analytics.top_4_brands} />
-        </div>
-      </section>
-    </ContainerDashboard>
+          <div className="ps-section__right">
+            {analytics && (
+              <CardStatics
+                active_clients={analytics.active_clients}
+                daily_sales={analytics.daily_sales}
+              />
+            )}
+            <CardTopCountries top_4_brands={analytics.top_4_brands} />
+          </div>
+        </section>
+      </ContainerDashboard>
+    </ProtectedRoute>
   )
 }

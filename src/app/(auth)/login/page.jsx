@@ -26,16 +26,21 @@ export default function Login() {
 
     try {
       const response = await loginUser(email, password)
-      toast.success('Login Successfully successfully!')
+      toast.success('Login Successfully!')
+
       if (response.token) {
         localStorage.setItem('access_token', response.token)
-        console.log('Redirecting...')
-        router.push('admin/') // Redirect to home page
+        localStorage.setItem('user_role', response.role) // 👈 role save karo
+
+        // Role-based redirection
+        if (response.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/')
+        }
       }
     } catch (error) {
       toast.error('Failed to Login.')
-    } finally {
-      setIsLoading(false)
     }
   }
 

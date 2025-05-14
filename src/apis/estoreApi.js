@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const ESTORE_API = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/estore/',
+  baseURL: 'https://backendmcm.estelatechnologies.com/api/estore/',
   withCredentials: true,
 });
 
