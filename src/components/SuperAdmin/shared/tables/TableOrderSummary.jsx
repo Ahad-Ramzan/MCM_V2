@@ -52,7 +52,7 @@ const TableOrderSummary = ({ analytics }) => {
                     {order.products && order.products.length > 0
                       ? item.products.map((product, index) => (
                           <span key={product.id || index}>
-                            {product.product_name}
+                            {product.products}
                             {index !== item.products.length - 1 && ', '}
                           </span>
                         ))
