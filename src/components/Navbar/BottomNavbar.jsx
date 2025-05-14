@@ -33,10 +33,13 @@ export default function BottomNavbar() {
             <a href="/">Home</a>
           </li>
           <li>
-            <a href="#">Serviços</a>
+            <a href="">Serviços</a>
           </li>
           <li>
             <a href="#">Contactos</a>
+          </li>
+          <li>
+            <a href="/category">Categoria</a>
           </li>
         </ul>
 

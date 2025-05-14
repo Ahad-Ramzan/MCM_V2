@@ -1,7 +1,7 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrands, getAllBrands, getBarndAllData } from '@/apis/products'
+import { createBrands } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
@@ -23,21 +23,13 @@ const CreateBrand = () => {
     try {
       await createBrands(brandData)
       toast.success('Brand created successfully!')
-
-      router.push('/admin/brand') // ✅ navigate on success
+      router.push('/admin/brand')
     } catch (error) {
-      // alert('Failed to create brand');
       toast.error('Failed to create brand.')
     } finally {
       setLoading(false)
     }
   }
-
-  
-
-  useEffect(() => {
-    fetchBrandsData(), []
-  })
 
   return (
     <ContainerDefault title="Create new Brand">
