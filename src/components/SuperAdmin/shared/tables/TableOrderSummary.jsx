@@ -1,29 +1,5 @@
 import React from 'react'
 
-const orders = [
-  {
-    id: '#A580',
-    date: 'Aug 15, 2024',
-    product: 'Placas de gesso',
-    payment: 'Pago',
-    paymentStatus: 'success',
-    status: 'Entregue',
-    statusClass: 'success',
-    total: '12.00€',
-  },
-  {
-    id: '#B260',
-    date: 'Aug 15, 2024',
-    product: 'Placas de gesso',
-    payment: 'Pendente',
-    paymentStatus: 'gray',
-    status: 'Entregue',
-    statusClass: 'success',
-    total: '12.00€',
-  },
-  // Add more objects
-]
-
 const TableOrderSummary = ({ analytics }) => {
   return (
     <div className="table-responsive">
@@ -44,16 +20,16 @@ const TableOrderSummary = ({ analytics }) => {
             <tr key={index}>
               <td>{order.id}</td>
               <td>
-                <strong> {new Date(order.date).toLocaleDateString()}</strong>
+                <strong>{new Date(order.date).toLocaleDateString()}</strong>
               </td>
               <td>
                 <a href="order-detail.html">
                   <strong>
                     {order.products && order.products.length > 0
-                      ? item.products.map((product, index) => (
-                          <span key={product.id || index}>
-                            {product.products}
-                            {index !== item.products.length - 1 && ', '}
+                      ? order.products.map((product, index) => (
+                          <span key={index}>
+                            {product.product_name}
+                            {index !== order.products.length - 1 && ', '}
                           </span>
                         ))
                       : 'No Products'}
@@ -61,12 +37,20 @@ const TableOrderSummary = ({ analytics }) => {
                 </a>
               </td>
               <td>
-                <span className={`ps-badge ${order.paymentStatus}`}>
+                <span
+                  className={`ps-badge ${
+                    order.payment === 'pending' ? 'gray' : 'success'
+                  }`}
+                >
                   {order.payment}
                 </span>
               </td>
               <td>
-                <span className={`ps-fullfillment ${order.statusClass}`}>
+                <span
+                  className={`ps-fullfillment ${
+                    order.status === 'processing' ? 'warning' : 'success'
+                  }`}
+                >
                   {order.status}
                 </span>
               </td>
