@@ -1,27 +1,33 @@
-import React from 'react';
-import FormHeaderSearch from '@/components/SuperAdmin/shared/forms/FormHeaderSearch';
+import React from 'react'
+import FormHeaderSearch from '@/components/SuperAdmin/shared/forms/FormHeaderSearch'
 
 const HeaderDashboard = ({
-    title = 'Dashboard',
-    description = 'Tudo aqui',
+  title = 'Dashboard',
+  description = 'Tudo aqui',
 }) => {
-    return (
-        <header className="header--dashboard">
-            <div className="header__left">
-                <h3>{title}</h3>
-                <p>{description}</p>
-            </div>
-            <div className="header__center">
-                <FormHeaderSearch />
-            </div>
-            <div className="header__right">
-                <a className="header__site-link" href="#">
-                    <span>VER LOJA</span>
-                    <i className="icon-exit-right"></i>
-                </a>
-            </div>
-        </header>
-    );
-};
+  return (
+    <header className="header--dashboard">
+      <div className="header__left">
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+      <div className="header__center">
+        <FormHeaderSearch />
+      </div>
+      <div className="header__right">
+        <button
+          className="header__site-link flex items-center gap-2"
+          onClick={() => {
+            localStorage.removeItem('access_token') // logout
+            window.location.href = '/login' // redirect to login
+          }}
+        >
+          <span>VER LOJA</span>
+          <i className="icon-exit-right"></i>
+        </button>
+      </div>
+    </header>
+  )
+}
 
-export default HeaderDashboard;
+export default HeaderDashboard

@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const ORDERS_API = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/orders/',
+  baseURL: 'https://backendmcm.estelatechnologies.com/api/orders/',
   withCredentials: true,
 });
 

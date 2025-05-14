@@ -7,26 +7,30 @@ import Newsletter from '@/components/Footer/NewsLetter'
 import FooterLinks from '@/components/Footer/FooterLinks'
 import MobileTopbar from '@/components/Navbar/mobile/MobileTopbar'
 import MobileBottombar from '@/components/Navbar/MobileBottombar'
+import ProtectedRoute from './ProtectedRoute'
 
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname()
 
-  const isAdminRoute =  pathname.startsWith('/admin') ||
-  pathname === '/login' ||
-  pathname === '/register'
+  const isAdminRoute =
+    pathname.startsWith('/admin') ||
+    pathname === '/login' ||
+    pathname === '/register'
 
   return (
     <>
       {!isAdminRoute && (
         <>
-          <div className="hidden xl:block">
-            <TopNavbar />
-            <BottomNavbar />
-          </div>
-          <div className="xl:hidden">
-            <MobileTopbar />
-            <MobileBottombar />
-          </div>
+          <ProtectedRoute>
+            <div className="hidden xl:block">
+              <TopNavbar />
+              <BottomNavbar />
+            </div>
+            <div className="xl:hidden">
+              <MobileTopbar />
+              <MobileBottombar />
+            </div>
+          </ProtectedRoute>
         </>
       )}
 
@@ -34,10 +38,12 @@ export default function LayoutWrapper({ children }) {
 
       {!isAdminRoute && (
         <>
-          <span className="block border-t-1 border-[var(--lightGray6)] w-full my-8" />
-          <Newsletter />
-          <span className="block border-t-1 border-[var(--lightGray6)] w-full my-8" />
-          <FooterLinks />
+          <ProtectedRoute>
+            <span className="block border-t-1 border-[var(--lightGray6)] w-full my-8" />
+            <Newsletter />
+            <span className="block border-t-1 border-[var(--lightGray6)] w-full my-8" />
+            <FooterLinks />
+          </ProtectedRoute>
         </>
       )}
     </>
