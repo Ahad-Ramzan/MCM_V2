@@ -9,25 +9,22 @@ import Sliderhome from '@/components/Home/Slider/Sliderhome'
 import TopCategories from '@/components/Home/TopCategories'
 import InsulationSection from '@/components/Home/Insulation'
 import FlooringCoatingSection from '@/components/Home/FlooringCoating'
-import ProtectedRoute from '@/components/ProtectedRoute'
 
 export default function Home() {
   return (
-    <ProtectedRoute>
-      <div>
-        <Sliderhome />
-        <FeaturesBanner />
-        <PromotionSection />
+    <div>
+      <Sliderhome />
+      <FeaturesBanner />
+      <PromotionSection />
 
-        <ImageGallery />
-        <TopCategories />
-        <InsulationSection />
-        <ConstructionMaterials />
-        <FlooringCoatingSection />
-        <ImageGallery2 />
-        <AppDownload />
-        <NewArrivals />
-      </div>
-    </ProtectedRoute>
+      <ImageGallery />
+      <TopCategories />
+      <InsulationSection />
+      <ConstructionMaterials />
+      <FlooringCoatingSection />
+      <ImageGallery2 />
+      <AppDownload />
+      <NewArrivals />
+    </div>
   )
 }
