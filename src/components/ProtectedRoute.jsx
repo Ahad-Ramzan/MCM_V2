@@ -1,28 +1,34 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
-export default function ProtectedRoute({ children, adminOnly = false }) {
+export default function ProtectedRoute({ children }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
     const role = localStorage.getItem('user_role')
 
-    if (!token) {
-      router.replace('/login')
+    if (pathname === '/') {
+      setLoading(false)
       return
     }
 
-    if (adminOnly && role !== 'admin') {
+    // if (!token) {
+    //   router.replace('/login')
+    //   return
+    // }
+
+    if (pathname.startsWith('/admin') && role === 'user') {
       router.replace('/')
       return
     }
 
     setLoading(false)
-  }, [])
+  }, [pathname])
 
   if (loading)
     return (
