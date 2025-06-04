@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-// import { useRouter } from 'next/router'
 import { useRouter, useParams } from 'next/navigation'
 import { getcategoriesById, updateCategories } from '@/apis/products'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
@@ -10,39 +9,45 @@ import toast, { Toaster } from 'react-hot-toast'
 const EditCategoryPage = () => {
   const router = useRouter()
   const params = useParams()
-  console.log(params, 'params')
   const brandId = params.params
-  console.log(brandId, 'brandId')
 
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
-  const [subCategories, setSubCategories] = useState([{ name: '' }])
+  const [subCategories, setSubCategories] = useState([
+    { name: '', selected: false },
+  ])
 
   const fetchCategory = async () => {
     try {
       const data = await getcategoriesById(brandId)
-      // console.log(data, 'category data')
-      // toast.success('Order created successfully!')
       setName(data.name)
       setSlug(data.slug)
       setDescription(data.description || '')
       setSubCategories(
-        data.sub_categories?.length > 0 ? data.sub_categories : [{ name: '' }]
+        data.sub_categories?.length > 0
+          ? data.sub_categories.map((sc) => ({ name: sc.name, selected: true }))
+          : [{ name: '', selected: false }]
       )
     } catch (error) {
-      // console.error('Failed to fetch category:', error)
+      toast.error('Failed to fetch category')
     }
   }
 
-  const handleSubCategoryChange = (index, value) => {
+  const handleSubCategoryNameChange = (index, value) => {
     const updated = [...subCategories]
     updated[index].name = value
     setSubCategories(updated)
   }
 
+  const handleSubCategorySelectChange = (index) => {
+    const updated = [...subCategories]
+    updated[index].selected = !updated[index].selected
+    setSubCategories(updated)
+  }
+
   const handleAddSubCategory = () => {
-    setSubCategories([...subCategories, { name: '' }])
+    setSubCategories([...subCategories, { name: '', selected: false }])
   }
 
   const handleRemoveSubCategory = (index) => {
@@ -53,11 +58,15 @@ const EditCategoryPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    const selectedSubCategories = subCategories
+      .filter((sc) => sc.name.trim() !== '' && sc.selected)
+      .map((sc) => ({ name: sc.name }))
+
     const categoryData = {
       name,
       slug,
       description,
-      sub_categories: subCategories.filter((sc) => sc.name.trim() !== ''),
+      sub_categories: selectedSubCategories,
     }
 
     try {
@@ -66,7 +75,6 @@ const EditCategoryPage = () => {
       router.push('/admin/categories')
     } catch (error) {
       toast.error('Failed to Update Category.')
-      // console.error(error)
     }
   }
 
@@ -79,12 +87,7 @@ const EditCategoryPage = () => {
   return (
     <ContainerDefault>
       <HeaderDashboard title="Categorias" description="Lista de Categorias" />
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 4000, // default for all toasts
-        }}
-      />
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <div className="container">
         <h2>Edit Category</h2>
         <form className="ps-form" onSubmit={handleSubmit}>
@@ -118,13 +121,22 @@ const EditCategoryPage = () => {
           <div className="form-group">
             <label>Sub-Categories</label>
             {subCategories.map((subCat, index) => (
-              <div key={index} style={{ display: 'flex', gap: '10px' }}>
+              <div
+                key={index}
+                style={{ display: 'flex', gap: '10px', alignItems: 'center' }}
+              >
                 <input
                   className="form-control"
                   value={subCat.name}
                   onChange={(e) =>
-                    handleSubCategoryChange(index, e.target.value)
+                    handleSubCategoryNameChange(index, e.target.value)
                   }
+                />
+                <input
+                  type="checkbox"
+                  checked={subCat.selected}
+                  onChange={() => handleSubCategorySelectChange(index)}
+                  title="Select to include this sub-category"
                 />
                 {index > 0 && (
                   <button

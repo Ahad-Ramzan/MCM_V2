@@ -54,9 +54,9 @@ export default function TopNavbar() {
 
         {/* Search */}
         <div className="flex-1 max-w-2xl mx-6 flex items-center bg-[var(--White)] rounded-r-md">
-          <select className="h-10 px-3 text-black border-r border-[var(--darkGray)] rounded-l-md">
+          {/* <select className="h-10 px-3 text-black border-r border-[var(--darkGray)] rounded-l-md">
             <option value="all">Tudo</option>
-          </select>
+          </select> */}
           <input
             type="text"
             placeholder="Estou à procura de..."
@@ -71,7 +71,7 @@ export default function TopNavbar() {
 
         {/* Icons */}
         <div className="flex items-center gap-6 text-sm">
-          <IconWithBadge icon={<LiaChartBarSolid size={25} />} count={0} />
+          {/* <IconWithBadge icon={<LiaChartBarSolid size={25} />} count={0} /> */}
           <IconWithBadge icon={<CiHeart size={25} />} count={0} />
           <Link href="/checkout">
             <IconWithBadge

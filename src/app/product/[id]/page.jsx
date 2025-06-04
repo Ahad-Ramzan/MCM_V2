@@ -43,7 +43,7 @@ export default function Product() {
         ]}
       />
 
-      <div className="Container flex  flex-col lg:flex-row w-full">
+      <div className="Container flex  flex-col lg:flex-row w-full mt-20 ">
         {/* Main Content Area */}
         <div className="flex-1 p-4">
           {/* Your product list, filter, header etc. goes here */}

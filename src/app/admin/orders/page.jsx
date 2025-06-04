@@ -101,9 +101,22 @@ const OrdersPage = () => {
             <Link href="/admin/orders/create-orders" className="ps-btn ">
               <i className="icon icon-plus mr-2"></i>Nova Encomenda
             </Link>
-            <a className="ps-btn ps-btn--gray" href="new-order.html">
+            {/* <a className="ps-btn ps-btn--gray" href="new-order.html">
               <i className="icon icon-download2 mr-2"></i>Exportar
-            </a>
+            </a> */}
+
+            <Link href={`/admin/orders/order-detail`} className="ps-btn ps-btn">
+              Orders Details
+            </Link>
+
+            {/* <button
+              className="ps-btn ps-btn"
+              onClick={() => {
+                window.location.href = '/admin/orders/order-detail'
+              }}
+            >
+              Orders Detail
+            </button> */}
           </div>
         </div>
         <div className="ps-section__content">

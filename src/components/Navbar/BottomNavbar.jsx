@@ -1,15 +1,46 @@
 'use client'
 
 import { FaBars } from 'react-icons/fa'
-import { MdKeyboardArrowDown } from 'react-icons/md'
+import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PTflag, USflag } from '@/assets/icons/index'
+import { useEffect, useState } from 'react'
+import { getAllCategories } from '@/apis/products'
 
 export default function BottomNavbar() {
+  const [categories, setCategories] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
+  const [expandedCategory, setExpandedCategory] = useState(null)
+
+  const fetchData = async (page = 1, search = '') => {
+    try {
+      const response = await getAllCategories(page, search)
+      setCategories(response)
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const handleSubcategoryToggle = (categoryId) => {
+    if (expandedCategory === categoryId) {
+      setExpandedCategory(null)
+    } else {
+      setExpandedCategory(categoryId)
+    }
+  }
+
   return (
     <div className="bg-[var(--primary)] text-[var(--White)] text-sm relative z-50">
-      <nav className="Container flex items-center justify-between  py-2">
+      <nav className="Container flex items-center justify-between py-2">
         {/* Left: Category Menu */}
         <div className="relative group">
           <div className="flex items-center gap-2 font-semibold cursor-pointer">
@@ -20,10 +51,51 @@ export default function BottomNavbar() {
           </div>
 
           {/* Dropdown on hover */}
-          <ul className="absolute top-6 left-0 bg-[var(--White)] boder border-1 border-[var(--darkGray)] text-black  rounded w-56 p-2 hidden group-hover:block z-50">
-            <li className="hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
-              <Link href="/category">Categoria</Link>
-            </li>
+          <ul className="absolute top-full left-0 bg-[var(--White)] border border-[var(--darkGray)] text-black rounded w-56 p-2 hidden group-hover:block z-50 shadow-lg">
+            {categories.results.map((category) => (
+              <li key={category.id} className="relative">
+                <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
+                  <Link
+                    href={`/category/${category.slug}`}
+                    className="flex-grow"
+                  >
+                    {category.name}
+                  </Link>
+                  {category.sub_categories?.length > 0 && (
+                    <span
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleSubcategoryToggle(category.id)
+                      }}
+                      className="ml-2"
+                    >
+                      <MdKeyboardArrowRight
+                        size={16}
+                        className={`transition-transform ${expandedCategory === category.id ? 'rotate-90' : ''}`}
+                      />
+                    </span>
+                  )}
+                </div>
+
+                {/* Subcategories */}
+                {expandedCategory === category.id &&
+                  category.sub_categories?.length > 0 && (
+                    <ul className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg">
+                      {category.sub_categories.map((subcategory) => (
+                        <li key={subcategory.id}>
+                          <Link
+                            href={`/category/${category.slug}/${subcategory.id}`}
+                            className="block hover:bg-[var(--lightGray)] px-3 py-1"
+                          >
+                            {subcategory.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -37,9 +109,6 @@ export default function BottomNavbar() {
           </li>
           <li>
             <a href="#">Contactos</a>
-          </li>
-          <li>
-            <a href="/category">Categoria</a>
           </li>
         </ul>
 

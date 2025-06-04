@@ -55,7 +55,7 @@ const ProductCard = ({
         </div>
 
         {/* Sold */}
-        <p className="text-xs text-gray-500 mt-1">Vendidos: {sold}</p>
+        {/* <p className="text-xs text-gray-500 mt-1">Vendidos: {sold}</p> */}
       </div>
     </Link>
   )

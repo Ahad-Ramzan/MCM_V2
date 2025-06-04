@@ -8,11 +8,15 @@ import FormSearchSimple from '@/components/SuperAdmin/shared/forms/FormSearchSim
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
 import {
   deletecategory,
+  deletesubcategory,
   getAllCategories,
+  getAllSubCategories,
   getSubCategoriesAllData,
 } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import debounce from 'lodash.debounce'
+import TableSubCategoriesItems from '@/components/SuperAdmin/shared/tables/TableSubCategoriesItems'
+import FormCreateSubCategory from '@/components/SuperAdmin/shared/forms/FormCreateSubCategory'
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState({
@@ -21,15 +25,17 @@ const CategoriesPage = () => {
     previous: null,
     results: [],
   })
+
+  const [subcategories, setAllSubCategories] = useState([])
+  console.log(subcategories, 'subcategores--------------------all')
   const [searchTerm, setSearchTerm] = useState('')
   // console.log(categories, 'cat-----')
   const [currentPage, setCurrentPage] = useState(1)
-  const [subcategories, setAllSubCategories] = useState([])
-  console.log(subcategories, 'sub cate--------------------all now')
 
   const fetchData = async (page = 1, search = '') => {
     try {
-      const response = await getAllCategories(page, search)
+      const response = await getAllSubCategories(page, search)
+      console.log(response, 'response sub categories ------------')
       setCategories(response) // Store in state
       setCurrentPage(page)
     } catch (error) {
@@ -42,17 +48,26 @@ const CategoriesPage = () => {
       const response = await getSubCategoriesAllData(page, search)
       console.log(response, 'response sub categories ------------')
       setAllSubCategories(response) // Store in state
-      // setCurrentPage(page)
+      setCurrentPage(page)
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     }
   }
 
+  // const fetchData = async (page = 1, search = '') => {
+  //     try {
+  //       const response = await getAllProducts(page, search)
+  //       setProductsData(response)
+  //       setCurrentPage(page)
+  //     } catch (error) {
+  //       toast.error('Failed to fetch products')
+  //     }
+  //   }
 
   const handleDeleteCategory = async (id) => {
     if (confirm('Are you sure you want to delete this brand?')) {
       try {
-        await deletecategory(id)
+        await deletesubcategory(id)
         toast.success('Category Deleted successfully!')
         await fetchData(currentPage, searchTerm) // Refresh data after deletion
       } catch (error) {
@@ -101,7 +116,7 @@ const CategoriesPage = () => {
             />
           </div>
           <div className="ps-section__content">
-            <TableCategoryItems
+            <TableSubCategoriesItems
               categories={categories.results}
               onDelete={handleDeleteCategory}
             />
@@ -116,7 +131,8 @@ const CategoriesPage = () => {
           </div>
         </div>
         <div className="ps-section__right">
-          <FormCreateCategory categories={subcategories} />
+          {/* <FormCreateCategory /> */}
+          <FormCreateSubCategory categories={subcategories} />
         </div>
       </section>
     </ContainerDefault>

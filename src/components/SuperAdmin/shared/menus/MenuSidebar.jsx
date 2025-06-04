@@ -31,13 +31,18 @@ const MenuSidebar = () => {
       icon: 'icon-users2',
     },
     {
-      text: 'Settings',
-      url: '/admin/settings',
+      text: 'SubCategories',
+      url: '/admin/subcategories',
       icon: 'icon-cog',
     },
     {
-      text: 'Brand',
+      text: 'Marcas',
       url: '/admin/brand',
+      icon: 'icon-cog',
+    },
+    {
+      text: 'Settings',
+      url: '/admin/settings',
       icon: 'icon-cog',
     },
   ]

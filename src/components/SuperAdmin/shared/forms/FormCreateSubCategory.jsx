@@ -1,105 +1,53 @@
 import React, { useState } from 'react'
-import { createCategory } from '@/apis/products'
+import { createSubCategory } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
-const FormCreateCategory = ({ categories }) => {
+const FormCreateSubCategory = ({ categories }) => {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
-  const [selectedSubCategoryIds, setSelectedSubCategoryIds] = useState([])
-  const [expandedNodes, setExpandedNodes] = useState({})
+  const [selectedParentId, setSelectedParentId] = useState(null)
+  const [expandedNodes, setExpandedNodes] = useState([])
 
-  const toggleExpand = (id) => {
-    setExpandedNodes((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }))
+  const handleCheckboxChange = (id) => {
+    setSelectedParentId((prev) => (prev === id ? null : id))
   }
 
-  const collectAllChildIds = (node) => {
-    let ids = [node.id]
-    if (node.children) {
-      node.children.forEach((child) => {
-        ids = ids.concat(collectAllChildIds(child))
-      })
-    }
-    return ids
-  }
-
-  const findParentIds = (node, targetId, path = []) => {
-    if (node.id === targetId) return path
-    if (node.children) {
-      for (let child of node.children) {
-        const result = findParentIds(child, targetId, [...path, node.id])
-        if (result) return result
-      }
-    }
-    return null
-  }
-
-  const handleCheckboxChange = (category) => {
-    const allChildIds = collectAllChildIds(category)
-    const parentPathIds = categories.flatMap(
-      (cat) => findParentIds(cat, category.id) || []
+  const toggleNode = (id) => {
+    setExpandedNodes((prev) =>
+      prev.includes(id) ? prev.filter((nodeId) => nodeId !== id) : [...prev, id]
     )
-
-    const alreadySelected = allChildIds.every((id) =>
-      selectedSubCategoryIds.includes(id)
-    )
-
-    if (alreadySelected) {
-      setSelectedSubCategoryIds((prev) =>
-        prev.filter(
-          (id) => !allChildIds.includes(id) && !parentPathIds.includes(id)
-        )
-      )
-    } else {
-      setSelectedSubCategoryIds((prev) =>
-        Array.from(new Set([...prev, ...allChildIds, ...parentPathIds]))
-      )
-    }
   }
 
   const renderCategoryTree = (nodes) => {
     return nodes.map((cat) => {
-      const isChecked = selectedSubCategoryIds.includes(cat.id)
       const hasChildren = cat.children && cat.children.length > 0
-      const isExpanded = expandedNodes[cat.id]
+      const isExpanded = expandedNodes.includes(cat.id)
 
       return (
         <div key={cat.id} style={{ marginLeft: '20px', marginBottom: '5px' }}>
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
               justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                flex: 1,
-              }}
-            >
+            <label style={{ flexGrow: 1 }}>
               <input
                 type="checkbox"
-                checked={isChecked}
-                onChange={() => handleCheckboxChange(cat)}
+                checked={selectedParentId === cat.id}
+                onChange={() => handleCheckboxChange(cat.id)}
+                style={{ marginRight: '5px' }}
               />
               {cat.name}
             </label>
 
             {hasChildren && (
               <span
-                onClick={() => toggleExpand(cat.id)}
-                style={{
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  userSelect: 'none',
-                }}
+                onClick={() => toggleNode(cat.id)}
+                style={{ cursor: 'pointer' }}
               >
                 {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
               </span>
@@ -107,9 +55,7 @@ const FormCreateCategory = ({ categories }) => {
           </div>
 
           {hasChildren && isExpanded && (
-            <div style={{ marginLeft: '20px' }}>
-              {renderCategoryTree(cat.children)}
-            </div>
+            <div>{renderCategoryTree(cat.children)}</div>
           )}
         </div>
       )
@@ -119,23 +65,28 @@ const FormCreateCategory = ({ categories }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    if (!selectedParentId) {
+      toast.error('Please select a parent category.')
+      return
+    }
+
     const payload = {
       name,
       slug,
       description,
-      sub_categories: selectedSubCategoryIds,
+      parent: selectedParentId,
     }
 
     try {
-      await createCategory(payload)
-      toast.success('Category created successfully!')
+      await createSubCategory(payload)
+      toast.success('Sub-category created successfully!')
+
       setName('')
       setSlug('')
       setDescription('')
-      setSelectedSubCategoryIds([])
-      setExpandedNodes({})
+      setSelectedParentId(null)
     } catch (err) {
-      toast.error('Failed to create category')
+      toast.error('Failed to create sub-category.')
     }
   }
 
@@ -183,7 +134,7 @@ const FormCreateCategory = ({ categories }) => {
         </div>
 
         <div className="form-group">
-          <label>Select Sub-Categories</label>
+          <label>Select Sub Category</label>
           <div
             style={{
               border: '1px solid #e5e5e5',
@@ -205,8 +156,7 @@ const FormCreateCategory = ({ categories }) => {
             setName('')
             setSlug('')
             setDescription('')
-            setSelectedSubCategoryIds([])
-            setExpandedNodes({})
+            setSelectedParentId(null)
           }}
         >
           Clean
@@ -219,4 +169,4 @@ const FormCreateCategory = ({ categories }) => {
   )
 }
 
-export default FormCreateCategory
+export default FormCreateSubCategory

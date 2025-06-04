@@ -1,42 +1,42 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
+import React, { useState } from 'react'
 
 const slides = [
   {
-    title: "LOREM IPSUM",
-    subtitle: "DOLOR SIT AMET",
-    description: "CONSECTETUR",
-    buttonText: "Saiba Mais",
+    title: 'LOREM IPSUM',
+    subtitle: 'DOLOR SIT AMET',
+    description: 'CONSECTETUR',
+    buttonText: 'Saiba Mais',
   },
   {
-    title: "SEGUNDO SLIDE",
-    subtitle: "NOVO CONTEÚDO",
-    description: "MAIS DETALHES",
-    buttonText: "Explorar",
+    title: 'SEGUNDO SLIDE',
+    subtitle: 'NOVO CONTEÚDO',
+    description: 'MAIS DETALHES',
+    buttonText: 'Explorar',
   },
   {
-    title: "ÚLTIMO SLIDE",
-    subtitle: "INFORMAÇÃO FINAL",
-    description: "DESCUBRA MAIS",
-    buttonText: "Começar",
+    title: 'ÚLTIMO SLIDE',
+    subtitle: 'INFORMAÇÃO FINAL',
+    description: 'DESCUBRA MAIS',
+    buttonText: 'Começar',
   },
-];
+]
 
 const Sliderhome = () => {
-  const [current, setCurrent] = useState(0);
-  const totalSlides = slides.length;
+  const [current, setCurrent] = useState(0)
+  const totalSlides = slides.length
 
   const handlePrev = () => {
-    setCurrent((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
-  };
+    setCurrent((prev) => (prev === 0 ? totalSlides - 1 : prev - 1))
+  }
 
   const handleNext = () => {
-    setCurrent((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
-  };
+    setCurrent((prev) => (prev === totalSlides - 1 ? 0 : prev + 1))
+  }
 
   return (
-    <div className="Container mx-auto my-6">
+    <div className="Container mx-auto my-6 mt-37">
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Slider */}
         <div className="w-full xl:w-2/3 bg-gray-100 flex items-center justify-left pl-[13%] h-[400px] relative overflow-hidden">
@@ -76,7 +76,7 @@ const Sliderhome = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Sliderhome;
+export default Sliderhome
