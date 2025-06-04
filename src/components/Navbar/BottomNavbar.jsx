@@ -1,11 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 import { FaBars } from 'react-icons/fa'
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'
-import Image from 'next/image'
-import Link from 'next/link'
 import { PTflag, USflag } from '@/assets/icons/index'
-import { useEffect, useState } from 'react'
 import { getAllCategories } from '@/apis/products'
 
 export default function BottomNavbar() {
@@ -16,6 +16,7 @@ export default function BottomNavbar() {
     results: [],
   })
   const [expandedCategory, setExpandedCategory] = useState(null)
+  const [expandedSubcategory, setExpandedSubcategory] = useState(null)
 
   const fetchData = async (page = 1, search = '') => {
     try {
@@ -31,11 +32,14 @@ export default function BottomNavbar() {
   }, [])
 
   const handleSubcategoryToggle = (categoryId) => {
-    if (expandedCategory === categoryId) {
-      setExpandedCategory(null)
-    } else {
-      setExpandedCategory(categoryId)
-    }
+    setExpandedCategory((prev) => (prev === categoryId ? null : categoryId))
+    setExpandedSubcategory(null) // Close subcategory children when category changes
+  }
+
+  const handleChildToggle = (subcategoryId) => {
+    setExpandedSubcategory((prev) =>
+      prev === subcategoryId ? null : subcategoryId
+    )
   }
 
   return (
@@ -72,7 +76,9 @@ export default function BottomNavbar() {
                     >
                       <MdKeyboardArrowRight
                         size={16}
-                        className={`transition-transform ${expandedCategory === category.id ? 'rotate-90' : ''}`}
+                        className={`transition-transform ${
+                          expandedCategory === category.id ? 'rotate-90' : ''
+                        }`}
                       />
                     </span>
                   )}
@@ -83,13 +89,50 @@ export default function BottomNavbar() {
                   category.sub_categories?.length > 0 && (
                     <ul className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg">
                       {category.sub_categories.map((subcategory) => (
-                        <li key={subcategory.id}>
-                          <Link
-                            href={`/category/${category.slug}/${subcategory.id}`}
-                            className="block hover:bg-[var(--lightGray)] px-3 py-1"
-                          >
-                            {subcategory.name}
-                          </Link>
+                        <li key={subcategory.id} className="relative">
+                          <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
+                            <Link
+                              href={`/category/${category.slug}/${subcategory.id}`}
+                              className="flex-grow"
+                            >
+                              {subcategory.name}
+                            </Link>
+                            {subcategory.children?.length > 0 && (
+                              <span
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  handleChildToggle(subcategory.id)
+                                }}
+                              >
+                                <MdKeyboardArrowRight
+                                  size={16}
+                                  className={`transition-transform ${
+                                    expandedSubcategory === subcategory.id
+                                      ? 'rotate-90'
+                                      : ''
+                                  }`}
+                                />
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Children of Sub-category */}
+                          {expandedSubcategory === subcategory.id &&
+                            subcategory.children?.length > 0 && (
+                              <ul className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg">
+                                {subcategory.children.map((child) => (
+                                  <li key={child.id}>
+                                    <Link
+                                      href={`/category/${category.slug}/${subcategory.id}/${child.id}`}
+                                      className="block hover:bg-[var(--lightGray)] px-3 py-1"
+                                    >
+                                      {child.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                         </li>
                       ))}
                     </ul>
@@ -102,17 +145,17 @@ export default function BottomNavbar() {
         {/* Center: Navigation Links */}
         <ul className="flex items-center gap-6 font-medium">
           <li>
-            <a href="/">Home</a>
+            <Link href="/">Home</Link>
           </li>
           <li>
-            <a href="">Serviços</a>
+            <Link href="#">Serviços</Link>
           </li>
           <li>
-            <a href="#">Contactos</a>
+            <Link href="#">Contactos</Link>
           </li>
         </ul>
 
-        {/* Right: Language and Options */}
+        {/* Right: Language Selector */}
         <div className="flex items-center gap-4">
           <Link href="/trackorder" className="whitespace-nowrap">
             Acompanhar Encomenda
@@ -121,15 +164,12 @@ export default function BottomNavbar() {
           <span className="whitespace-nowrap">EUR</span>
           <span className="hidden sm:inline">|</span>
 
-          {/* Language Selector (on hover) */}
           <div className="relative group cursor-pointer">
             <div className="flex items-center gap-1">
               <Image src={PTflag} alt="PT" width={20} height={15} />
               <span>Português</span>
               <MdKeyboardArrowDown size={16} />
             </div>
-
-            {/* Language Dropdown */}
             <ul className="absolute top-5 right-0 bg-[var(--White)] text-black shadow-lg rounded w-40 p-2 hidden group-hover:block z-50">
               <li className="hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer flex items-center gap-2">
                 <Image src={PTflag} alt="PT" width={20} height={15} />
