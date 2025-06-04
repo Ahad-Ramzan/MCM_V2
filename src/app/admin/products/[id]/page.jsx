@@ -26,15 +26,12 @@ const initialFormState = {
   gallery: [],
   video: null,
   sku: '',
-  // status: '',
   brand: '',
-  // tags: '',
   category: '',
 }
 
 const EditProductPage = () => {
   const { id } = useParams()
-  console.log(id, 'prodid')
   const router = useRouter()
   const [formData, setFormData] = useState(initialFormState)
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
@@ -42,6 +39,7 @@ const EditProductPage = () => {
   const [videoPreview, setVideoPreview] = useState(null)
   const [categories, setCategories] = useState([])
   const [brand, setBrandsData] = useState([])
+  const [activeTab, setActiveTab] = useState('general')
 
   const fetchAllCategories = async () => {
     try {
@@ -81,9 +79,7 @@ const EditProductPage = () => {
           gallery: [],
           video: null,
           sku: data.SKU || '',
-          // status: data.status?.toString() || '',
           brand: data.brand?.toString() || '',
-          // tags: data.tags || '',
           category: data.category?.toString() || '',
         })
       } catch (err) {
@@ -98,16 +94,6 @@ const EditProductPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleFileChange = (e, fieldName, isMultiple = false) => {
-    const files = e.target.files
-    if (!files.length) return
-    if (isMultiple) {
-      setFormData((prev) => ({ ...prev, [fieldName]: files }))
-    } else {
-      setFormData((prev) => ({ ...prev, [fieldName]: files[0] }))
-    }
   }
 
   const handleThumbnailChange = (e) => {
@@ -198,10 +184,8 @@ const EditProductPage = () => {
     productData.append('product_summary', formData.summary)
     productData.append('product_description', formData.description)
     productData.append('SKU', formData.sku)
-    // productData.append('status', formData.status)
     productData.append('brand', formData.brand)
     productData.append('category', formData.category)
-    // productData.append('tags', formData.tags)
 
     if (formData.thumbnail) {
       productData.append('product_thumbnail', formData.thumbnail)
@@ -223,7 +207,6 @@ const EditProductPage = () => {
       router.push('/admin/products')
     } catch (error) {
       toast.error('Failed to update product.')
-      // console.error(error)
     }
   }
 
@@ -241,7 +224,7 @@ const EditProductPage = () => {
       <Toaster
         position="top-center"
         toastOptions={{
-          duration: 3000, // default for all toasts
+          duration: 3000,
         }}
       />
       <form
@@ -249,231 +232,309 @@ const EditProductPage = () => {
         onSubmit={handleSubmit}
         encType="multipart/form-data"
       >
-        <div className="ps-form__content">
-          <div className="row">
-            {/* Left Side */}
-            <div className="col-xl-6 col-lg-6 col-md-12">
-              <figure className="ps-block--form-box">
-                <figcaption>General</figcaption>
-                <div className="ps-block__content">
-                  {[
-                    { label: 'Product Name', name: 'name' },
-                    { label: 'Reference', name: 'reference' },
-                    { label: 'Regular Price', name: 'regularPrice' },
-                    { label: 'Sale Price', name: 'salePrice' },
-                    { label: 'Sale Quantity', name: 'saleQuantity' },
-                    { label: 'Sold Items', name: 'soldItems' },
-                    { label: 'stock', name: 'stock' },
-                    { label: 'SKU', name: 'sku' },
-                    // { label: 'Tags', name: 'tags' },
-                  ].map(({ label, name }) => (
-                    <div className="form-group" key={name}>
-                      <label>{label} *</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  ))}
-                  <div className="form-group">
-                    <label>Product Summary</label>
-                    <textarea
-                      className="form-control"
-                      name="summary"
-                      rows="3"
-                      value={formData.summary}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Product Description</label>
-                    <textarea
-                      className="form-control"
-                      name="description"
-                      rows="6"
-                      value={formData.description}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </figure>
-            </div>
-
-            {/* Right Side */}
-            <div className="col-xl-6 col-lg-6 col-md-12">
-              <figure className="ps-block--form-box">
-                <figcaption>Product Images</figcaption>
-                <div className="ps-block__content">
-                  {/* Thumbnail Upload */}
-                  <div className="form-group">
-                    <label className="d-block mb-2">Thumbnail *</label>
-                    <div className="file-upload-wrapper">
-                      <label className="file-upload-label">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleThumbnailChange}
-                          className="file-upload-input"
-                        />
-                        <div className="file-upload-content">
-                          <FiUpload className="upload-icon" />
-                          <span>Click to upload thumbnail</span>
-                        </div>
-                      </label>
-                    </div>
-                    {thumbnailPreview && (
-                      <div className="preview-container mt-3">
-                        <div className="image-preview">
-                          <img
-                            src={thumbnailPreview}
-                            alt="Thumbnail preview"
-                            className="img-thumbnail"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Gallery Upload */}
-                  <div className="form-group">
-                    <label className="d-block mb-2">
-                      Gallery (Max 4 images)
-                    </label>
-                    <div className="file-upload-wrapper">
-                      <label className="file-upload-label">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleGalleryChange}
-                          className="file-upload-input"
-                          disabled={galleryPreview.length >= 4}
-                        />
-                        <div className="file-upload-content">
-                          <FiImage className="upload-icon" />
-                          <span>
-                            {galleryPreview.length >= 4
-                              ? 'Maximum 4 images reached'
-                              : `Click to upload images (${galleryPreview.length}/4)`}
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-                    {galleryPreview.length > 0 && (
-                      <div className="gallery-preview mt-3">
-                        <div className="row">
-                          {galleryPreview.map((src, index) => (
-                            <div
-                              className="col-3 mb-2 position-relative"
-                              key={index}
-                            >
-                              <img
-                                src={src}
-                                alt={`Gallery preview ${index}`}
-                                className="img-thumbnail w-100"
-                                style={{ height: '80px', objectFit: 'cover' }}
-                              />
-                              <button
-                                type="button"
-                                className="btn btn-danger btn-sm position-absolute top-0 end-0"
-                                style={{ transform: 'translate(30%, -30%)' }}
-                                onClick={() => removeGalleryImage(index)}
-                              >
-                                <FiX />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Video Upload */}
-                  <div className="form-group">
-                    <label className="d-block mb-2">Product Video</label>
-                    <div className="file-upload-wrapper">
-                      <label className="file-upload-label">
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={handleVideoChange}
-                          className="file-upload-input"
-                        />
-                        <div className="file-upload-content">
-                          <FiVideo className="upload-icon" />
-                          <span>Click to upload video</span>
-                        </div>
-                      </label>
-                    </div>
-                    {videoPreview && (
-                      <div className="preview-container mt-3">
-                        <video
-                          controls
-                          className="img-thumbnail w-100"
-                          style={{ maxHeight: '200px' }}
-                        >
-                          <source src={videoPreview} type="video/mp4" />
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </figure>
-
-              <figure className="ps-block--form-box">
-                <figcaption>Meta</figcaption>
-                <div className="ps-block__content">
-                  <div className="form-group">
-                    <label>Brand</label>
-                    <select
-                      className="form-control"
-                      name="brand"
-                      value={formData.brand}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select brand</option>
-                      {brand &&
-                        brand.map((brand) => (
-                          <option key={brand.id} value={brand.id}>
-                            {brand.brand_name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Category *</label>
-                    <select
-                      className="form-control"
-                      name="category"
-                      value={formData.category}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </figure>
-            </div>
-          </div>
-
-          <div className="form-group submit">
-            <button type="submit" className="ps-btn ps-btn--fullwidth">
-              Update Product
+        {/* Tab Navigation */}
+        <div className="ps-form__tabs mb-4">
+          <div className="nav nav-tabs" role="tablist">
+            <button
+              className={`nav-link ${activeTab === 'general' ? 'active' : ''}`}
+              onClick={() => setActiveTab('general')}
+              type="button"
+            >
+              General
+            </button>
+            <button
+              className={`nav-link ${activeTab === 'images' ? 'active' : ''}`}
+              onClick={() => setActiveTab('images')}
+              type="button"
+            >
+              Product Images
+            </button>
+            <button
+              className={`nav-link ${activeTab === 'meta' ? 'active' : ''}`}
+              onClick={() => setActiveTab('meta')}
+              type="button"
+            >
+              Meta
             </button>
           </div>
         </div>
+
+        <div className="ps-form__content">
+          {/* General Tab Content */}
+          <div
+            className={`tab-pane fade ${
+              activeTab === 'general' ? 'show active' : 'd-none'
+            }`}
+          >
+            <figure className="ps-block--form-box">
+              <div className="ps-block__content">
+                {[
+                  { label: 'Product Name', name: 'name' },
+                  { label: 'Reference', name: 'reference' },
+                  { label: 'Regular Price', name: 'regularPrice' },
+                  { label: 'Sale Price', name: 'salePrice' },
+                  { label: 'Sale Quantity', name: 'saleQuantity' },
+                  { label: 'Sold Items', name: 'soldItems' },
+                  { label: 'stock', name: 'stock' },
+                  { label: 'SKU', name: 'sku' },
+                ].map(({ label, name }) => (
+                  <div className="form-group" key={name}>
+                    <label>{label} *</label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name={name}
+                      value={formData[name]}
+                      onChange={handleChange}
+                    />
+                  </div>
+                ))}
+                <div className="form-group">
+                  <label>Product Summary</label>
+                  <textarea
+                    className="form-control"
+                    name="summary"
+                    rows="3"
+                    value={formData.summary}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Product Description</label>
+                  <textarea
+                    className="form-control"
+                    name="description"
+                    rows="6"
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </figure>
+          </div>
+
+          {/* Product Images Tab Content */}
+          <div
+            className={`tab-pane fade ${
+              activeTab === 'images' ? 'show active' : 'd-none'
+            }`}
+          >
+            <figure className="ps-block--form-box">
+              <div className="ps-block__content">
+                {/* Thumbnail Upload */}
+                <div className="form-group">
+                  <label className="d-block mb-2">Thumbnail *</label>
+                  <div className="file-upload-wrapper">
+                    <label className="file-upload-label">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleThumbnailChange}
+                        className="file-upload-input"
+                      />
+                      <div className="file-upload-content">
+                        <FiUpload className="upload-icon" />
+                        <span>Click to upload thumbnail</span>
+                      </div>
+                    </label>
+                  </div>
+                  {thumbnailPreview && (
+                    <div className="preview-container mt-3">
+                      <div className="image-preview">
+                        <img
+                          src={thumbnailPreview}
+                          alt="Thumbnail preview"
+                          className="img-thumbnail"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Gallery Upload */}
+                <div className="form-group">
+                  <label className="d-block mb-2">Gallery (Max 4 images)</label>
+                  <div className="file-upload-wrapper">
+                    <label className="file-upload-label">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleGalleryChange}
+                        className="file-upload-input"
+                        disabled={galleryPreview.length >= 4}
+                      />
+                      <div className="file-upload-content">
+                        <FiImage className="upload-icon" />
+                        <span>
+                          {galleryPreview.length >= 4
+                            ? 'Maximum 4 images reached'
+                            : `Click to upload images (${galleryPreview.length}/4)`}
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                  {galleryPreview.length > 0 && (
+                    <div className="gallery-preview mt-3">
+                      <div className="row">
+                        {galleryPreview.map((src, index) => (
+                          <div
+                            className="col-3 mb-2 position-relative"
+                            key={index}
+                          >
+                            <img
+                              src={src}
+                              alt={`Gallery preview ${index}`}
+                              className="img-thumbnail w-100"
+                              style={{ height: '80px', objectFit: 'cover' }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm position-absolute top-0 end-0"
+                              style={{ transform: 'translate(30%, -30%)' }}
+                              onClick={() => removeGalleryImage(index)}
+                            >
+                              <FiX />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Video Upload */}
+                <div className="form-group">
+                  <label className="d-block mb-2">Product Video</label>
+                  <div className="file-upload-wrapper">
+                    <label className="file-upload-label">
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoChange}
+                        className="file-upload-input"
+                      />
+                      <div className="file-upload-content">
+                        <FiVideo className="upload-icon" />
+                        <span>Click to upload video</span>
+                      </div>
+                    </label>
+                  </div>
+                  {videoPreview && (
+                    <div className="preview-container mt-3">
+                      <video
+                        controls
+                        className="img-thumbnail w-100"
+                        style={{ maxHeight: '200px' }}
+                      >
+                        <source src={videoPreview} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </figure>
+          </div>
+
+          {/* Meta Tab Content */}
+          <div
+            className={`tab-pane fade ${
+              activeTab === 'meta' ? 'show active' : 'd-none'
+            }`}
+          >
+            <figure className="ps-block--form-box">
+              <div className="ps-block__content">
+                <div className="form-group">
+                  <label>Brand</label>
+                  <select
+                    className="form-control"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select brand</option>
+                    {brand &&
+                      brand.map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                          {brand.brand_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Category *</label>
+                  <select
+                    className="form-control"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </figure>
+          </div>
+        </div>
+
+        {/* Bottom buttons - always visible */}
+        <div className="ps-form__bottom mt-4">
+          <button
+            type="button"
+            className="ps-btn ps-btn--black"
+            onClick={() => router.push('/admin/products')}
+          >
+            Back
+          </button>
+          <button type="button" className="ps-btn ps-btn--gray">
+            Cancel
+          </button>
+          <button type="submit" className="ps-btn">
+            Update Product
+          </button>
+        </div>
       </form>
+
       <style jsx>{`
+        .ps-form__tabs {
+          border-bottom: 1px solid #dee2e6;
+        }
+        .nav-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          padding-left: 0;
+          margin-bottom: 0;
+          list-style: none;
+        }
+        .nav-link {
+          padding: 0.5rem 1rem;
+          border: 1px solid transparent;
+          border-top-left-radius: 0.25rem;
+          border-top-right-radius: 0.25rem;
+          color: #495057;
+          cursor: pointer;
+          margin-bottom: -1px;
+          background: none;
+          border: none;
+          font-weight: 500;
+        }
+        .nav-link:hover {
+          border-color: #e9ecef #e9ecef #dee2e6;
+          color: #0056b3;
+        }
+        .nav-link.active {
+          color: #0056b3;
+          background-color: #fff;
+          border-color: #dee2e6 #dee2e6 #fff;
+          border-bottom: 2px solid #0056b3;
+        }
         .file-upload-wrapper {
           position: relative;
           margin-bottom: 1rem;

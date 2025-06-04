@@ -22,7 +22,7 @@ export default function LayoutWrapper({ children }) {
       {!isAdminRoute && (
         <>
           <ProtectedRoute>
-            <div className="hidden xl:block">
+            <div className="hidden xl:block fixed top-0 left-0 right-0 z-50 ">
               <TopNavbar />
               <BottomNavbar />
             </div>

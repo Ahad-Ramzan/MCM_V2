@@ -111,6 +111,12 @@ const TableOrdersItems = ({ orders, onDelete }) => {
           <strong>{item.amount}</strong>
         </td>
         <td>
+          <Link
+            href={`/admin/products/${item.id}`}
+            className="ps-btn ps-btn--sm"
+          >
+            Edit
+          </Link>
           {/* <DropdownAction /> */}
           <button
             className="ps-btn ps-btn--sm ps-btn--danger ml-2"

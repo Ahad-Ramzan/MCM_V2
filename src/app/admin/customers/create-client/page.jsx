@@ -4,6 +4,7 @@ import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
 import toast, { Toaster } from 'react-hot-toast'
 import axios from 'axios'
+import { registerUser } from '@/apis/userApi'
 
 // Initial state
 const initialFormState = {
@@ -29,15 +30,24 @@ const CreateUserPage = () => {
     e.preventDefault()
 
     try {
-      const response = await axios.post(
-        'http://localhost:8000/api/user/create/',
-        formData
-      )
+      // Use the registerUser function instead of direct axios call
+      const response = await registerUser({
+        email: formData.email,
+        password: formData.password,
+        full_name: formData.full_name,
+        address: formData.address,
+        bio: formData.bio,
+        display_name: formData.display_name,
+      })
+
       toast.success('User created successfully!')
       setFormData(initialFormState)
+
+      // If you need to do something with the response
+      console.log('Registration response:', response)
     } catch (error) {
-      console.error(error)
-      toast.error('Failed to create user')
+      console.error('Registration error:', error)
+      toast.error(error.message || 'Failed to create user')
     }
   }
 
