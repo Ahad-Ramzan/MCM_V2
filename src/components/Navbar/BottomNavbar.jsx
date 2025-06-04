@@ -60,7 +60,7 @@ export default function BottomNavbar() {
               <li key={category.id} className="relative">
                 <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
                   <Link
-                    href={/category/${category.slug}}
+                    href={`/category/${category.slug}`}
                     className="flex-grow"
                   >
                     {category.name}
@@ -92,7 +92,7 @@ export default function BottomNavbar() {
                         <li key={subcategory.id} className="relative">
                           <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
                             <Link
-                              href={/category/${category.slug}/${subcategory.id}}
+                              href={`/category/${category.slug}/${subcategory.id}`}
                               className="flex-grow"
                             >
                               {subcategory.name}
@@ -124,7 +124,7 @@ export default function BottomNavbar() {
                                 {subcategory.children.map((child) => (
                                   <li key={child.id}>
                                     <Link
-                                      href={/category/${category.slug}/${subcategory.id}/${child.id}}
+                                      href={`/category/${category.slug}/${subcategory.id}/${child.id}`}
                                       className="block hover:bg-[var(--lightGray)] px-3 py-1"
                                     >
                                       {child.name}
