@@ -290,6 +290,19 @@ export const createOrder = async (orderPayload) => {
   }
 }
 
+export const createOrderBanner = async (orderPayload) => {
+  try {
+    const response = await ORDERS_API.post('orders/banners/', orderPayload)
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error creating order:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to create order')
+  }
+}
+
 export const getBrandById = async (id) => {
   const response = await ESTORE_API.get(`brands/${id}/`)
   return response.data

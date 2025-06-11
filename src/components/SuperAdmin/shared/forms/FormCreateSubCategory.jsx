@@ -134,7 +134,7 @@ const FormCreateSubCategory = ({ categories }) => {
         </div>
 
         <div className="form-group">
-          <label>Select Sub Category</label>
+          <label>Select Parent Category</label>
           <div
             style={{
               border: '1px solid #e5e5e5',

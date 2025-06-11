@@ -1,10 +1,21 @@
 'use client'
-import React from 'react'
-// import Link from '../../../../../node_modules/next/link';
-import Link from 'next/link'
+import EditCategoryModal from '@/app/admin/categories/[params]/page'
+import React, { useState } from 'react'
+// import EditCategoryModal from './EditCategoryModal'
 
-const TableCategoryItems = ({ categories, onDelete }) => {
-  console.log(categories, 'new categories')
+const TableCategoryItems = ({ categories, onDelete, onUpdate }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState(null)
+
+  const handleEditClick = (category) => {
+    setSelectedCategory(category)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedCategory(null)
+  }
 
   return (
     <div className="table-responsive">
@@ -31,19 +42,12 @@ const TableCategoryItems = ({ categories, onDelete }) => {
                     : '—'}
                 </td>
                 <td>
-                  {/* <Link href={`/admin/brand/edit/${brand.id}`} className="ps-btn ps-btn--sm">
-                                                Edit
-                                              </Link> */}
-                  {/* <Link className="ps-btn ps-btn--sm"  >
-                                              Edit
-                                              </Link> */}
-
-                  <Link
-                    href={`/admin/categories/${category.id}`}
+                  <button
                     className="ps-btn ps-btn--sm"
+                    onClick={() => handleEditClick(category)}
                   >
                     Edit
-                  </Link>
+                  </button>
                   <button
                     className="ps-btn ps-btn--sm ps-btn--danger ml-2"
                     onClick={() => onDelete(category.id)}
@@ -60,6 +64,12 @@ const TableCategoryItems = ({ categories, onDelete }) => {
           )}
         </tbody>
       </table>
+      <EditCategoryModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        category={selectedCategory}
+        onUpdate={onUpdate}
+      />
     </div>
   )
 }

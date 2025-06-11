@@ -123,7 +123,7 @@ const FormCreateCategory = ({ categories }) => {
       name,
       slug,
       description,
-      sub_categories: selectedSubCategoryIds,
+      sub_category_ids: selectedSubCategoryIds,
     }
 
     try {
