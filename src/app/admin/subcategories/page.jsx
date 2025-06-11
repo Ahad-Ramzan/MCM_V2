@@ -119,6 +119,7 @@ const CategoriesPage = () => {
             <TableSubCategoriesItems
               categories={categories.results}
               onDelete={handleDeleteCategory}
+              subcategories={subcategories}
             />
             <div className="ps-section__footer">
               <p>Mortar 5 de 30 items.</p>
