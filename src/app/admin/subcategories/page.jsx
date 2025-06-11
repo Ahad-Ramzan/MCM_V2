@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from 'react'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import TableCategoryItems from '@/components/SuperAdmin/shared/tables/TableCategoryItems'
+import TableSubCategoriesItems from '@/components/SuperAdmin/shared/tables/TableSubCategoriesItems'
 import Pagination from '@/components/SuperAdmin/elements/basic/Pagination'
 import FormCreateCategory from '@/components/SuperAdmin/shared/forms/FormCreateCategory'
+import FormCreateSubCategory from '@/components/SuperAdmin/shared/forms/FormCreateSubCategory'
 import FormSearchSimple from '@/components/SuperAdmin/shared/forms/FormSearchSimple'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
 import {
@@ -15,8 +17,7 @@ import {
 } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import debounce from 'lodash.debounce'
-import TableSubCategoriesItems from '@/components/SuperAdmin/shared/tables/TableSubCategoriesItems'
-import FormCreateSubCategory from '@/components/SuperAdmin/shared/forms/FormCreateSubCategory'
+import { Modal, Button } from 'antd'
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState({
@@ -27,15 +28,13 @@ const CategoriesPage = () => {
   })
 
   const [subcategories, setAllSubCategories] = useState([])
-  console.log(subcategories, 'subcategores--------------------all')
   const [searchTerm, setSearchTerm] = useState('')
-  // console.log(categories, 'cat-----')
   const [currentPage, setCurrentPage] = useState(1)
+  const [isModalVisible, setIsModalVisible] = useState(false) // Modal visibility state
 
   const fetchData = async (page = 1, search = '') => {
     try {
       const response = await getAllSubCategories(page, search)
-      console.log(response, 'response sub categories ------------')
       setCategories(response) // Store in state
       setCurrentPage(page)
     } catch (error) {
@@ -46,23 +45,12 @@ const CategoriesPage = () => {
   const fetchAllData = async (page = 1, search = '') => {
     try {
       const response = await getSubCategoriesAllData(page, search)
-      console.log(response, 'response sub categories ------------')
       setAllSubCategories(response) // Store in state
       setCurrentPage(page)
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     }
   }
-
-  // const fetchData = async (page = 1, search = '') => {
-  //     try {
-  //       const response = await getAllProducts(page, search)
-  //       setProductsData(response)
-  //       setCurrentPage(page)
-  //     } catch (error) {
-  //       toast.error('Failed to fetch products')
-  //     }
-  //   }
 
   const handleDeleteCategory = async (id) => {
     if (confirm('Are you sure you want to delete this brand?')) {
@@ -71,7 +59,6 @@ const CategoriesPage = () => {
         toast.success('Category Deleted successfully!')
         await fetchData(currentPage, searchTerm) // Refresh data after deletion
       } catch (error) {
-        // console.error('Delete failed:', error)
         toast.error('Failed to Delete Category')
       }
     }
@@ -97,8 +84,7 @@ const CategoriesPage = () => {
   }, [])
 
   const totalPages = Math.ceil(categories.count / 10)
-  // const data=
-  // console.log(data,"categories data")
+
   return (
     <ContainerDefault>
       <HeaderDashboard title="Categorias" description="Lista de Categorias" />
@@ -110,10 +96,24 @@ const CategoriesPage = () => {
       />
       <section className="ps-dashboard ps-items-listing">
         <div className="ps-section__left">
-          <div className="ps-section__header">
+          <div
+            className="ps-section__header"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <FormSearchSimple
               onSearchChange={(value) => setSearchTerm(value)}
             />
+            <button
+              className="ps-btn ml-60 w-40"
+              onClick={() => setIsModalVisible(true)} // Open modal for subcategory creation
+            >
+              <i className="icon icon-plus mr-2" />
+              Add New Subcategory
+            </button>
           </div>
           <div className="ps-section__content">
             <TableSubCategoriesItems
@@ -122,7 +122,9 @@ const CategoriesPage = () => {
               subcategories={subcategories}
             />
             <div className="ps-section__footer">
-              <p>Mortar 5 de 30 items.</p>
+              <p>
+                Showing {categories.results.length} of {categories.count} items.
+              </p>
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -131,11 +133,17 @@ const CategoriesPage = () => {
             </div>
           </div>
         </div>
-        <div className="ps-section__right">
-          {/* <FormCreateCategory /> */}
-          <FormCreateSubCategory categories={subcategories} />
-        </div>
       </section>
+
+      {/* Create Subcategory Modal */}
+      <Modal
+        title="Create New Subcategory"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <FormCreateSubCategory categories={subcategories} />
+      </Modal>
     </ContainerDefault>
   )
 }

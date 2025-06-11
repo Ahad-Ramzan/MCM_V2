@@ -4,49 +4,6 @@ import { Menu } from 'antd'
 import DropdownAction from '@/components/SuperAdmin/elements/basic/DropdownAction'
 
 const TableOrdersItems = ({ orders, onDelete }) => {
-  //   const orderItems = [
-  //     {
-  //       id: '#A580',
-  //       date: 'Ago 15, 2024',
-  //       product: 'Placas de gesso',
-  //       payment: true,
-  //       fullfillment: 'delivered',
-  //       total: '123.00€',
-  //     },
-  //     {
-  //       id: '#B260',
-  //       date: 'Ago 15, 2024',
-  //       product: 'Placas de gesso',
-  //       payment: false,
-  //       fullfillment: 'delivered',
-  //       total: '123.00€',
-  //     },
-  //     {
-  //       id: '#A583',
-  //       date: 'Ago 15, 2024',
-  //       product: 'Placas de gesso',
-  //       payment: true,
-  //       fullfillment: 'In Progress',
-  //       total: '123.00€',
-  //     },
-  //     {
-  //       id: '#A523',
-  //       date: 'Ago 15, 2024',
-  //       product: 'Placas de gesso',
-  //       payment: false,
-  //       fullfillment: 'delivered',
-  //       total: '123.00€',
-  //     },
-  //     {
-  //       id: '#A112',
-  //       date: 'Ago 15, 2024',
-  //       product: 'Placas de gesso',
-  //       payment: true,
-  //       fullfillment: 'Cancel',
-  //       total: '123.00€',
-  //     },
-  //   ]
-
   const tableItemsView = orders.map((item) => {
     let badgeView, fullfillmentView
     const menuView = (
@@ -111,12 +68,6 @@ const TableOrdersItems = ({ orders, onDelete }) => {
           <strong>{item.amount}</strong>
         </td>
         <td>
-          <Link
-            href={`/admin/products/${item.id}`}
-            className="ps-btn ps-btn--sm"
-          >
-            Edit
-          </Link>
           {/* <DropdownAction /> */}
           <button
             className="ps-btn ps-btn--sm ps-btn--danger ml-2"

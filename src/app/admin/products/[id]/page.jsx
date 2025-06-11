@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import {
   getBrandAllData,
   getCategoriesAllData,
@@ -30,15 +30,14 @@ const initialFormState = {
   category: '',
 }
 
-const EditProductPage = () => {
-  const { id } = useParams()
+const EditProductPage = ({ productId }) => {
   const router = useRouter()
   const [formData, setFormData] = useState(initialFormState)
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
   const [galleryPreview, setGalleryPreview] = useState([])
   const [videoPreview, setVideoPreview] = useState(null)
   const [categories, setCategories] = useState([])
-  const [brand, setBrandsData] = useState([])
+  const [brands, setBrands] = useState([])
   const [activeTab, setActiveTab] = useState('general')
 
   const fetchAllCategories = async () => {
@@ -46,25 +45,25 @@ const EditProductPage = () => {
       const response = await getCategoriesAllData()
       setCategories(response)
     } catch (error) {
-      throw new Error('failed to fetch data')
+      toast.error('Failed to fetch categories')
+      console.error(error)
     }
   }
 
   const fetchBrandsData = async () => {
     try {
       const response = await getBrandAllData()
-      setBrandsData(response)
+      setBrands(response)
     } catch (error) {
-      throw new Error('failed to fetch the data')
+      toast.error('Failed to fetch brands')
+      console.error(error)
     }
   }
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const data = await getProductsById(id)
-        console.log(data, 'prod data')
-
+        const data = await getProductsById(productId)
         setFormData({
           name: data.product_name || '',
           reference: data.reference || '',
@@ -89,7 +88,9 @@ const EditProductPage = () => {
     }
 
     fetchProduct()
-  }, [id])
+    fetchAllCategories() // Fetch categories on mount
+    fetchBrandsData() // Fetch brands on mount
+  }, [productId])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -117,7 +118,7 @@ const EditProductPage = () => {
     // Limit to 4 images
     const selectedFiles = Array.from(files).slice(0, 4 - galleryPreview.length)
     if (selectedFiles.length === 0) {
-      toast.error('You can upload maximum 4 images')
+      toast.error('You can upload a maximum of 4 images')
       return
     }
 
@@ -202,25 +203,21 @@ const EditProductPage = () => {
     }
 
     try {
-      const response = await updateProducts(id, productData)
+      await updateProducts(productId, productData)
       toast.success('Product updated successfully!')
       router.push('/admin/products')
     } catch (error) {
       toast.error('Failed to update product.')
+      console.error(error)
     }
   }
 
-  useEffect(() => {
-    fetchAllCategories()
-    fetchBrandsData()
-  }, [])
-
   return (
-    <ContainerDefault title="Edit Product">
-      <HeaderDashboard
+    <>
+      {/* <HeaderDashboard
         title="Edit Product"
         description="Update product details"
-      />
+      /> */}
       <Toaster
         position="top-center"
         toastOptions={{
@@ -275,7 +272,7 @@ const EditProductPage = () => {
                   { label: 'Sale Price', name: 'salePrice' },
                   { label: 'Sale Quantity', name: 'saleQuantity' },
                   { label: 'Sold Items', name: 'soldItems' },
-                  { label: 'stock', name: 'stock' },
+                  { label: 'Stock', name: 'stock' },
                   { label: 'SKU', name: 'sku' },
                 ].map(({ label, name }) => (
                   <div className="form-group" key={name}>
@@ -286,6 +283,7 @@ const EditProductPage = () => {
                       name={name}
                       value={formData[name]}
                       onChange={handleChange}
+                      required={name !== 'salePrice' && name !== 'saleQuantity'} // Make fields required as needed
                     />
                   </div>
                 ))}
@@ -454,12 +452,11 @@ const EditProductPage = () => {
                     onChange={handleChange}
                   >
                     <option value="">Select brand</option>
-                    {brand &&
-                      brand.map((brand) => (
-                        <option key={brand.id} value={brand.id}>
-                          {brand.brand_name}
-                        </option>
-                      ))}
+                    {brands.map((brand) => (
+                      <option key={brand.id} value={brand.id}>
+                        {brand.brand_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="form-group">
@@ -586,7 +583,7 @@ const EditProductPage = () => {
           background: #f9f9f9;
         }
       `}</style>
-    </ContainerDefault>
+    </>
   )
 }
 

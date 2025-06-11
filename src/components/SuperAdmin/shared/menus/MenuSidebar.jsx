@@ -41,6 +41,11 @@ const MenuSidebar = () => {
       icon: 'icon-cog',
     },
     {
+      text: 'Banners',
+      url: '/admin/banners',
+      icon: 'icon-cog',
+    },
+    {
       text: 'Settings',
       url: '/admin/settings',
       icon: 'icon-cog',

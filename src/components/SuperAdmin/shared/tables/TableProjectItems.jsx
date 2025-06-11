@@ -1,8 +1,14 @@
-import React from 'react'
-// import DropdownAction from '@/components/SuperAdmin/elements/basic/DropdownAction';
+// TableProjectItems.js
+import React, { useState } from 'react'
 import Link from 'next/link'
+import { Modal } from 'antd'
+import EditProductPage from '@/app/admin/products/[id]/page'
+// import EditProductPage from './EditProductPage' // Adjust the path as necessary
 
 const TableProjectItems = ({ productsData, onDelete }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [editingProductId, setEditingProductId] = useState(null)
+
   const tableItems = Array.isArray(productsData)
     ? productsData.map((item, index) => {
         const badgeView =
@@ -11,8 +17,6 @@ const TableProjectItems = ({ productsData, onDelete }) => {
           ) : (
             <span className="ps-badge gray">Out of stock</span>
           )
-
-        console.log(productsData, 'production data')
 
         return (
           <tr key={item.id}>
@@ -23,26 +27,26 @@ const TableProjectItems = ({ productsData, onDelete }) => {
               </a>
             </td>
             <td>{item.SKU}</td>
-            {/* <td>{badgeView}</td> */}
             <td>{item.stock}</td>
             <td>
               <strong>{item.regular_price}€</strong>
             </td>
             <td>
-              {/* Optional: show category name if you fetch it */}
               <p className="ps-item-categories">
                 <a href="#">Categoria ID: {item.category}</a>
               </p>
             </td>
             <td>{new Date(item.date).toLocaleDateString()}</td>
             <td>
-              {/* <DropdownAction /> */}
-              <Link
-                href={`/admin/products/${item.id}`}
+              <button
                 className="ps-btn ps-btn--sm"
+                onClick={() => {
+                  setEditingProductId(item.id)
+                  setIsModalVisible(true)
+                }}
               >
                 Edit
-              </Link>
+              </button>
               <button
                 className="ps-btn ps-btn--sm ps-btn--danger ml-2"
                 onClick={() => onDelete(item.id)}
@@ -72,6 +76,17 @@ const TableProjectItems = ({ productsData, onDelete }) => {
         </thead>
         <tbody>{tableItems}</tbody>
       </table>
+
+      {/* Edit Product Modal */}
+      <Modal
+        title="Edit Product"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+        width={800} // Adjust width as needed
+      >
+        {editingProductId && <EditProductPage productId={editingProductId} />}
+      </Modal>
     </div>
   )
 }
