@@ -1,46 +1,70 @@
-// components/SuperAdmin/shared/tables/TableBrandName.jsx
+import EditBrandModal from '@/app/admin/brand/edit/[params]/page'
+import React, { useState } from 'react'
+// import EditBrandModal from '../modals/EditBrandModal' // Import the modal component
 
-import React from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+const TableBrandName = ({ productsData, onDelete, onUpdateBrand }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [currentBrand, setCurrentBrand] = useState(null)
 
-const TableBrandName = ({ productsData, onDelete }) => {
-  const router = useRouter()
-  const handleEdit = (id) => {
-    router.push(`/admin/brand/edit/${id}`)
+  const handleEdit = (brand) => {
+    setCurrentBrand(brand)
+    setIsModalVisible(true)
   }
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false)
+    setCurrentBrand(null)
+  }
+
+  const handleUpdate = async (updatedBrand) => {
+    await onUpdateBrand(updatedBrand)
+    handleModalCancel() // Close the modal after updating
+  }
+
   return (
-    <table className="table ps-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Brand Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {productsData.map((brand) => (
-          <tr key={brand.id}>
-            <td>{brand.id}</td>
-            <td>{brand.brand_name}</td>
-            <td>
-              <button
-                className="ps-btn ps-btn--sm"
-                onClick={() => handleEdit(brand.id)}
-              >
-                Edit
-              </button>
-              <button
-                className="ps-btn ps-btn--sm ps-btn--danger ml-2"
-                onClick={() => onDelete(brand.id)}
-              >
-                Delete
-              </button>
-            </td>
+    <>
+      <table className="table ps-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Brand Name</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {productsData.map((brand) => (
+            <tr key={brand.id}>
+              <td>{brand.id}</td>
+              <td>{brand.brand_name}</td>
+              <td>
+                <button
+                  className="ps-btn ps-btn--sm"
+                  onClick={() => handleEdit(brand)} // Open the modal for editing
+                >
+                  Edit
+                </button>
+                <button
+                  className="ps-btn ps-btn--sm ps-btn--danger ml-2"
+                  onClick={() => onDelete(brand.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Edit Brand Modal */}
+      {currentBrand && (
+        <EditBrandModal
+          visible={isModalVisible}
+          onCancel={handleModalCancel}
+          brandData={currentBrand}
+          onUpdate={handleUpdate} // Pass the update function
+        />
+      )}
+    </>
   )
 }
 

@@ -292,7 +292,7 @@ export const createOrder = async (orderPayload) => {
 
 export const createOrderBanner = async (orderPayload) => {
   try {
-    const response = await ORDERS_API.post('orders/banners/', orderPayload)
+    const response = await ORDERS_API.post('banners/', orderPayload)
     return response.data
   } catch (error) {
     console.error(
@@ -300,6 +300,19 @@ export const createOrderBanner = async (orderPayload) => {
       error.response?.data || error.message
     )
     throw new Error('Failed to create order')
+  }
+}
+
+export const updateOrderBanner = async (orderPayload) => {
+  try {
+    const response = await ORDERS_API.put('orders/banners/', orderPayload)
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error updating order:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to update order')
   }
 }
 
