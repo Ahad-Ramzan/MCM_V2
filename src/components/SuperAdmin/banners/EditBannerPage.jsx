@@ -98,13 +98,17 @@ const EditBannerPage = ({ bannerData, onSuccess }) => {
               <option value="footer_2">Banner Footer 2</option>
             </select>
           </div>
-          <button
-            className="btn btn-primary"
-            onClick={handleBannerUpdate}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Updating...' : 'Update Banner'}
-          </button>
+
+          <div className="ps-section__actions">
+            <button
+              className="ps-btn"
+              onClick={handleBannerUpdate}
+              disabled={isLoading}
+            >
+              {/* <i className="icon icon-plus mr-2" /> */}
+              Update Banners
+            </button>
+          </div>
         </div>
       </div>
     </div>

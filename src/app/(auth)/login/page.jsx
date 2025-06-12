@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-// import { loginUser } from "@/apis/auth";
 import { loginUser } from '@/apis/userApi'
 import { useRouter } from 'next/navigation'
 import toast, { Toaster } from 'react-hot-toast'
@@ -18,7 +17,7 @@ export default function Login() {
     setError('')
     setIsLoading(true)
 
-    if (email === '' || password === '') {
+    if (!email || !password) {
       setError('Please enter both email and password')
       setIsLoading(false)
       return
@@ -26,21 +25,26 @@ export default function Login() {
 
     try {
       const response = await loginUser(email, password)
-      toast.success('Login Successfully!')
 
-      if (response.token) {
-        localStorage.setItem('access_token', response.token)
-        localStorage.setItem('user_role', response.role) // 👈 role save karo
-
-        // Role-based redirection
-        if (response.role === 'admin') {
-          router.push('/admin')
-        } else {
-          router.push('/')
-        }
+      if (!response?.token) {
+        throw new Error('Invalid response from server')
       }
+
+      toast.success('Login Successful!')
+      localStorage.setItem('access_token', response.token)
+      localStorage.setItem('user_role', response.role)
+
+      // Role-based redirection
+      router.push(response.role === 'admin' ? '/admin' : '/')
     } catch (error) {
-      toast.error('Failed to Login.')
+      setIsLoading(false) // Reset loading state on error
+      const errorMessage =
+        error.response?.data?.message ||
+        'Invalid credentials. Please try again.'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsLoading(false) // Ensure loading is always reset
     }
   }
 
@@ -49,7 +53,7 @@ export default function Login() {
       <Toaster
         position="top-center"
         toastOptions={{
-          duration: 4000, // default for all toasts
+          duration: 4000,
         }}
       />
       <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md text-center">
@@ -92,19 +96,34 @@ export default function Login() {
             className="w-full bg-blue-700 text-white py-2 rounded-md font-semibold hover:bg-blue-800 transition disabled:bg-blue-400"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Signing in...
+              </span>
+            ) : (
+              'Sign In'
+            )}
           </button>
-          {/* <div className="mt-4 text-center">
-            <p className="text-sm">
-              Don't have an account?{' '}
-              <button
-                onClick={() => router.push('/register')}
-                className="text-blue-600 hover:underline font-medium"
-              >
-                Register
-              </button>
-            </p>
-          </div> */}
         </form>
       </div>
     </div>
