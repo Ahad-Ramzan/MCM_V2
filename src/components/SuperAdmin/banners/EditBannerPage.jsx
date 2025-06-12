@@ -50,7 +50,7 @@ const EditBannerPage = ({ bannerData, onSuccess }) => {
 
   return (
     <div className="container my-5">
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+      <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
       <h1 className="mb-4">Edit Banner</h1>
       <div className="card">
         <div className="card-body">
