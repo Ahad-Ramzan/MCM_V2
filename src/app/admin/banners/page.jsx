@@ -8,6 +8,8 @@ import Pagination from '@/components/SuperAdmin/elements/basic/Pagination'
 import FormSearchSimple from '@/components/SuperAdmin/shared/forms/FormSearchSimple'
 import BannerUploadPage from '@/components/SuperAdmin/banners/CreateBannerModal'
 import { Modal } from 'antd'
+import { deleteBanner, getbanner } from '@/apis/products'
+import toast, { Toaster } from 'react-hot-toast'
 
 const BannerPage = () => {
   const [banners, setBanners] = useState([])
@@ -19,23 +21,32 @@ const BannerPage = () => {
 
   const fetchBanners = async () => {
     try {
-      const response = await axios.get(
-        'https://backendmcm.estelatechnologies.com/api/orders/banners/'
-      )
-      setBanners(response.data.results)
+      const response = await getbanner()
+      setBanners(response.results)
     } catch (error) {
       console.error('Error fetching banners:', error)
     }
   }
 
+  // const handleDeleteBanner = async (bannerId) => {
+  //   try {
+  //     await axios.delete(
+  //       `https://backendmcm.estelatechnologies.com/api/orders/banners/${bannerId}/`
+  //     )
+  //     await fetchBanners()
+  //   } catch (error) {
+  //     console.error('Error deleting banner:', error)
+  //   }
+  // }
+
   const handleDeleteBanner = async (bannerId) => {
     try {
-      await axios.delete(
-        `https://backendmcm.estelatechnologies.com/api/orders/banners/${bannerId}/`
-      )
-      await fetchBanners()
+      await deleteBanner(bannerId)
+      toast.success('Banner deleted successfully!')
+      await fetchBanners() // Refresh the list after deletion
     } catch (error) {
       console.error('Error deleting banner:', error)
+      message.error(error.message || 'Failed to delete banner')
     }
   }
 
@@ -57,6 +68,7 @@ const BannerPage = () => {
         title="Banner Management"
         description="Manage your banners"
       />
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
       <section className="ps-items-listing">
         <div className="ps-section__actions">

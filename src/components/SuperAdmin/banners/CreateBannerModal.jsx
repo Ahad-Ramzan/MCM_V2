@@ -87,13 +87,17 @@ const BannerUploadPage = () => {
               <option value="footer_2">Banner Footer 2</option>
             </select>
           </div>
-          <button
-            className="btn btn-primary"
-            onClick={handleBannerUpload}
-            disabled={!imageFile || !position}
-          >
-            Upload Banner
-          </button>
+
+          <div className="ps-section__actions">
+            <button
+              className="ps-btn"
+              onClick={handleBannerUpload}
+              disabled={!imageFile || !position}
+            >
+              <i className="icon icon-plus mr-2" />
+              Add Banners
+            </button>
+          </div>
         </div>
       </div>
     </div>

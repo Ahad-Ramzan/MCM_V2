@@ -290,6 +290,19 @@ export const createOrder = async (orderPayload) => {
   }
 }
 
+export const getbanner = async () => {
+  try {
+    const response = await ORDERS_API.get('banners/')
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error creating order:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to create order')
+  }
+}
+
 export const createOrderBanner = async (orderPayload) => {
   try {
     const response = await ORDERS_API.post('banners/', orderPayload)
@@ -305,7 +318,7 @@ export const createOrderBanner = async (orderPayload) => {
 
 export const updateOrderBanner = async (orderPayload) => {
   try {
-    const response = await ORDERS_API.put('orders/banners/', orderPayload)
+    const response = await ORDERS_API.put('banners/', orderPayload)
     return response.data
   } catch (error) {
     console.error(
@@ -313,6 +326,19 @@ export const updateOrderBanner = async (orderPayload) => {
       error.response?.data || error.message
     )
     throw new Error('Failed to update order')
+  }
+}
+
+export const deleteBanner = async (bannerId) => {
+  try {
+    const response = await ORDERS_API.delete(`banners/${bannerId}/`)
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error deleting brand:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to delete brand')
   }
 }
 
