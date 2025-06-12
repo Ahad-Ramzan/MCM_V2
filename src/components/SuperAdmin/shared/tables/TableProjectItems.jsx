@@ -83,7 +83,8 @@ const TableProjectItems = ({ productsData, onDelete }) => {
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        width={800} // Adjust width as needed
+        width={800}
+        style={{ top: 20 }}
       >
         {editingProductId && <EditProductPage productId={editingProductId} />}
       </Modal>

@@ -190,11 +190,7 @@ const CreateProductPage = () => {
   }, [])
 
   return (
-    <ContainerDefault title="Create new product">
-      <HeaderDashboard
-        title="Create Product"
-        description="Martfury Create New Product"
-      />
+    <div>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -243,27 +239,97 @@ const CreateProductPage = () => {
             >
               <figure className="ps-block--form-box">
                 <div className="ps-block__content">
-                  {[
-                    { label: 'Product Name', name: 'name' },
-                    { label: 'Reference', name: 'reference' },
-                    { label: 'Regular Price', name: 'regularPrice' },
-                    { label: 'Sale Price', name: 'salePrice' },
-                    { label: 'Sale Quantity', name: 'saleQuantity' },
-                    { label: 'Sold Items', name: 'soldItems' },
-                    { label: 'stock', name: 'stock' },
-                    { label: 'SKU', name: 'sku' },
-                  ].map(({ label, name }) => (
-                    <div className="form-group" key={name}>
-                      <label>{label} *</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleChange}
-                      />
+                  <div className="row">
+                    {/* First Column */}
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Product Name *</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Regular Price *</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="regularPrice"
+                          value={formData.regularPrice}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Sale Quantity</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="saleQuantity"
+                          value={formData.saleQuantity}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Stock</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="stock"
+                          value={formData.stock}
+                          onChange={handleChange}
+                        />
+                      </div>
                     </div>
-                  ))}
+
+                    {/* Second Column */}
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Reference *</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="reference"
+                          value={formData.reference}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Sale Price</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="salePrice"
+                          value={formData.salePrice}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Sold Items</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="soldItems"
+                          value={formData.soldItems}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>SKU</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="sku"
+                          value={formData.sku}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Full-width textareas */}
                   <div className="form-group">
                     <label>Product Summary *</label>
                     <textarea
@@ -288,7 +354,7 @@ const CreateProductPage = () => {
               </figure>
             </div>
 
-            {/* Product Images Tab Content */}
+            {/* Product Images Tab Content (unchanged) */}
             <div
               className={`tab-pane fade ${
                 activeTab === 'images' ? 'show active' : 'd-none'
@@ -414,7 +480,7 @@ const CreateProductPage = () => {
               </figure>
             </div>
 
-            {/* Meta Tab Content */}
+            {/* Meta Tab Content (unchanged) */}
             <div
               className={`tab-pane fade ${
                 activeTab === 'meta' ? 'show active' : 'd-none'
@@ -559,8 +625,11 @@ const CreateProductPage = () => {
           border-radius: 5px;
           background: #f9f9f9;
         }
+        .form-group {
+          margin-bottom: 1rem;
+        }
       `}</style>
-    </ContainerDefault>
+    </div>
   )
 }
 

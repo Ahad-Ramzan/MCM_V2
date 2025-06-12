@@ -1,11 +1,8 @@
-// id: client-detail-page
-// name: Client Detail Page with Utilizadores Tab
-// type: tsx
-// content: |-
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
+import { deleteAddress, getAddress, updateAddress } from '@/apis/userApi'
 
 const initialLojasData = [
   {
@@ -34,56 +31,27 @@ const utilizadoresData = [
     estado: '1',
     dataRegisto: 'há 11 meses',
   },
-  {
-    name: 'João Fernandes',
-    email: 'joao.fernandes@vondin-go.com',
-    estado: '1',
-    dataRegisto: 'há 2 semanas',
-  },
-  {
-    name: 'Beatriz Lima @ Finance',
-    email: 'finance@vendin-go.com',
-    estado: '1',
-    dataRegisto: 'há 2025 anos',
-  },
-  {
-    name: 'Edgar Gomes @ Shipping',
-    email: 'shipping@vendin-go.com',
-    estado: '1',
-    dataRegisto: 'há 2025 anos',
-  },
-  {
-    name: 'Henrique @ vendinGO',
-    email: 'tech@vendin-go.com',
-    estado: '1',
-    dataRegisto: 'há 2025 anos',
-  },
-  {
-    name: 'Joana Cardoso @ Supply',
-    email: 'supply@vendin-go.com',
-    estado: '1',
-    dataRegisto: 'há 2025 anos',
-  },
-  {
-    name: 'José Marinheiro @ Finance',
-    email: 'jose.marinheiro@vendin-go.com',
-    estado: '1',
-    dataRegisto: 'há 2025 anos',
-  },
-  {
-    name: 'David Baeza',
-    email: 'david.baeza@vendin-go.com',
-    estado: '1',
-    dataRegisto: 'há 1 semana',
-  },
 ]
 
 function LojaEditModal({ open, loja, onClose, onSave }) {
-  const [form, setForm] = useState(loja || {})
+  const [form, setForm] = useState({
+    street_address: '',
+    city: '',
+    country: '',
+    postal_code: '',
+    is_default: false,
+  })
 
-  // Update form when loja changes
   React.useEffect(() => {
-    setForm(loja || {})
+    if (loja) {
+      setForm({
+        street_address: loja.street_address || '',
+        city: loja.city || '',
+        country: loja.country || '',
+        postal_code: loja.postal_code || '',
+        is_default: loja.is_default || false,
+      })
+    }
   }, [loja])
 
   if (!open) return null
@@ -106,38 +74,65 @@ function LojaEditModal({ open, loja, onClose, onSave }) {
           }}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-            <div>
-              <label className="block text-sm mb-1">Nome</label>
-              <input
-                className="w-full border rounded px-3 py-2"
-                value={form.name || ''}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, name: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Contacto</label>
-              <input
-                className="w-full border rounded px-3 py-2"
-                value={form.phone || ''}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, phone: e.target.value }))
-                }
-              />
-            </div>
             <div className="md:col-span-2">
-              <label className="block text-sm mb-1">Morada</label>
+              <label className="block text-sm mb-1">Endereço</label>
               <input
                 className="w-full border rounded px-3 py-2"
-                value={form.address || ''}
+                value={form.street_address}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, address: e.target.value }))
+                  setForm((f) => ({ ...f, street_address: e.target.value }))
                 }
+                required
               />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Cidade</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.city}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, city: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">País</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.country}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, country: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Código Postal</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.postal_code}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, postal_code: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="is_default"
+                checked={form.is_default}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, is_default: e.target.checked }))
+                }
+                className="mr-2"
+              />
+              <label htmlFor="is_default" className="text-sm">
+                Definir como endereço principal
+              </label>
             </div>
           </div>
-          {/* You can add more fields here as needed */}
           <div className="flex justify-end gap-2 mt-4">
             <button
               type="button"
@@ -159,31 +154,215 @@ function LojaEditModal({ open, loja, onClose, onSave }) {
   )
 }
 
+function AddAddressModal({ open, onClose, onAdd }) {
+  const [form, setForm] = useState({
+    street_address: '',
+    city: '',
+    country: '',
+    postal_code: '',
+    is_default: false,
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const token =
+        localStorage.getItem('access_token') ||
+        '2f845a19f899034bba9a49419e58b575e8fb3418'
+
+      const response = await fetch(
+        'https://backendmcm.estelatechnologies.com/api/user/addresses/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `token ${token}`,
+          },
+          body: JSON.stringify(form),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to add address')
+      }
+
+      const data = await response.json()
+      onAdd(data) // Pass the new address data to parent
+      onClose()
+    } catch (error) {
+      console.error('Error adding address:', error)
+      // Handle error (show toast, etc.)
+    }
+  }
+
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div className="bg-[#f9f6ef] rounded-lg shadow-lg w-full max-w-2xl p-6 relative animate-fade-in">
+        <h3 className="text-lg font-semibold mb-4">Adicionar Novo Endereço</h3>
+        <button
+          className="absolute top-3 right-3 text-gray-500 text-2xl"
+          onClick={onClose}
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+            <div className="md:col-span-2">
+              <label className="block text-sm mb-1">Endereço</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.street_address}
+                onChange={(e) =>
+                  setForm({ ...form, street_address: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Cidade</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">País</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.country}
+                onChange={(e) => setForm({ ...form, country: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Código Postal</label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={form.postal_code}
+                onChange={(e) =>
+                  setForm({ ...form, postal_code: e.target.value })
+                }
+                required
+              />
+            </div>
+            {/* <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="is_default"
+                checked={form.is_default}
+                onChange={(e) =>
+                  setForm({ ...form, is_default: e.target.checked })
+                }
+                className="mr-2"
+              />
+              <label htmlFor="is_default" className="text-sm">
+                Definir como endereço principal
+              </label>
+            </div> */}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              type="button"
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded"
+              onClick={onClose}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="bg-green-600 text-white px-6 py-2 rounded"
+            >
+              Adicionar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 const ClientDetailPage = () => {
   const [activeTab, setActiveTab] = useState('info')
-  const [lojas, setLojas] = useState(initialLojasData)
   const [showLojaModal, setShowLojaModal] = useState(false)
-  const [editingLojaIndex, setEditingLojaIndex] = useState(null)
+  const [showAddAddressModal, setShowAddAddressModal] = useState(false)
+  const [address, setAddress] = useState([])
+  console.log(address, 'clients Addresses--------')
 
-  // Handler to open modal for editing
-  function handleEditLoja(idx) {
-    setEditingLojaIndex(idx)
+  //edit
+  const [editingAddressId, setEditingAddressId] = useState(null)
+  const [editingAddressData, setEditingAddressData] = useState(null)
+
+  function handleEditLoja(id) {
+    const addr = address?.results?.find((a) => a.id === id)
+    setEditingAddressId(id)
+    setEditingAddressData(addr)
     setShowLojaModal(true)
   }
 
-  // Handler to close modal
+  //editfunction
+
+  async function handleSaveLoja(form) {
+    try {
+      await updateAddress(editingAddressId, form)
+      await fetchdata() // Refresh the list
+      setShowLojaModal(false)
+      setEditingAddressId(null)
+      setEditingAddressData(null)
+    } catch (e) {
+      alert('Erro ao atualizar endereço')
+    }
+  }
+
   function handleCloseLojaModal() {
     setShowLojaModal(false)
     setEditingLojaIndex(null)
   }
 
-  // Handler to save loja changes
-  function handleSaveLoja(updatedLoja) {
-    setLojas((prev) =>
-      prev.map((l, idx) => (idx === editingLojaIndex ? updatedLoja : l))
+  const handleDeleteLoja = async (id) => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this address?'
     )
-    handleCloseLojaModal()
+    if (!confirmDelete) return
+
+    try {
+      await deleteAddress(id)
+      setAddress((prev) => ({
+        ...prev,
+        results: prev.results.filter((item) => item.id !== id),
+      }))
+      setShowAddAddressModal(false)
+    } catch (error) {
+      console.error('Failed to delete address:', error)
+    }
   }
+
+  const handleAddAddress = (newAddress) => {
+    // Convert the API response to your loja format
+    const newLoja = {
+      name: 'New Address', // You might want to customize this
+      address: `${newAddress.street_address}, ${newAddress.postal_code} ${newAddress.city}, ${newAddress.country}`,
+      phone: '', // You might want to add phone number field to your form
+    }
+    setLojas((prev) => [...prev, newLoja])
+  }
+
+  const fetchdata = async () => {
+    try {
+      const response = await getAddress()
+      setAddress(response)
+    } catch (error) {
+      throw new Error(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchdata()
+  }, [])
 
   return (
     <ContainerDefault title="Editar Comprador">
@@ -340,37 +519,49 @@ const ClientDetailPage = () => {
 
             {activeTab === 'lojas' && (
               <div>
-                <button className="bg-green-600 text-white px-4 py-2 rounded mb-4">
+                <button
+                  className="bg-green-600 text-white px-4 py-2 rounded mb-4"
+                  onClick={() => setShowAddAddressModal(true)}
+                >
                   Adicionar Endereço
                 </button>
                 <div className="mb-3 text-base font-medium">
                   Por favor selecione a sua morada de faturação:
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  {lojas.map((loja, idx) => (
+                  {address?.results?.map((loja) => (
                     <div
-                      key={idx}
+                      key={loja.id}
                       className="flex-1 min-w-[270px] bg-gray-50 border rounded-lg p-4 shadow-sm"
                     >
                       <div className="font-semibold text-gray-800 mb-1">
-                        {loja.name}
+                        {loja.city}
                       </div>
                       <div className="text-gray-700 text-sm mb-1">
-                        {loja.address}
+                        {loja.street_address}
                       </div>
+                      <div className="text-gray-600 text-sm mb-1">
+                        {loja.country}, {loja.postal_code}
+                      </div>
+
                       {loja.phone && (
                         <div className="text-gray-600 text-xs mb-2">
                           Tlf: {loja.phone}
                         </div>
                       )}
+
                       <div className="flex gap-3 mt-2">
                         <button
                           className="text-primary text-sm font-medium underline"
-                          onClick={() => handleEditLoja(idx)}
+                          onClick={() => handleEditLoja(loja.id)}
                         >
                           Editar
                         </button>
-                        <button className="text-red-600 text-sm font-medium underline">
+
+                        <button
+                          className="text-red-600 text-sm font-medium underline"
+                          onClick={() => handleDeleteLoja(loja.id)}
+                        >
                           Apagar
                         </button>
                       </div>
@@ -380,12 +571,21 @@ const ClientDetailPage = () => {
               </div>
             )}
 
-            {/* Modal should be here, outside the tab content */}
             <LojaEditModal
               open={showLojaModal}
-              loja={editingLojaIndex !== null ? lojas[editingLojaIndex] : null}
-              onClose={handleCloseLojaModal}
+              loja={editingAddressData}
+              onClose={() => {
+                setShowLojaModal(false)
+                setEditingAddressId(null)
+                setEditingAddressData(null)
+              }}
               onSave={handleSaveLoja}
+            />
+
+            <AddAddressModal
+              open={showAddAddressModal}
+              onClose={() => setShowAddAddressModal(false)}
+              onAdd={handleAddAddress}
             />
 
             {activeTab === 'utilizadores' && (
