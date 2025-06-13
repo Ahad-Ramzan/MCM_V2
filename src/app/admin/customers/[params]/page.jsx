@@ -7,9 +7,11 @@ import {
   getAddress,
   getUserById,
   updateAddress,
+  updateUserdata,
 } from '@/apis/userApi'
 import { useParams } from '../../../../../node_modules/next/navigation'
 import toast, { Toaster } from 'react-hot-toast'
+import { getAllHistory, getOrderById } from '@/apis/products'
 
 const initialLojasData = [
   {
@@ -306,12 +308,99 @@ const ClientDetailPage = () => {
   const [clients, setClientdata] = useState([])
   console.log(clients, 'each clients')
 
+  const [formData, setFormData] = useState({
+    full_name: '',
+    contact_number: '',
+    is_active: true,
+    email: '',
+    bio: '',
+    company: '',
+    nif: '',
+    photo: '',
+  })
+
+  // Add file input ref
+  const fileInputRef = React.useRef(null)
+
+  // Handle image upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    try {
+      // Create FormData
+      const formDataToSend = new FormData()
+      formDataToSend.append('photo', file)
+      formDataToSend.append('full_name', formData.full_name)
+      formDataToSend.append('contact_number', formData.contact_number)
+      formDataToSend.append('is_active', formData.is_active)
+      formDataToSend.append('email', formData.email)
+      formDataToSend.append('bio', formData.bio)
+      formDataToSend.append('company', formData.company)
+      formDataToSend.append('nif', formData.nif)
+
+      const token =
+        localStorage.getItem('access_token') ||
+        '2f845a19f899034bba9a49419e58b575e8fb3418'
+
+      // Update user with new image using fetch directly
+      const response = await fetch(
+        `https://backendmcm.estelatechnologies.com/api/user/users/${clientId}/`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+          body: formDataToSend,
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to update photo')
+      }
+
+      const data = await response.json()
+
+      // Update the formData state with the new photo URL immediately
+      setFormData((prev) => ({
+        ...prev,
+        photo: data.photo, // Update with the new photo URL from response
+      }))
+
+      // Also update the clients state to reflect the new photo
+      setClientdata((prev) => ({
+        ...prev,
+        photo: data.photo,
+      }))
+
+      toast.success('Profile photo updated successfully!')
+    } catch (error) {
+      console.error('Failed to update photo:', error)
+      toast.error('Failed to update profile photo. Please try again.')
+    }
+  }
+
+  // Handle alterar button click
+  const handleAlterarClick = () => {
+    fileInputRef.current?.click()
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getUserById(clientId)
         setClientdata(response)
-        console.log(response, 'clients data respnse------------------------')
+        // Set form data when client data is fetched
+        setFormData({
+          full_name: response.full_name || '',
+          contact_number: response.contact_number || '',
+          is_active: response.is_active || true,
+          email: response.email || '',
+          bio: response.bio || '',
+          company: response.company || '',
+          nif: response.nif || '',
+          photo: response.photo || '',
+        })
       } catch (error) {
         console.error('Failed to fetch categories:', error)
       }
@@ -404,6 +493,38 @@ const ClientDetailPage = () => {
     fetchdata()
   }, [])
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleUpdate = async () => {
+    try {
+      // Create payload without photo
+      const { photo, ...updatePayload } = formData
+
+      await updateUserdata(clientId, updatePayload)
+      // Refresh data after update
+      const response = await getUserById(clientId)
+      setClientdata(response)
+      toast.success('User information updated successfully!')
+    } catch (error) {
+      console.error('Failed to update user:', error)
+      toast.error('Failed to update user information. Please try again.')
+    }
+  }
+
+  // Add new state for selected address
+  const [selectedAddressId, setSelectedAddressId] = useState(null)
+
+  // Add function to handle address selection
+  const handleAddressSelect = (addressId) => {
+    setSelectedAddressId(addressId)
+  }
+
   return (
     <ContainerDefault title="Editar Comprador">
       <HeaderDashboard
@@ -416,198 +537,314 @@ const ClientDetailPage = () => {
           duration: 4000,
         }}
       />
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 bg-gray-50">
         {/* Breadcrumb */}
-        <div className="text-right text-sm text-gray-500 mb-2">
-          Clientes &gt;{' '}
+        <div className="text-sm text-gray-500 mb-6 flex items-center">
+          <span className="hover:text-primary cursor-pointer">Clientes</span>
+          <span className="mx-2">›</span>
           <span className="text-primary font-semibold">Editar Comprador</span>
         </div>
 
         {/* Page Title */}
-        <h2 className="text-xl font-bold text-gray-800 mb-6">
-          EDITAR COMPRADOR
-        </h2>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-800">EDITAR COMPRADOR</h2>
+          <div className="flex items-center gap-4">
+            <span
+              className={`px-3 py-1 rounded-full text-sm ${
+                clients.is_active
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }`}
+            >
+              {clients.is_active ? 'Ativo' : 'Inativo'}
+            </span>
+          </div>
+        </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col md:flex-row gap-8">
           {/* Left Section */}
-          <div className="flex-1 bg-white rounded-lg shadow p-6">
+          <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
             {/* Tabs */}
-            <div className="flex border-b mb-6">
+            <div className="flex border-b mb-8">
               <button
-                className={`px-4 py-2 border-b-2 font-semibold rounded-t ${
+                className={`px-6 py-3 border-b-2 font-semibold text-sm transition-colors ${
                   activeTab === 'info'
-                    ? 'border-primary text-primary bg-white'
-                    : 'border-transparent text-gray-600 bg-transparent'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-primary'
                 }`}
                 onClick={() => setActiveTab('info')}
               >
                 Informação geral
               </button>
               <button
-                className={`px-4 py-2 border-b-2 font-semibold rounded-t ml-2 ${
+                className={`px-6 py-3 border-b-2 font-semibold text-sm transition-colors ${
                   activeTab === 'lojas'
-                    ? 'border-primary text-primary bg-white'
-                    : 'border-transparent text-gray-600 bg-transparent'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-primary'
                 }`}
                 onClick={() => setActiveTab('lojas')}
               >
-                Lojas
+                Addresses
               </button>
-              {/* <button
-                className={`px-4 py-2 border-b-2 font-semibold rounded-t ml-2 ${
-                  activeTab === 'utilizadores'
-                    ? 'border-primary text-primary bg-white'
-                    : 'border-transparent text-gray-600 bg-transparent'
-                }`}
-                onClick={() => setActiveTab('utilizadores')}
-              >
-                Utilizadores
-              </button> */}
             </div>
 
             {/* Tab Content */}
             {activeTab === 'info' && (
-              <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex flex-col md:flex-row gap-8">
                 {/* Logo */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 text-3xl">
-                    {clients.photo ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-4xl shadow-inner overflow-hidden">
+                    {formData.photo ? (
                       <img
-                        src={clients.photo}
+                        src={formData.photo}
                         alt="Client Logo"
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <span>🖼️</span>
+                      <img
+                        src="https://backendmcm.estelatechnologies.com/media/profile_photos/doctor_kTCy0cx.jpeg"
+                        alt="Default Profile"
+                        className="w-full h-full object-cover"
+                      />
                     )}
                   </div>
-                  <button className="text-xs text-primary underline">
-                    Alterar
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    onClick={handleAlterarClick}
+                    className="text-sm text-primary hover:text-primary-dark transition-colors"
+                  >
+                    Alterar foto
                   </button>
-                  <span className="text-xs text-gray-500 mt-1">
+                  <span className="text-xs text-gray-500">
                     Logotipo da empresa
                   </span>
                 </div>
 
                 {/* Fields */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nome
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded px-3 py-2"
-                      value={clients.full_name || ''}
-                      readOnly
+                      name="full_name"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      value={formData.full_name}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email
                     </label>
                     <input
                       type="email"
-                      className="w-full border rounded px-3 py-2"
-                      value={clients.email || ''}
-                      readOnly
+                      name="email"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      value={formData.email}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       NIF
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded px-3 py-2"
-                      value={clients.nif || 'N/A'}
-                      readOnly
+                      name="nif"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      value={formData.nif}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Telefone
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded px-3 py-2"
-                      value={clients.contact_number || 'N/A'}
-                      readOnly
+                      name="contact_number"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      value={formData.contact_number}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Company
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded px-3 py-2"
-                      value={clients.company || 'N/A'}
-                      readOnly
+                      name="company"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      value={formData.company}
+                      onChange={handleInputChange}
                     />
                   </div>
 
-                  {/* Bio Field (if needed) */}
+                  {/* Bio Field */}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Bio
                     </label>
                     <textarea
-                      className="w-full border rounded px-3 py-2"
-                      value={clients.bio || ''}
-                      readOnly
+                      name="bio"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      value={formData.bio}
+                      onChange={handleInputChange}
                       rows={3}
                     />
+                  </div>
+
+                  <div className="md:col-span-2 flex justify-end">
+                    <button
+                      onClick={handleUpdate}
+                      className="bg-primary text-white px-8 py-2.5 rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center gap-2"
+                    >
+                      <span>Atualizar</span>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
             )}
+
             {activeTab === 'lojas' && (
               <div>
                 <button
-                  className="bg-green-600 text-white px-4 py-2 rounded mb-4"
+                  className="bg-primary text-white px-6 py-2.5 rounded-lg shadow-sm hover:bg-primary-dark transition-colors mb-6 flex items-center gap-2"
                   onClick={() => setShowAddAddressModal(true)}
                 >
-                  Adicionar Endereço
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span>Adicionar Endereço</span>
                 </button>
-                <div className="mb-3 text-base font-medium">
+                {/* <div className="mb-6 text-base font-medium text-gray-700">
                   Por favor selecione a sua morada de faturação:
-                </div>
-                <div className="flex flex-wrap gap-4">
+                </div> */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                   {clients.addresses?.map((loja) => (
                     <div
                       key={loja.id}
-                      className="flex-1 min-w-[270px] bg-gray-50 border rounded-lg p-4 shadow-sm"
+                      onClick={() => handleAddressSelect(loja.id)}
+                      className={`bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer relative ${
+                        selectedAddressId === loja.id
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-gray-200'
+                      }`}
                     >
-                      <div className="font-semibold text-gray-800 mb-1">
+                      {/* Check Icon for selected address */}
+                      {selectedAddressId === loja.id && (
+                        <div className="absolute top-4 left-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      )}
+
+                      <div
+                        className={`font-semibold text-gray-800 mb-2 ${selectedAddressId === loja.id ? 'ml-8' : ''}`}
+                      >
                         {loja.city}
                       </div>
-                      <div className="text-gray-700 text-sm mb-1">
+                      <div className="text-gray-600 text-sm mb-2">
                         {loja.street_address}
                       </div>
-                      <div className="text-gray-600 text-sm mb-1">
+                      <div className="text-gray-500 text-sm mb-4">
                         {loja.country}, {loja.postal_code}
                       </div>
 
                       {loja.phone && (
-                        <div className="text-gray-600 text-xs mb-2">
+                        <div className="text-gray-500 text-sm mb-4">
                           Tlf: {loja.phone}
                         </div>
                       )}
 
-                      <div className="flex gap-3 mt-2">
+                      <div className="flex gap-4 mt-4 pt-4 border-t">
                         <button
-                          className="text-primary text-sm font-medium underline"
-                          onClick={() => handleEditLoja(loja.id)}
+                          className="text-primary hover:text-primary-dark transition-colors text-sm font-medium flex items-center gap-1"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditLoja(loja.id)
+                          }}
                         >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
                           Editar
                         </button>
 
                         <button
-                          className="text-red-600 text-sm font-medium underline"
-                          onClick={() => handleDeleteLoja(loja.id)}
+                          className="text-red-600 hover:text-red-700 transition-colors text-sm font-medium flex items-center gap-1"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteLoja(loja.id)
+                          }}
                         >
-                          Apagar
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -615,124 +852,85 @@ const ClientDetailPage = () => {
                 </div>
               </div>
             )}
-
-            <LojaEditModal
-              open={showLojaModal}
-              loja={editingAddressData}
-              onClose={() => {
-                setShowLojaModal(false)
-                setEditingAddressId(null)
-                setEditingAddressData(null)
-              }}
-              onSave={handleSaveLoja}
-              userId={clientId}
-            />
-
-            <AddAddressModal
-              open={showAddAddressModal}
-              onClose={() => setShowAddAddressModal(false)}
-              onAdd={handleAddAddress}
-              userId={clientId}
-            />
-
-            {/* {activeTab === 'utilizadores' && (
-              <div>
-                <table className="min-w-full bg-white border border-gray-200 rounded">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2 border-b text-left text-base font-medium text-gray-700">
-                        Nome
-                      </th>
-                      <th className="px-4 py-2 border-b text-left text-base font-medium text-gray-700">
-                        Email
-                      </th>
-                      <th className="px-4 py-2 border-b text-left text-base font-medium text-gray-700">
-                        Estado
-                      </th>
-                      <th className="px-4 py-2 border-b text-left text-base font-medium text-gray-700">
-                        Data registo
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {utilizadoresData.map((user, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 border-b text-base font-medium">
-                          {user.name}
-                        </td>
-                        <td className="px-4 py-2 border-b text-base font-medium">
-                          {user.email}
-                        </td>
-                        <td className="px-4 py-2 border-b text-base font-medium">
-                          {user.estado}
-                        </td>
-                        <td className="px-4 py-2 border-b text-base font-medium">
-                          {user.dataRegisto}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )} */}
           </div>
 
           {/* Right Section */}
           <div className="w-full md:w-[340px] flex flex-col gap-6">
             {/* More Info */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-base font-semibold mb-4">Mais informação</h3>
-              <div className="flex flex-col gap-3">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Mais informação
+              </h3>
+              <div className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-xs mb-1">Primavera ID</label>
+                  <label className="block text-sm text-gray-500 mb-1">
+                    Primavera ID
+                  </label>
                   <input
                     type="text"
-                    className="w-full border rounded px-2 py-1 text-sm"
-                    value="0001"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    value={`${clientId.toString().padStart()}`}
                     readOnly
                   />
                 </div>
                 <div>
-                  <label className="block text-xs mb-1">
+                  <label className="block text-sm text-gray-500 mb-1">
                     Categoria Preços *
                   </label>
                   <input
                     type="text"
-                    className="w-full border rounded px-2 py-1 text-sm"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50"
                     value="[PVU P] Varejista PT"
                     readOnly
                   />
                 </div>
               </div>
             </div>
+
             {/* Summary */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-base font-semibold mb-4">Resumo</h3>
-              <div className="flex justify-between text-sm mb-1">
-                <span>TOTAL ENCOMENDAS</span>
-                <span>{clients?.total_orders || 0}</span>{' '}
-                {/* Changed from total_order to total_orders */}
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>TOTAL COMPRADO</span>
-                <span>
-                  {clients?.total_order_amount?.toFixed(2) || '0.00'}€
-                </span>
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Resumo
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">
+                    TOTAL ENCOMENDAS
+                  </span>
+                  <span className="font-medium text-gray-800">
+                    {clients?.total_orders || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">TOTAL COMPRADO</span>
+                  <span className="font-medium text-gray-800">
+                    {clients?.total_order_amount?.toFixed(2) || '0.00'}€
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="mt-8 flex gap-3">
-          <button className="bg-primary text-white px-6 py-2 rounded shadow hover:bg-blue-700 transition">
-            Atualizar
-          </button>
-          {/* <button className="bg-gray-200 text-gray-700 px-6 py-2 rounded shadow">
-            Login
-          </button> */}
-        </div>
       </div>
+
+      <LojaEditModal
+        open={showLojaModal}
+        loja={editingAddressData}
+        onClose={() => {
+          setShowLojaModal(false)
+          setEditingAddressId(null)
+          setEditingAddressData(null)
+        }}
+        onSave={handleSaveLoja}
+        userId={clientId}
+      />
+
+      <AddAddressModal
+        open={showAddAddressModal}
+        onClose={() => setShowAddAddressModal(false)}
+        onAdd={handleAddAddress}
+        userId={clientId}
+      />
     </ContainerDefault>
   )
 }

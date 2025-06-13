@@ -23,7 +23,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
     bio: '',
     company: '',
     nif: '',
-    photo: ''
+    photo: '',
   })
 
   const handleEditClick = (user) => {
@@ -37,16 +37,16 @@ const TableCustomerItems = ({ userData, onDelete }) => {
       bio: user.bio || '',
       company: user.company || '',
       nif: user.nif || '',
-      photo: user.photo || ''
+      photo: user.photo || '',
     })
     setIsModalVisible(true)
   }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
@@ -55,7 +55,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
       const reader = new FileReader()
       reader.readAsDataURL(file)
       reader.onload = () => resolve(reader.result)
-      reader.onerror = error => reject(error)
+      reader.onerror = (error) => reject(error)
     })
   }
 
@@ -83,9 +83,9 @@ const TableCustomerItems = ({ userData, onDelete }) => {
         setLoading(true)
         const base64Url = await getBase64(file)
         setImageUrl(base64Url)
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          photo: base64Url
+          photo: base64Url,
         }))
         onSuccess()
         message.success('Image uploaded successfully')
@@ -95,7 +95,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
       } finally {
         setLoading(false)
       }
-    }
+    },
   }
 
   const handleSubmit = async (e) => {
@@ -105,11 +105,11 @@ const TableCustomerItems = ({ userData, onDelete }) => {
       // Create a new object with all form data including the photo
       const payload = {
         ...formData,
-        photo: imageUrl // Ensure photo URL is included
+        photo: imageUrl, // Ensure photo URL is included
       }
-      
+
       console.log('Submitting payload:', payload) // Debug log
-      
+
       await updateUserdata(selectedUser.id, payload)
       toast.success('User updated successfully!')
       setIsModalVisible(false)
@@ -146,12 +146,12 @@ const TableCustomerItems = ({ userData, onDelete }) => {
         <td>{item.total_orders}</td>
         <td>{item.is_active ? 'Active' : 'Inactive'}</td>
         <td>
-          <button 
+          {/* <button 
             className="ps-btn ps-btn--sm mr-10" 
             onClick={() => handleEditClick(item)}
           >
             Edit
-          </button>
+          </button> */}
           <button className="ps-btn ps-btn--sm" onClick={handleDetailsClick}>
             Details
           </button>
@@ -190,7 +190,9 @@ const TableCustomerItems = ({ userData, onDelete }) => {
         title={
           <div className="text-center">
             <h3 className="mb-0">Edit User Profile</h3>
-            <p className="text-muted">Update user information and profile picture</p>
+            <p className="text-muted">
+              Update user information and profile picture
+            </p>
           </div>
         }
         open={isModalVisible}
@@ -216,7 +218,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
                               width: '200px',
                               height: '200px',
                               objectFit: 'cover',
-                              borderRadius: '50%'
+                              borderRadius: '50%',
                             }}
                           />
                           <button
@@ -224,7 +226,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
                             className="ps-btn ps-btn--sm ps-btn--danger mt-2"
                             onClick={() => {
                               setImageUrl('')
-                              setFormData(prev => ({ ...prev, photo: '' }))
+                              setFormData((prev) => ({ ...prev, photo: '' }))
                             }}
                           >
                             Remove
@@ -235,10 +237,12 @@ const TableCustomerItems = ({ userData, onDelete }) => {
                           <p className="ant-upload-drag-icon">
                             {loading ? <LoadingOutlined /> : <InboxOutlined />}
                           </p>
-                          <p className="ant-upload-text">Click or drag file to upload</p>
+                          <p className="ant-upload-text">
+                            Click or drag file to upload
+                          </p>
                           <p className="ant-upload-hint">
-                            Support for a single upload. Strictly prohibited from uploading company data or other
-                            banned files.
+                            Support for a single upload. Strictly prohibited
+                            from uploading company data or other banned files.
                           </p>
                         </Dragger>
                       )}
@@ -252,12 +256,37 @@ const TableCustomerItems = ({ userData, onDelete }) => {
                   <div className="ps-block__content">
                     <div className="row">
                       {[
-                        { label: 'Full Name', name: 'full_name', type: 'text', col: 6 },
-                        { label: 'Email', name: 'email', type: 'email', col: 6 },
-                        { label: 'Contact Number', name: 'contact_number', type: 'text', col: 6 },
-                        { label: 'Company', name: 'company', type: 'text', col: 6 },
+                        {
+                          label: 'Full Name',
+                          name: 'full_name',
+                          type: 'text',
+                          col: 6,
+                        },
+                        {
+                          label: 'Email',
+                          name: 'email',
+                          type: 'email',
+                          col: 6,
+                        },
+                        {
+                          label: 'Contact Number',
+                          name: 'contact_number',
+                          type: 'text',
+                          col: 6,
+                        },
+                        {
+                          label: 'Company',
+                          name: 'company',
+                          type: 'text',
+                          col: 6,
+                        },
                         { label: 'NIF', name: 'nif', type: 'text', col: 6 },
-                        { label: 'Bio', name: 'bio', type: 'textarea', col: 12 },
+                        {
+                          label: 'Bio',
+                          name: 'bio',
+                          type: 'textarea',
+                          col: 12,
+                        },
                       ].map(({ label, name, type, col }) => (
                         <div className={`col-xl-${col}`} key={name}>
                           <div className="form-group">
@@ -312,11 +341,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
-              className="ps-btn"
-              disabled={loading}
-            >
+            <button type="submit" className="ps-btn" disabled={loading}>
               {loading ? <LoadingOutlined /> : 'Update Profile'}
             </button>
           </div>
@@ -371,7 +396,7 @@ const TableCustomerItems = ({ userData, onDelete }) => {
             transition: all 0.3s;
             &:focus {
               border-color: #1890ff;
-              box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
             }
           }
         }

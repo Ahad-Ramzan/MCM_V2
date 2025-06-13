@@ -140,7 +140,7 @@ export const getUserById = async (id) => {
 }
 
 export const updateUserdata = async (id, data) => {
-  const response = await axiosInstance.put(`user/users/${id}/`, data)
+  const response = await axiosInstance.patch(`user/users/${id}/`, data)
   return response.data
 }
 

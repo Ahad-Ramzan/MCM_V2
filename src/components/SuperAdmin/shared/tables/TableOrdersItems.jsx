@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Menu } from 'antd'
 import DropdownAction from '@/components/SuperAdmin/elements/basic/DropdownAction'
+import { useRouter } from 'next/navigation'
 
 const TableOrdersItems = ({ orders, onDelete }) => {
   const tableItemsView = orders.map((item) => {
@@ -43,6 +44,12 @@ const TableOrdersItems = ({ orders, onDelete }) => {
         )
         break
     }
+    const router = useRouter()
+
+    const handleDetailsClick = () => {
+      router.push(`/admin/orders/${item.id}`)
+    }
+
     return (
       <tr key={item.id}>
         <td>{item.id}</td>
@@ -69,6 +76,9 @@ const TableOrdersItems = ({ orders, onDelete }) => {
         </td>
         <td>
           {/* <DropdownAction /> */}
+          <button className="ps-btn ps-btn--sm" onClick={handleDetailsClick}>
+            Details
+          </button>
           <button
             className="ps-btn ps-btn--sm ps-btn--danger ml-2"
             onClick={() => onDelete(item.id)}
