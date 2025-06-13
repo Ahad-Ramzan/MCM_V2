@@ -76,7 +76,11 @@ const TableOrdersItems = ({ orders, onDelete }) => {
         </td>
         <td>
           {/* <DropdownAction /> */}
-          <button className="ps-btn ps-btn--sm" onClick={handleDetailsClick}>
+          <button
+            className="ps-btn ps-btn--sm"
+            onClick={handleDetailsClick}
+            style={{ backgroundColor: '#fcb800', color: '#000' }}
+          >
             Details
           </button>
           <button

@@ -134,7 +134,7 @@ const OrderDetailPage = () => {
                       {total.toFixed(2)} €
                     </td>
                   </tr> */}
-                  <tr className="border-t">
+                  <tr className="border">
                     <td className="font-semibold">Orders Total Amount:</td>
                     <td className="text-end font-semibold text-primary">
                       {parseFloat(orderDetails.amount).toFixed(2)} €
@@ -156,7 +156,7 @@ const OrderDetailPage = () => {
 
             {/* Order Status Section */}
             <div className="row">
-              <div className="col-md-6">
+              {/* <div className="col-md-6">
                 <div className="ps-card mb-4 p-4 bg-white shadow-sm rounded">
                   <h4 className="mb-3 text-lg font-semibold text-gray-800">
                     Order Status
@@ -173,7 +173,7 @@ const OrderDetailPage = () => {
                     Update Status
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* Order History */}
               <div className="col-md-6">

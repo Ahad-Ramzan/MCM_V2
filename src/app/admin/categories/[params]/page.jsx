@@ -156,11 +156,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     try {
       await updateCategories(category.id, payload)
       toast.success('Category Updated successfully!')
+      onUpdate()
     } catch (error) {
       toast.error('Failed to Update Category.')
-      return // Stop further execution if failed
     }
-    // These should only run if the update was successful
     onUpdate()
     onClose()
   }

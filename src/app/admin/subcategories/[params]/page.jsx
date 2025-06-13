@@ -177,7 +177,7 @@ const EditSubCategoryModal = ({
       setSubmitting(true)
       await onSubmit(subCategory.id, updatedData)
       toast.success('Sub-category updated successfully!')
-      onUpdate?.()
+      onUpdate()
       onClose()
     } catch (err) {
       toast.error('Failed to update sub-category.')

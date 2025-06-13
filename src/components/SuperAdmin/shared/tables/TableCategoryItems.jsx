@@ -16,6 +16,10 @@ const TableCategoryItems = ({ categories, onDelete, onUpdate }) => {
     setIsModalOpen(false)
     setSelectedCategory(null)
   }
+  const handleSuccessfulUpdate = () => {
+    if (onUpdate) onUpdate() // Call the parent's update handler
+    handleCloseModal() // Close the modal
+  }
 
   return (
     <div className="table-responsive">
@@ -45,6 +49,7 @@ const TableCategoryItems = ({ categories, onDelete, onUpdate }) => {
                   <button
                     className="ps-btn ps-btn--sm"
                     onClick={() => handleEditClick(category)}
+                    style={{ backgroundColor: '#fcb800', color: '#000' }}
                   >
                     Edit
                   </button>
@@ -68,7 +73,8 @@ const TableCategoryItems = ({ categories, onDelete, onUpdate }) => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         category={selectedCategory}
-        onUpdate={onUpdate}
+        // onUpdate={onUpdate}
+        onUpdate={handleSuccessfulUpdate}
       />
     </div>
   )

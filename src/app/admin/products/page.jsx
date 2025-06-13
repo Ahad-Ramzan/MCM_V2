@@ -277,10 +277,16 @@ const ProductPage = () => {
     }
   }
 
+  const handleProductCreated = async () => {
+    setIsModalVisible(false)
+    await fetchData(currentPage, searchTerm)
+    await fetchData()
+  }
+
   return (
     <ContainerDefault title="Products">
       <HeaderDashboard title="Produtos" description="Lista de Protudos " />
-      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
+      <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
       <section className="ps-items-listing">
         <div className="ps-section__actions">
           <button className="ps-btn" onClick={showModal}>
@@ -380,6 +386,7 @@ const ProductPage = () => {
             <TableProjectItems
               productsData={productsData.results}
               onDelete={handleDeleteProduct}
+              onUpdate={handleProductCreated}
             />
           ) : (
             <p style={{ padding: '1rem' }}>No products found.</p>
@@ -407,8 +414,9 @@ const ProductPage = () => {
         footer={null}
         width={800}
         style={{ top: 20 }}
+        onSuccess={handleProductCreated}
       >
-        <CreateProductPage />
+        <CreateProductPage onSuccess={handleProductCreated} />
       </Modal>
       <style jsx>{`
         .ps-form__tabs {

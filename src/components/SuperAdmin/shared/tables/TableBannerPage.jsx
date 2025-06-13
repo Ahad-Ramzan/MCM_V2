@@ -4,7 +4,7 @@ import EditBannerPage from '../../banners/EditBannerPage'
 // import BannerUploadPage from '../../banners/CreateBannerModal'
 // import EditBannerPage from '../../banners/EditBannerPage' // Import the new component
 
-const TableBannerPage = ({ banners, onDelete, onUpdate }) => {
+const TableBannerPage = ({ banners, onDelete, onUpdate, onUpdated }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [currentBanner, setCurrentBanner] = useState(null)
 
@@ -21,6 +21,11 @@ const TableBannerPage = ({ banners, onDelete, onUpdate }) => {
   const handleUpdateSuccess = () => {
     onUpdate() // This will trigger the parent to refresh the banners list
     handleModalCancel()
+  }
+
+  const handleSuccessfulUpdate = () => {
+    if (onUpdated) onUpdated() // Call the parent's update handler
+    setIsEditModalVisible() // Close the modal
   }
 
   return (
@@ -50,6 +55,7 @@ const TableBannerPage = ({ banners, onDelete, onUpdate }) => {
                 <button
                   className="ps-btn ps-btn--sm"
                   onClick={() => handleEdit(banner)}
+                  style={{ backgroundColor: '#fcb800', color: '#000' }}
                 >
                   Edit
                 </button>
@@ -84,6 +90,7 @@ const TableBannerPage = ({ banners, onDelete, onUpdate }) => {
           <EditBannerPage
             bannerData={currentBanner}
             onSuccess={handleUpdateSuccess}
+            onUpdated={handleSuccessfulUpdate}
           />
         )}
       </Modal>

@@ -26,7 +26,7 @@ const OrdersPage = () => {
   })
 
   const [currentPage, setCurrentPage] = useState(1)
-  const [isModalVisible, setIsModalVisible] = useState(false) // Modal visibility state
+  const [isModalVisible, setIsModalVisible] = useState(false)
   const [formData, setFormData] = useState({
     product_items: [],
     delivery_info: {
@@ -255,9 +255,9 @@ const OrdersPage = () => {
             >
               <i className="icon icon-plus mr-2"></i>Nova Encomenda
             </button>
-            <Link href={`/admin/orders/order-detail`} className="ps-btn ps-btn">
+            {/* <Link href={`/admin/orders/order-detail`} className="ps-btn ps-btn">
               Orders Details
-            </Link>
+            </Link> */}
           </div>
         </div>
         <div className="ps-section__content">

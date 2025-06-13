@@ -62,6 +62,12 @@ const CategoriesPage = () => {
     fetchData(page, searchTerm)
   }
 
+  const handleCategoryCreated = async () => {
+    setIsModalVisible(false)
+    await fetchData(currentPage, searchTerm)
+    await fetchAllData()
+  }
+
   useEffect(() => {
     const debouncedSearch = debounce(() => {
       fetchData(1, searchTerm)
@@ -90,29 +96,30 @@ const CategoriesPage = () => {
       />
       <section className="ps-dashboard ps-items-listing">
         <div className="ps-section__left">
-          <div
-            className="ps-section__header"
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <FormSearchSimple
-              onSearchChange={(value) => setSearchTerm(value)}
-            />
-            <button
-              className="ps-btn ml-60 w-40"
-              onClick={() => setIsModalVisible(true)} // Open modal
-            >
-              <i className="icon icon-plus mr-2" />
-              Add New Category
-            </button>
+          <div className="ps-section__header simple">
+            <div className="ps-section__filter">
+              <FormSearchSimple />
+            </div>
+            <div className="ps-section__actions">
+              <button
+                className="ps-btn"
+                onClick={() => setIsModalVisible(true)} // Open modal
+              >
+                <i className="icon icon-plus mr-2" />
+                Add Category
+              </button>
+              {/* <Link href="/admin/customers/client-detail" className="ps-btn">
+             
+              Client Detail
+            </Link> */}
+            </div>
           </div>
+
           <div className="ps-section__content">
             <TableCategoryItems
               categories={categories.results}
               onDelete={handleDeleteCategory}
+              onUpdate={handleCategoryCreated}
             />
             <div className="ps-section__footer">
               <p>
@@ -135,7 +142,10 @@ const CategoriesPage = () => {
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
-        <FormCreateCategory categories={subcategories} />
+        <FormCreateCategory
+          categories={subcategories}
+          onSuccess={handleCategoryCreated}
+        />
       </Modal>
     </ContainerDefault>
   )

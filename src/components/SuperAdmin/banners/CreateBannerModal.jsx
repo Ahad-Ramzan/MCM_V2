@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 // import { createOrderBanner } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 
-const BannerUploadPage = () => {
+const BannerUploadPage = ({ onSuccess }) => {
   const [imageFile, setImageFile] = useState(null)
   const [position, setPosition] = useState('')
 
@@ -32,6 +32,10 @@ const BannerUploadPage = () => {
 
       await createOrderBanner(formData)
       toast.success('Banner uploaded successfully')
+      if (onSuccess) {
+        onSuccess()
+      }
+
       setImageFile(null)
       setPosition('')
     } catch (error) {
@@ -48,7 +52,7 @@ const BannerUploadPage = () => {
           duration: 3000,
         }}
       />
-      <h1 className="mb-4">Upload Banner</h1>
+      {/* <h1 className="mb-4">Upload Banner</h1> */}
       <div className="card">
         <div className="card-body">
           <div className="form-group">

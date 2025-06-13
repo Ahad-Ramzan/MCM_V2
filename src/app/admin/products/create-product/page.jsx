@@ -30,7 +30,7 @@ const initialFormState = {
   category: '',
 }
 
-const CreateProductPage = () => {
+const CreateProductPage = ({ onSuccess }) => {
   const [formData, setFormData] = useState(initialFormState)
   const [categories, setCategories] = useState([])
   const [brand, setBrandsData] = useState([])
@@ -175,6 +175,9 @@ const CreateProductPage = () => {
     try {
       const response = await createProducts(productData)
       toast.success('Product created successfully!')
+      if (onSuccess) {
+        onSuccess()
+      }
       setFormData(initialFormState)
       setThumbnailPreview(null)
       setGalleryPreview([])
@@ -194,7 +197,7 @@ const CreateProductPage = () => {
       <Toaster
         position="top-center"
         toastOptions={{
-          duration: 4000,
+          duration: 5000,
         }}
       />
       <section className="ps-new-item">

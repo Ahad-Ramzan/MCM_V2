@@ -30,7 +30,7 @@ const initialFormState = {
   category: '',
 }
 
-const EditProductPage = ({ productId }) => {
+const EditProductPage = ({ productId, onUpdate }) => {
   const router = useRouter()
   const [formData, setFormData] = useState(initialFormState)
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
@@ -39,6 +39,7 @@ const EditProductPage = ({ productId }) => {
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
   const [activeTab, setActiveTab] = useState('general')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const fetchAllCategories = async () => {
     try {
@@ -203,12 +204,22 @@ const EditProductPage = ({ productId }) => {
     }
 
     try {
-      await updateProducts(productId, productData)
+      const response = await updateProducts(productId, productData)
+
+      // Check if the response indicates success
+      if (!response || response.error) {
+        throw new Error(response?.message || 'Failed to update product')
+      }
+
       toast.success('Product updated successfully!')
+      onUpdate() // Refresh data if needed
+      close()
+
+      // Only navigate if update was truly successful
       router.push('/admin/products')
     } catch (error) {
-      toast.error('Failed to update product.')
-      console.error(error)
+      console.error('Update error:', error)
+      toast.error(error.message || 'Failed to update product.')
     }
   }
 
