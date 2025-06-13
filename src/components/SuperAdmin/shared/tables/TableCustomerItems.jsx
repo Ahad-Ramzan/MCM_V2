@@ -152,7 +152,11 @@ const TableCustomerItems = ({ userData, onDelete }) => {
           >
             Edit
           </button> */}
-          <button className="ps-btn ps-btn--sm" onClick={handleDetailsClick}>
+          <button
+            className="ps-btn ps-btn--sm"
+            onClick={handleDetailsClick}
+            style={{ backgroundColor: '#fcb800', color: '#000' }}
+          >
             Details
           </button>
           <button

@@ -71,7 +71,11 @@ const TableOrderSummary = ({ analytics }) => {
                     className="dropdown-menu"
                     aria-labelledby="dropdownMenuButton"
                   >
-                    <a className="dropdown-item" href="#">
+                    <a
+                      className="dropdown-item"
+                      href="#"
+                      style={{ backgroundColor: '#fcb800', color: '#000' }}
+                    >
                       Edit
                     </a>
                     <a className="dropdown-item" href="#">

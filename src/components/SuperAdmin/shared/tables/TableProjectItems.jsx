@@ -5,7 +5,7 @@ import { Modal } from 'antd'
 import EditProductPage from '@/app/admin/products/[id]/page'
 // import EditProductPage from './EditProductPage' // Adjust the path as necessary
 
-const TableProjectItems = ({ productsData, onDelete }) => {
+const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [editingProductId, setEditingProductId] = useState(null)
 
@@ -44,6 +44,7 @@ const TableProjectItems = ({ productsData, onDelete }) => {
                   setEditingProductId(item.id)
                   setIsModalVisible(true)
                 }}
+                style={{ backgroundColor: '#fcb800', color: '#000' }}
               >
                 Edit
               </button>
@@ -58,6 +59,16 @@ const TableProjectItems = ({ productsData, onDelete }) => {
         )
       })
     : []
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false)
+    // setSelectedCategory(null)
+  }
+
+  const handleSuccessfulUpdate = () => {
+    if (onUpdate) onUpdate() // Call the parent's update handler
+    handleCloseModal() // Close the modal
+  }
 
   return (
     <div className="table-responsive">
@@ -86,7 +97,12 @@ const TableProjectItems = ({ productsData, onDelete }) => {
         width={800}
         style={{ top: 20 }}
       >
-        {editingProductId && <EditProductPage productId={editingProductId} />}
+        {editingProductId && (
+          <EditProductPage
+            productId={editingProductId}
+            onUpdate={handleSuccessfulUpdate}
+          />
+        )}
       </Modal>
     </div>
   )

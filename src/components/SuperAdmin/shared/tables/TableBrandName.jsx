@@ -40,6 +40,7 @@ const TableBrandName = ({ productsData, onDelete, onUpdateBrand }) => {
                 <button
                   className="ps-btn ps-btn--sm"
                   onClick={() => handleEdit(brand)} // Open the modal for editing
+                  style={{ backgroundColor: '#fcb800', color: '#000' }}
                 >
                   Edit
                 </button>

@@ -3,7 +3,7 @@ import { createCategory } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
-const FormCreateCategory = ({ categories }) => {
+const FormCreateCategory = ({ categories, onSuccess }) => {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
@@ -134,8 +134,13 @@ const FormCreateCategory = ({ categories }) => {
       setDescription('')
       setSelectedSubCategoryIds([])
       setExpandedNodes({})
+
+      // Call the success callback which will close modal and refresh data
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (err) {
-      toast.error('Failed to create category')
+      toast.error(err.response?.data?.message || 'Failed to create category')
     }
   }
 

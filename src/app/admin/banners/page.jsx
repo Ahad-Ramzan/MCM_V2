@@ -28,16 +28,11 @@ const BannerPage = () => {
     }
   }
 
-  // const handleDeleteBanner = async (bannerId) => {
-  //   try {
-  //     await axios.delete(
-  //       `https://backendmcm.estelatechnologies.com/api/orders/banners/${bannerId}/`
-  //     )
-  //     await fetchBanners()
-  //   } catch (error) {
-  //     console.error('Error deleting banner:', error)
-  //   }
-  // }
+  const handleBannersCreated = async () => {
+    setIsModalVisible(false)
+    await fetchData(currentPage, searchTerm)
+    await fetchBanners()
+  }
 
   const handleDeleteBanner = async (bannerId) => {
     try {
@@ -83,17 +78,18 @@ const BannerPage = () => {
             banners={banners}
             onDelete={handleDeleteBanner}
             onUpdate={handleUpdateBanner}
+            onUpdated={handleBannersCreated}
           />
         </div>
       </section>
 
       <Modal
-        title="Create New Brand"
+        title="Create New Banner"
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
-        <BannerUploadPage />
+        <BannerUploadPage onSuccess={handleBannersCreated} />
       </Modal>
     </ContainerDefault>
   )

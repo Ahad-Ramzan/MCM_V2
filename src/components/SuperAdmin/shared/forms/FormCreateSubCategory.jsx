@@ -3,7 +3,7 @@ import { createSubCategory } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
-const FormCreateSubCategory = ({ categories }) => {
+const FormCreateSubCategory = ({ categories, onSuccess }) => {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
@@ -81,12 +81,20 @@ const FormCreateSubCategory = ({ categories }) => {
       await createSubCategory(payload)
       toast.success('Sub-category created successfully!')
 
+      // Reset form
       setName('')
       setSlug('')
       setDescription('')
       setSelectedParentId(null)
+
+      // Notify parent component of success
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (err) {
-      toast.error('Failed to create sub-category.')
+      toast.error(
+        err.response?.data?.message || 'Failed to create sub-category.'
+      )
     }
   }
 

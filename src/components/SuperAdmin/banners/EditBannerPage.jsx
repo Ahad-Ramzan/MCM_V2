@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { toast, Toaster } from 'react-hot-toast'
 
-const EditBannerPage = ({ bannerData, onSuccess }) => {
+const EditBannerPage = ({ bannerData, onSuccess, onUpdated }) => {
   const [imageFile, setImageFile] = useState(null)
   const [position, setPosition] = useState(bannerData.position)
   const [isLoading, setIsLoading] = useState(false)
@@ -40,6 +40,7 @@ const EditBannerPage = ({ bannerData, onSuccess }) => {
 
       toast.success('Banner updated successfully')
       onSuccess()
+      onUpdated()
     } catch (error) {
       toast.error('Error updating banner')
       console.error('Error updating banner:', error)
@@ -51,7 +52,7 @@ const EditBannerPage = ({ bannerData, onSuccess }) => {
   return (
     <div className="container my-5">
       <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
-      <h1 className="mb-4">Edit Banner</h1>
+      {/* <h1 className="mb-4">Edit Banner</h1> */}
       <div className="card">
         <div className="card-body">
           <div className="form-group">

@@ -24,7 +24,7 @@ const TableSubCategoriesItems = ({
       const data = await getcategoriesById()
       setCategoriesTree(data)
     } catch (err) {
-      toast.error('Failed to load categories')
+      // toast.error('Failed to load categories')
       setCategoriesTree([])
     } finally {
       setLoadingCategories(false)
@@ -35,6 +35,11 @@ const TableSubCategoriesItems = ({
     setSelectedSubCategory(subCategory)
     setIsModalOpen(true)
     fetchCategoriesTree()
+  }
+
+  const handleSuccessfulUpdate = () => {
+    if (onUpdate) onUpdate() // Call the parent's update handler
+    handleCloseModal() // Close the modal
   }
 
   const handleCloseModal = () => {
@@ -64,6 +69,8 @@ const TableSubCategoriesItems = ({
       </ul>
     )
   }
+
+  
 
   return (
     <div className="table-responsive">
@@ -95,6 +102,7 @@ const TableSubCategoriesItems = ({
                   <button
                     className="ps-btn ps-btn--sm"
                     onClick={() => handleEditClick(category)}
+                    style={{ backgroundColor: '#fcb800', color: '#000' }}
                   >
                     Edit
                   </button>
@@ -120,7 +128,7 @@ const TableSubCategoriesItems = ({
         subCategory={selectedSubCategory}
         categoriesTree={categoriesTree}
         loadingCategories={loadingCategories}
-        onUpdate={onUpdate}
+        onUpdate={handleSuccessfulUpdate}
         onSubmit={handleUpdateSubCategory}
         subcategories={subcategories}
       />
