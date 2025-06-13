@@ -88,7 +88,6 @@ export async function updateAddress(id, data) {
   return await response.json()
 }
 
-
 export const loginUser = async (email, password) => {
   try {
     const response = await axiosInstance.post('user/token/', {
@@ -132,6 +131,16 @@ export const deleteUser = async (userId) => {
 
 export const getUserdata = async (page = 1) => {
   const response = await axiosInstance.get(`user/users/?page=${page}`)
+  return response.data
+}
+
+export const getUserById = async (id) => {
+  const response = await axiosInstance.get(`user/users/${id}/`)
+  return response.data
+}
+
+export const updateUserdata = async (id, data) => {
+  const response = await axiosInstance.put(`user/users/${id}/`, data)
   return response.data
 }
 
