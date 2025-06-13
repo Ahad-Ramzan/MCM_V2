@@ -147,6 +147,15 @@ export const getAllOrders = async (page = 1) => {
   }
 }
 
+export const getOrderById = async (orderId) => {
+  try {
+    const response = await ORDERS_API.get(`orders/${orderId}/`)
+    return response.data
+  } catch (error) {
+    throw new Error('Failed to fetch order')
+  }
+}
+
 export const getAllHistory = async () => {
   try {
     const response = await ORDERS_API.get(`orders/history/`)
