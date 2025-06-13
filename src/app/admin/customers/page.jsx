@@ -36,7 +36,7 @@ const CustomersPage = () => {
   const fetchData = async (page = 1) => {
     try {
       const response = await getUserdata(page)
-      console.log(response, 'ressclinet data')
+      console.log(response, 'users data with orders details')
       setUsersData(response)
       setCurrentPage(page)
     } catch (error) {
@@ -107,10 +107,10 @@ const CustomersPage = () => {
               <i className="icon icon-plus mr-2" />
               Add Client
             </button>
-            <Link href="/admin/customers/client-detail" className="ps-btn">
-              {/* <i className="icon icon-plus mr-2" /> */}
+            {/* <Link href="/admin/customers/client-detail" className="ps-btn">
+             
               Client Detail
-            </Link>
+            </Link> */}
           </div>
         </div>
         <div className="ps-section__content">
