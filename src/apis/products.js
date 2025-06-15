@@ -299,6 +299,11 @@ export const createOrder = async (orderPayload) => {
   }
 }
 
+export const updateOrders = async (id, data) => {
+  const response = await ORDERS_API.put(`orders/${id}/`, data)
+  return response.data
+}
+
 export const getbanner = async () => {
   try {
     const response = await ORDERS_API.get('banners/')
