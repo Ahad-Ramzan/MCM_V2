@@ -295,7 +295,7 @@ function AddAddressModal({ open, onClose, onAdd, userId }) {
   )
 }
 
-const ClientDetailPage = () => {
+const ClientDetailPage = ({ editingClientId }) => {
   const [activeTab, setActiveTab] = useState('info')
   const [showLojaModal, setShowLojaModal] = useState(false)
   const [showAddAddressModal, setShowAddAddressModal] = useState(false)
@@ -345,7 +345,7 @@ const ClientDetailPage = () => {
 
       // Update user with new image using fetch directly
       const response = await fetch(
-        `https://backendmcm.estelatechnologies.com/api/user/users/${clientId}/`,
+        `https://backendmcm.estelatechnologies.com/api/user/users/${editingClientId}/`,
         {
           method: 'PUT',
           headers: {
@@ -388,7 +388,7 @@ const ClientDetailPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getUserById(clientId)
+        const response = await getUserById(editingClientId)
         setClientdata(response)
         // Set form data when client data is fetched
         setFormData({
@@ -406,7 +406,7 @@ const ClientDetailPage = () => {
       }
     }
 
-    if (clientId) {
+    if (editingClientId) {
       fetchData()
     }
   }, [])
@@ -428,12 +428,12 @@ const ClientDetailPage = () => {
     try {
       const payload = {
         ...form,
-        user_id: clientId,
+        user_id: editingClientId,
       }
       await updateAddress(editingAddressId, payload)
 
       // Refresh both client data and address data
-      const response = await getUserById(clientId)
+      const response = await getUserById(editingClientId)
       setClientdata(response)
       await fetchdata()
 
@@ -462,7 +462,7 @@ const ClientDetailPage = () => {
       await deleteAddress(id)
 
       // Refresh both client data and address data
-      const response = await getUserById(clientId)
+      const response = await getUserById(editingClientId)
       setClientdata(response)
       await fetchdata()
 
@@ -475,7 +475,7 @@ const ClientDetailPage = () => {
 
   const handleAddAddress = async (newAddress) => {
     // Refresh both client data and address data
-    const response = await getUserById(clientId)
+    const response = await getUserById(editingClientId)
     setClientdata(response)
     await fetchdata()
   }
@@ -506,9 +506,9 @@ const ClientDetailPage = () => {
       // Create payload without photo
       const { photo, ...updatePayload } = formData
 
-      await updateUserdata(clientId, updatePayload)
+      await updateUserdata(editingClientId, updatePayload)
       // Refresh data after update
-      const response = await getUserById(clientId)
+      const response = await getUserById(editingClientId)
       setClientdata(response)
       toast.success('User information updated successfully!')
     } catch (error) {
@@ -526,11 +526,7 @@ const ClientDetailPage = () => {
   }
 
   return (
-    <ContainerDefault title="Editar Comprador">
-      <HeaderDashboard
-        title="Editar Comprador"
-        description="Editar dados do comprador"
-      />
+    <div>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -539,14 +535,14 @@ const ClientDetailPage = () => {
       />
       <div className="min-h-screen p-8 bg-gray-50">
         {/* Breadcrumb */}
-        <div className="text-sm text-gray-500 mb-6 flex items-center">
+        {/* <div className="text-sm text-gray-500 mb-6 flex items-center">
           <span className="hover:text-primary cursor-pointer">Clientes</span>
           <span className="mx-2">›</span>
           <span className="text-primary font-semibold">Editar Comprador</span>
-        </div>
+        </div> */}
 
         {/* Page Title */}
-        <div className="flex justify-between items-center mb-8">
+        {/* <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">EDITAR COMPRADOR</h2>
           <div className="flex items-center gap-4">
             <span
@@ -559,7 +555,7 @@ const ClientDetailPage = () => {
               {clients.is_active ? 'Ativo' : 'Inativo'}
             </span>
           </div>
-        </div>
+        </div> */}
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Left Section */}
@@ -869,7 +865,7 @@ const ClientDetailPage = () => {
                   <input
                     type="text"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50"
-                    value={`${clientId.toString().padStart()}`}
+                    value={`${editingClientId.toString().padStart()}`}
                     readOnly
                   />
                 </div>
@@ -922,16 +918,16 @@ const ClientDetailPage = () => {
           setEditingAddressData(null)
         }}
         onSave={handleSaveLoja}
-        userId={clientId}
+        userId={editingClientId}
       />
 
       <AddAddressModal
         open={showAddAddressModal}
         onClose={() => setShowAddAddressModal(false)}
         onAdd={handleAddAddress}
-        userId={clientId}
+        userId={editingClientId}
       />
-    </ContainerDefault>
+    </div>
   )
 }
 
