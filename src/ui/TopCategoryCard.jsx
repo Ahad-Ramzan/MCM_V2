@@ -1,20 +1,28 @@
 'use client'
 import React from 'react'
 
-// Dummy placeholder image (can be replaced with your own or a free CDN like Unsplash)
-const DEFAULT_IMAGE = 'https://source.unsplash.com/random/160x160'
-const CategoryCard = ({ title, image }) => {
-  const hasValidImage = typeof image === 'string' && image.trim() !== ''
+// Use this specific default image instead of the random Unsplash image
+const DEFAULT_IMAGE =
+  'https://backendmcm.estelatechnologies.com/media/category_gallery/ban2.jpeg'
 
+const CategoryCard = ({ title, image }) => {
   return (
-    <div className="w-[160px] h-52 border border-[var(--lightGray4)] overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-      <img
-        src={hasValidImage ? image : DEFAULT_IMAGE}
-        alt={title}
-        className="h-full w-full object-cover"
-      />
-      <div className="p-2 pb-10 text-center text-sm font-medium bg-white">
-        {title}
+    <div className="w-[160px] h-52 min-w-[160px] relative overflow-hidden rounded-xl shadow-md cursor-pointer group">
+      {image ? (
+        <img
+          src={image}
+          alt={title}
+          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+      ) : (
+        <img
+          src={DEFAULT_IMAGE}
+          alt="Default Category"
+          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+      )}
+      <div className="absolute bottom-0 w-full bg-black bg-opacity-50 text-white text-center text-sm font-semibold py-2 px-2">
+        <p className="truncate">{title}</p>
       </div>
     </div>
   )

@@ -70,7 +70,9 @@ export const getAllProducts = async (
   search = '',
   brand = '',
   category = '',
-  status = ''
+  status = '',
+  sale_price_min = '',
+  sale_price_max = ''
 ) => {
   try {
     const response = await ESTORE_API.get(`products/`, {
@@ -79,7 +81,9 @@ export const getAllProducts = async (
         search,
         brand,
         category,
-        status, // ✅ Add status here
+        status,
+        sale_price_min,
+        sale_price_max,
       },
     })
     return response.data

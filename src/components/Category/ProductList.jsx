@@ -4,6 +4,7 @@ import ProductCardStar from '@/ui/ProductCardStar'
 import { FaTh, FaBars } from 'react-icons/fa'
 import { getAllProducts } from '@/apis/products'
 import Pagination from '../SuperAdmin/elements/basic/Pagination'
+import useProductsStore from '@/store/productsStore'
 
 const itemsPerPage = 15
 
@@ -17,6 +18,14 @@ const ProductListPage = () => {
     previous: null,
     results: [],
   })
+
+  const { products, brands, categories } = useProductsStore()
+
+  useEffect(() => {
+    console.log('Products: find out prod---', products)
+    console.log('Brands:', brands)
+    console.log('Categories:', categories)
+  }, [products, brands, categories])
 
   const fetchData = async (
     page = 1,
@@ -96,7 +105,7 @@ const ProductListPage = () => {
 
       {/* Product grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {visibleProducts.map((product, index) => (
+        {products.map((product, index) => (
           <ProductCardStar
             key={product.id || index}
             productId={product.id}
