@@ -9,6 +9,8 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
   const [description, setDescription] = useState('')
   const [selectedSubCategoryIds, setSelectedSubCategoryIds] = useState([])
   const [expandedNodes, setExpandedNodes] = useState({})
+  const [image, setImage] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
 
   const toggleExpand = (id) => {
     setExpandedNodes((prev) => ({
@@ -36,6 +38,14 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
       }
     }
     return null
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImage(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
   }
 
   const handleCheckboxChange = (category) => {
@@ -119,23 +129,26 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const payload = {
-      name,
-      slug,
-      description,
-      sub_category_ids: selectedSubCategoryIds,
-    }
+    const formData = new FormData()
+    formData.append('name', name)
+    formData.append('slug', slug)
+    formData.append('description', description)
+    formData.append('image', image)
+    selectedSubCategoryIds.forEach((id) =>
+      formData.append('sub_category_ids', id)
+    )
 
     try {
-      await createCategory(payload)
+      await createCategory(formData)
       toast.success('Category created successfully!')
       setName('')
       setSlug('')
       setDescription('')
       setSelectedSubCategoryIds([])
       setExpandedNodes({})
+      setImage(null)
+      setImagePreview(null)
 
-      // Call the success callback which will close modal and refresh data
       if (onSuccess) {
         onSuccess()
       }
@@ -188,6 +201,28 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
         </div>
 
         <div className="form-group">
+          <label>Category Image</label>
+          <div className="image-upload-container">
+            <label htmlFor="category-image" className="image-upload-box">
+              📁 Click or Drag to Upload
+              <input
+                id="category-image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden-file-input"
+              />
+            </label>
+
+            {imagePreview && (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="form-group">
           <label>Select Sub-Categories</label>
           <div
             style={{
@@ -220,6 +255,48 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
           Add
         </button>
       </div>
+
+      <style jsx>{`
+        .image-upload-container {
+          margin-top: 8px;
+        }
+
+        .image-upload-box {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #fafafa;
+          border: 2px dashed #ccc;
+          padding: 20px;
+          border-radius: 10px;
+          color: #666;
+          cursor: pointer;
+          text-align: center;
+          transition: border 0.3s ease;
+          font-weight: 500;
+        }
+
+        .image-upload-box:hover {
+          border-color: #999;
+          background-color: #f0f0f0;
+        }
+
+        .hidden-file-input {
+          display: none;
+        }
+
+        .image-preview {
+          margin-top: 12px;
+        }
+
+        .image-preview img {
+          width: 100px;
+          height: 100px;
+          border-radius: 8px;
+          object-fit: cover;
+          border: 1px solid #ddd;
+        }
+      `}</style>
     </form>
   )
 }

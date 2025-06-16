@@ -87,6 +87,7 @@ const CategoryGrid = () => {
             key={index}
             title={category.name}
             items={category.sub_categories.map((sub) => sub.name)}
+            image={category.image}
           />
         ))}
       </div>

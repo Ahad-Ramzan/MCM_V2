@@ -9,6 +9,8 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
   const [description, setDescription] = useState('')
   const [subCategoryIds, setSubCategoryIds] = useState([])
   const [expanded, setExpanded] = useState({}) // { [id]: true/false }
+  const [image, setImage] = useState(null)
+  const [imagePreview, setImagePreview] = useState('')
 
   useEffect(() => {
     if (category) {
@@ -21,8 +23,17 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           : []
       )
       setExpanded({})
+      setImagePreview(category.image || '') // if API returns image URL
     }
   }, [category])
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImage(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
+  }
 
   // Helper to find a category object by ID in the subcategory tree
   const findCategoryById = (subs, id) => {
@@ -147,21 +158,25 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const payload = {
-      name,
-      slug,
-      description,
-      sub_category_ids: subCategoryIds,
+
+    const formData = new FormData()
+    formData.append('name', name)
+    formData.append('slug', slug)
+    formData.append('description', description)
+    subCategoryIds.forEach((id) => formData.append('sub_category_ids', id))
+
+    if (image) {
+      formData.append('image', image)
     }
+
     try {
-      await updateCategories(category.id, payload)
+      await updateCategories(category.id, formData)
       toast.success('Category Updated successfully!')
       onUpdate()
+      onClose()
     } catch (error) {
       toast.error('Failed to Update Category.')
     }
-    onUpdate()
-    onClose()
   }
 
   if (!isOpen) return null
@@ -199,6 +214,28 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+
+          <div className="form-group">
+            <label>Category Image</label>
+            <div className="custom-upload-wrapper">
+              <label className="custom-upload-label">
+                📁 Click to Upload Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="custom-upload-input"
+                />
+              </label>
+
+              {imagePreview && (
+                <div className="image-preview-box">
+                  <img src={imagePreview} alt="Preview" />
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Subcategories with checkboxes and arrows */}
           <div className="form-group">
             <label>Select Sub Category</label>
@@ -258,6 +295,44 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
         }
         .form-group ul {
           margin: 0;
+        }
+        .custom-upload-wrapper {
+          margin-top: 8px;
+        }
+
+        .custom-upload-label {
+          display: inline-block;
+          background-color: #f5f5f5;
+          border: 2px dashed #ccc;
+          padding: 12px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          color: #555;
+          font-weight: 500;
+          text-align: center;
+          transition: all 0.3s ease;
+          width: 100%;
+        }
+
+        .custom-upload-label:hover {
+          background-color: #eaeaea;
+          border-color: #888;
+        }
+
+        .custom-upload-input {
+          display: none;
+        }
+
+        .image-preview-box {
+          margin-top: 12px;
+        }
+
+        .image-preview-box img {
+          width: 100px;
+          height: 100px;
+          border-radius: 8px;
+          object-fit: cover;
+          border: 1px solid #ddd;
         }
       `}</style>
     </div>

@@ -148,6 +148,9 @@ export default function BottomNavbar() {
             <Link href="/">Home</Link>
           </li>
           <li>
+            <Link href="/category">Category</Link>
+          </li>
+          <li>
             <Link href="#">Serviços</Link>
           </li>
           <li>
