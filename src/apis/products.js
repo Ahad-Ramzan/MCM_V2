@@ -1,5 +1,6 @@
 import ESTORE_API from './estoreApi'
 import ORDERS_API from './estoreOrder'
+import PUBLIC_API from './publicApi'
 
 export const getProductById = async (id) => {
   try {
@@ -308,16 +309,17 @@ export const updateOrders = async (id, data) => {
   return response.data
 }
 
+
 export const getbanner = async () => {
   try {
-    const response = await ORDERS_API.get('banners/')
+    const response = await PUBLIC_API.get('banners/')
     return response.data
   } catch (error) {
     console.error(
-      'Error creating order:',
+      'Error fetching public banners:',
       error.response?.data || error.message
     )
-    throw new Error('Failed to create order')
+    throw new Error('Failed to fetch banners')
   }
 }
 
