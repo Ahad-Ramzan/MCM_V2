@@ -65,16 +65,13 @@ const FormCreateSubCategory = ({ categories, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!selectedParentId) {
-      toast.error('Please select a parent category.')
-      return
-    }
-
+    // Create base payload without parent
     const payload = {
       name,
       slug,
       description,
-      parent: selectedParentId,
+      // Only include parent if selected
+      ...(selectedParentId && { parent: selectedParentId }),
     }
 
     try {

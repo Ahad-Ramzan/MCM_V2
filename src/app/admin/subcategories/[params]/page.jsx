@@ -16,8 +16,9 @@ const EditSubCategoryModal = ({
   const [description, setDescription] = useState('')
   const [selectedChildrenIds, setSelectedChildrenIds] = useState([])
   const [expandedNodes, setExpandedNodes] = useState([])
-  const [selectedParentId, setSelectedParentId] = useState(null)
+  // const [selectedParentId, setSelectedParentId] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [selectedParentId, setSelectedParentId] = useState(null)
 
   useEffect(() => {
     if (subCategory) {
@@ -170,7 +171,7 @@ const EditSubCategoryModal = ({
       name,
       slug,
       description,
-      parent: selectedParentId || 0,
+      ...(selectedParentId !== null && { parent: selectedParentId }),
     }
 
     try {
