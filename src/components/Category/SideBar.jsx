@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { getAllBrands, getAllCategories, getAllProducts } from '@/apis/products'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import useProductsStore from '@/store/productsStore'
 
 const SidebarFilter = () => {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const [isClient, setIsClient] = useState(false)
 
   // Zustand store values
   const {
@@ -24,15 +24,33 @@ const SidebarFilter = () => {
   const [price, setPrice] = useState([0, 10000])
   const [loading, setLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusQuery, setStatusQuery] = useState('')
 
   // Debounce price changes to avoid too many API calls
   const [priceDebounceTimeout, setPriceDebounceTimeout] = useState(null)
 
-  // Memoized URL update function to prevent unnecessary re-renders
+  // Get current URL parameters
+  const getCurrentParams = useCallback(() => {
+    if (typeof window === 'undefined') return {}
+
+    const params = new URLSearchParams(window.location.search)
+    return {
+      category: params.get('category'),
+      brand: params.get('brand'),
+      sale_price_min: params.get('sale_price_min') || '0',
+      sale_price_max: params.get('sale_price_max') || '10000',
+      search: params.get('search') || '',
+      status: params.get('status') || '',
+    }
+  }, [])
+
+  // Memoized URL update function
   const updateUrlAndFetchProducts = useCallback(
     (categoryId, brandId, minPrice, maxPrice, shouldFetch = true) => {
-      // Update URL parameters without causing page jump
-      const params = new URLSearchParams(searchParams.toString())
+      if (typeof window === 'undefined') return
+
+      const params = new URLSearchParams(window.location.search)
 
       if (categoryId) {
         params.set('category', categoryId)
@@ -49,16 +67,14 @@ const SidebarFilter = () => {
       params.set('sale_price_min', minPrice)
       params.set('sale_price_max', maxPrice)
 
-      // Use replace instead of push to prevent page jump
       const newUrl = `${window.location.pathname}?${params.toString()}`
       window.history.replaceState({}, '', newUrl)
 
-      // Fetch products with filters only if needed
       if (shouldFetch) {
         fetchProductsWithFilters(categoryId, brandId, minPrice, maxPrice)
       }
     },
-    [searchParams]
+    []
   )
 
   const handlePriceChange = useCallback(
@@ -67,12 +83,10 @@ const SidebarFilter = () => {
       newPrice[index] = parseInt(value)
       setPrice(newPrice)
 
-      // Clear previous timeout
       if (priceDebounceTimeout) {
         clearTimeout(priceDebounceTimeout)
       }
 
-      // Debounce the API call to avoid too many requests
       const timeout = setTimeout(() => {
         updateUrlAndFetchProducts(
           selectedCategory,
@@ -80,7 +94,7 @@ const SidebarFilter = () => {
           newPrice[0],
           newPrice[1]
         )
-      }, 300) // 300ms debounce
+      }, 300)
 
       setPriceDebounceTimeout(timeout)
     },
@@ -95,9 +109,6 @@ const SidebarFilter = () => {
 
   const handleCategorySelect = useCallback(
     (categoryId) => {
-      // Prevent event bubbling
-      event?.stopPropagation()
-
       const newCategory = selectedCategory === categoryId ? null : categoryId
       setSelectedCategory(newCategory)
       updateUrlAndFetchProducts(newCategory, selectedBrand, price[0], price[1])
@@ -107,9 +118,6 @@ const SidebarFilter = () => {
 
   const handleBrandSelect = useCallback(
     (brandId) => {
-      // Prevent event bubbling
-      event?.stopPropagation()
-
       const newBrand = selectedBrand === brandId ? null : brandId
       setSelectedBrand(newBrand)
       updateUrlAndFetchProducts(selectedCategory, newBrand, price[0], price[1])
@@ -139,12 +147,13 @@ const SidebarFilter = () => {
     async (categoryId, brandId, min, max) => {
       try {
         setLoading(true)
+        const currentParams = getCurrentParams()
         const data = await getAllProducts(
           1,
-          searchParams.get('search') || '',
+          currentParams.search || '',
           brandId || '',
           categoryId || '',
-          searchParams.get('status') || '',
+          currentParams.status || '',
           min,
           max
         )
@@ -155,7 +164,7 @@ const SidebarFilter = () => {
         setLoading(false)
       }
     },
-    [searchParams, setProducts]
+    [getCurrentParams, setProducts]
   )
 
   const clearAllFilters = useCallback(() => {
@@ -165,35 +174,37 @@ const SidebarFilter = () => {
     updateUrlAndFetchProducts(null, null, 0, 10000)
   }, [updateUrlAndFetchProducts])
 
-  // Memoized check for active filters
   const hasActiveFilters = useMemo(() => {
     return selectedCategory || selectedBrand || price[0] > 0 || price[1] < 10000
   }, [selectedCategory, selectedBrand, price])
 
   // Initialize filters from URL parameters only once
   useEffect(() => {
-    if (!isInitialized) {
+    setIsClient(true)
+
+    if (!isInitialized && typeof window !== 'undefined') {
       const initializeFilters = async () => {
-        // Fetch data first
         await Promise.all([fetchBrands(), fetchCategories()])
+        const currentParams = getCurrentParams()
 
-        // Get initial values from URL
-        const categoryFromUrl = searchParams.get('category')
-        const brandFromUrl = searchParams.get('brand')
-        const minPrice = searchParams.get('sale_price_min') || 0
-        const maxPrice = searchParams.get('sale_price_max') || 10000
+        setSelectedCategory(
+          currentParams.category ? parseInt(currentParams.category) : null
+        )
+        setSelectedBrand(
+          currentParams.brand ? parseInt(currentParams.brand) : null
+        )
+        setPrice([
+          parseInt(currentParams.sale_price_min),
+          parseInt(currentParams.sale_price_max),
+        ])
+        setSearchQuery(currentParams.search)
+        setStatusQuery(currentParams.status)
 
-        // Set initial state
-        setSelectedCategory(categoryFromUrl ? parseInt(categoryFromUrl) : null)
-        setSelectedBrand(brandFromUrl ? parseInt(brandFromUrl) : null)
-        setPrice([parseInt(minPrice), parseInt(maxPrice)])
-
-        // Fetch products with initial filters
         await fetchProductsWithFilters(
-          categoryFromUrl ? parseInt(categoryFromUrl) : null,
-          brandFromUrl ? parseInt(brandFromUrl) : null,
-          minPrice,
-          maxPrice
+          currentParams.category ? parseInt(currentParams.category) : null,
+          currentParams.brand ? parseInt(currentParams.brand) : null,
+          currentParams.sale_price_min,
+          currentParams.sale_price_max
         )
 
         setIsInitialized(true)
@@ -203,7 +214,7 @@ const SidebarFilter = () => {
     }
   }, [
     isInitialized,
-    searchParams,
+    getCurrentParams,
     fetchBrands,
     fetchCategories,
     fetchProductsWithFilters,
@@ -217,6 +228,12 @@ const SidebarFilter = () => {
       }
     }
   }, [priceDebounceTimeout])
+
+  if (!isClient || !isInitialized) {
+    return (
+      <div className="hidden max-w-[250px] xl:flex xl:flex-col h-[calc(100vh-120px)] sticky top-[120px]"></div>
+    )
+  }
 
   return (
     <div className="hidden max-w-[250px] xl:flex xl:flex-col h-[calc(100vh-120px)] sticky top-[120px]">
@@ -266,7 +283,6 @@ const SidebarFilter = () => {
             ))}
           </ul>
 
-          {/* Clear Category Filter */}
           {selectedCategory && (
             <button
               onClick={(e) => {
@@ -326,7 +342,6 @@ const SidebarFilter = () => {
             ))}
           </ul>
 
-          {/* Clear Brand Filter */}
           {selectedBrand && (
             <button
               onClick={(e) => {
@@ -376,7 +391,6 @@ const SidebarFilter = () => {
               </div>
             </div>
 
-            {/* Price Input Fields */}
             <div className="flex items-center gap-2 mt-2">
               <input
                 type="number"
