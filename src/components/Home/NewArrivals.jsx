@@ -3,6 +3,7 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import ProductCardStarHorizontal from '@/ui/ProductCardStarHorizontal'
 import { getAllProducts } from '@/apis/products'
+import Pagination from '../SuperAdmin/elements/basic/Pagination'
 
 const NewArrivals = () => {
   const [productsData, setProductsData] = useState({
@@ -11,14 +12,20 @@ const NewArrivals = () => {
     previous: null,
     results: [],
   })
-
-  const fetchData = async () => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const totalPages = Math.ceil(productsData.count / 10)
+  const fetchData = async (page = 1) => {
     try {
-      const response = await getAllProducts()
+      const response = await getAllProducts(page)
       setProductsData(response)
+      setCurrentPage(page)
     } catch (error) {
       console.error('Failed to fetch products:', error)
     }
+  }
+
+  const handlePageChange = (page) => {
+    fetchData(page)
   }
 
   useEffect(() => {
@@ -34,25 +41,22 @@ const NewArrivals = () => {
         </div>
       </div>
       {/* New arrivals Map */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {/* {[1, 2, 3, 4, 5, 6, 7, 8].map((product) => (
-          <ProductCardStarHorizontal key={product} />
-        ))} */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {productsData.results.map((product, index) => (
           <ProductCardStarHorizontal
             key={product.id || index}
-            // productId={product.id}
             image={product.product_thumbnail}
-            // brand={product.brand}
             title={product.product_name}
             price={product.regular_price + '€'}
-            // sold={product.sold_items}
-            // discount={calculateDiscount(
-            //   product.regular_price,
-            //   product.sale_price
-            // )}
           />
         ))}
+      </div>
+      <div className="ps-section__footer">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   )

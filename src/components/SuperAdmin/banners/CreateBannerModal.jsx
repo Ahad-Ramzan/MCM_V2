@@ -22,7 +22,7 @@ const BannerUploadPage = ({ onSuccess }) => {
   const handleBannerUpload = async () => {
     try {
       if (!imageFile || !position) {
-        toast.error('Please select an image and a position')
+        toast.error('Please select an image and enter a position')
         return
       }
 
@@ -71,25 +71,19 @@ const BannerUploadPage = ({ onSuccess }) => {
             </div>
           </div>
           <div className="form-group">
-            <label htmlFor="position-select">Select Position</label>
-            <select
+            <label htmlFor="position-input">Position</label>
+            <input
+              type="text"
               className="form-control"
-              id="position-select"
+              id="position-input"
               value={position}
               onChange={handlePositionChange}
-            >
-              <option value="">Select a position</option>
-              <option value="slider_1">Slider 1</option>
-              <option value="slider_2">Slider 2</option>
-              <option value="slider_3">Slider 3</option>
-              <option value="top_1">Banner Top 1</option>
-              <option value="top_2">Banner Top 2</option>
-              <option value="home_1">Banner Home 1</option>
-              <option value="home_2">Banner Home 2</option>
-              <option value="home_3">Banner Home 3</option>
-              <option value="footer_1">Banner Footer 1</option>
-              <option value="footer_2">Banner Footer 2</option>
-            </select>
+              placeholder="Enter position (e.g., slider_1, top_1, home_1)"
+            />
+            {/* <small className="form-text text-muted">
+              Example positions: slider_1, slider_2, slider_3, top_1, top_2,
+              home_1, home_2, home_3, footer_1, footer_2
+            </small> */}
           </div>
 
           <div className="ps-section__actions">

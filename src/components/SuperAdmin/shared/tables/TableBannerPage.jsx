@@ -40,7 +40,7 @@ const TableBannerPage = ({ banners, onDelete, onUpdate, onUpdated }) => {
           </tr>
         </thead>
         <tbody>
-          {banners.map((banner) => (
+          {banners.results.map((banner) => (
             <tr key={banner.id}>
               <td>{banner.id}</td>
               <td>

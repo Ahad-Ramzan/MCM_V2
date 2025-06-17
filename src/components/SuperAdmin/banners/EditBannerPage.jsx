@@ -1,13 +1,26 @@
 // components/SuperAdmin/banners/EditBannerPage.js
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { toast, Toaster } from 'react-hot-toast'
 
-const EditBannerPage = ({ bannerData, onSuccess, onUpdated }) => {
+const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
   const [imageFile, setImageFile] = useState(null)
-  const [position, setPosition] = useState(bannerData.position)
+  const [position, setPosition] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Set position from bannerData when component mounts or bannerData changes
+  useEffect(() => {
+    if (bannerData && bannerData.position) {
+      setPosition(bannerData.position)
+    }
+
+    // Cleanup function to reset state when component unmounts
+    return () => {
+      setImageFile(null)
+      setPosition('')
+    }
+  }, [bannerData])
 
   const handleImageChange = (e) => {
     setImageFile(e.target.files[0])
@@ -22,10 +35,27 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated }) => {
       setIsLoading(true)
       const formData = new FormData()
 
-      // Only append image if a new one was selected
+      // If a new image is selected, append it to formData
       if (imageFile) {
         formData.append('image', imageFile)
+      } else if (bannerData.image) {
+        // If no new image is selected, we need to handle the existing image
+        // Option 1: Try to fetch the existing image and append it
+        try {
+          const response = await fetch(bannerData.image)
+          const blob = await response.blob()
+          const fileName = bannerData.image.split('/').pop()
+          const existingImageFile = new File([blob], fileName, {
+            type: blob.type,
+          })
+          formData.append('image', existingImageFile)
+        } catch (error) {
+          console.error('Error fetching existing image:', error)
+          // Option 2: If fetching fails, send the image URL as a string
+          formData.append('image_url', bannerData.image)
+        }
       }
+
       formData.append('position', position)
 
       await axios.put(
@@ -41,11 +71,21 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated }) => {
       toast.success('Banner updated successfully')
       onSuccess()
       onUpdated()
+      handleClose()
     } catch (error) {
       toast.error('Error updating banner')
       console.error('Error updating banner:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleClose = () => {
+    // Reset state when closing
+    setImageFile(null)
+    setPosition('')
+    if (onClose) {
+      onClose()
     }
   }
 
@@ -80,24 +120,15 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated }) => {
             </div>
           </div>
           <div className="form-group">
-            <label htmlFor="position-select">Position</label>
-            <select
+            <label htmlFor="position-input">Position</label>
+            <input
+              type="text"
               className="form-control"
-              id="position-select"
+              id="position-input"
               value={position}
               onChange={handlePositionChange}
-            >
-              <option value="slider_1">Slider 1</option>
-              <option value="slider_2">Slider 2</option>
-              <option value="slider_3">Slider 3</option>
-              <option value="top_1">Banner Top 1</option>
-              <option value="top_2">Banner Top 2</option>
-              <option value="home_1">Banner Home 1</option>
-              <option value="home_2">Banner Home 2</option>
-              <option value="home_3">Banner Home 3</option>
-              <option value="footer_1">Banner Footer 1</option>
-              <option value="footer_2">Banner Footer 2</option>
-            </select>
+              placeholder="Enter position (e.g., slider_1, top_1, home_1)"
+            />
           </div>
 
           <div className="ps-section__actions">
@@ -106,8 +137,7 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated }) => {
               onClick={handleBannerUpdate}
               disabled={isLoading}
             >
-              {/* <i className="icon icon-plus mr-2" /> */}
-              Update Banners
+              {isLoading ? 'Updating...' : 'Update Banner'}
             </button>
           </div>
         </div>

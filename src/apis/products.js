@@ -309,10 +309,13 @@ export const updateOrders = async (id, data) => {
   return response.data
 }
 
-
-export const getbanner = async () => {
+export const getbanner = async (page = 1) => {
   try {
-    const response = await PUBLIC_API.get('banners/')
+    const response = await PUBLIC_API.get('banners/', {
+      params: {
+        page,
+      },
+    })
     return response.data
   } catch (error) {
     console.error(

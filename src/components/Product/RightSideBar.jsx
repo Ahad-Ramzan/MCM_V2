@@ -45,14 +45,14 @@ const RightSideBar = () => {
 
       {/* Placeholder Banner */}
       <div className="bg-gray-100 aspect-square p-4 w-full rounded" />
+      <div className="bg-gray-100 aspect-square p-4 w-full rounded" />
 
-      {/* Brand Section */}
-      <div className="border border-[var(--lightGray4)] ">
+      {/* <div className="border border-[var(--lightGray4)] ">
         <div className="bg-gray-100   w-full h-9 rounded flex items-center ">
           <h3 className="text-sm font-semibold pl-4">Marca 1</h3>
         </div>
 
-        {/* Product Card */}
+      
         <div className="p-4">
           {productsData.results.map((product, index) => (
             <ProductCardStar
@@ -63,17 +63,12 @@ const RightSideBar = () => {
               title={product.product_name}
               price={product.regular_price + '€'}
               sold={product.sold_items}
-              // discount={calculateDiscount(
-              //   product.regular_price,
-              //   product.sale_price
-              // )}
+             
             />
           ))}
-          {/* <ProductCardStar />
-          <ProductCardStar />
-          <ProductCardStar /> */}
+        
         </div>
-      </div>
+      </div> */}
     </aside>
   )
 }

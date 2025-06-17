@@ -20,11 +20,23 @@ const Sliderhome = () => {
     try {
       setIsLoading(true)
       const response = await getbanner()
-      const sliderBannersData = response.results
-        .filter((banner) => banner.position.startsWith('slider_'))
-        .sort((a, b) => a.position.localeCompare(b.position))
+      // Filter for banners with position "category_slider"
+      const categorySliderBanner = response.results.find(
+        (banner) => banner.position === 'category_slider'
+      )
 
-      setSliderBanners(sliderBannersData)
+      if (categorySliderBanner) {
+        // Duplicate the same banner 3 times
+        const duplicatedBanners = [
+          categorySliderBanner,
+          categorySliderBanner,
+          categorySliderBanner,
+        ]
+        setSliderBanners(duplicatedBanners)
+      } else {
+        setSliderBanners([])
+      }
+
       setCurrent(0)
     } catch (error) {
       console.error('Error fetching banners:', error)
@@ -82,14 +94,16 @@ const Sliderhome = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         ) : totalSlides === 0 ? (
-          <div className="text-gray-500">No banners available</div>
+          <div className="text-gray-500">
+            No category slider banner available
+          </div>
         ) : (
           <>
             {/* Background Image */}
             {sliderBanners[current]?.image && (
               <img
                 src={sliderBanners[current].image}
-                alt={`Slider ${current + 1}`}
+                alt={`Category Slider ${current + 1}`}
                 className="absolute w-full h-full object-cover"
               />
             )}
