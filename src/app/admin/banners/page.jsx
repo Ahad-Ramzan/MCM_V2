@@ -12,36 +12,50 @@ import { deleteBanner, getbanner } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 
 const BannerPage = () => {
-  const [banners, setBanners] = useState([])
+  const [banners, setBanners] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  })
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    fetchBanners()
-  }, [])
+  const totalPages = Math.ceil(banners.count / 10)
 
-  const fetchBanners = async () => {
+  const fetchBanners = async (page = 1) => {
     try {
-      const response = await getbanner()
-      setBanners(response.results)
+      setIsLoading(true)
+      const response = await getbanner(page)
+      setBanners(response)
+      setCurrentPage(page)
     } catch (error) {
       console.error('Error fetching banners:', error)
+      toast.error('Failed to fetch banners')
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  const handlePageChange = (page) => {
+    fetchBanners(page)
   }
 
   const handleBannersCreated = async () => {
     setIsModalVisible(false)
-    await fetchData(currentPage, searchTerm)
-    await fetchBanners()
+    await fetchBanners(currentPage) // Refresh the current page
+    toast.success('Banner created successfully!')
   }
 
   const handleDeleteBanner = async (bannerId) => {
     try {
       await deleteBanner(bannerId)
       toast.success('Banner deleted successfully!')
-      await fetchBanners() // Refresh the list after deletion
+      await fetchBanners(currentPage) // Refresh the current page after deletion
     } catch (error) {
       console.error('Error deleting banner:', error)
-      message.error(error.message || 'Failed to delete banner')
+      toast.error(error.message || 'Failed to delete banner')
     }
   }
 
@@ -51,11 +65,17 @@ const BannerPage = () => {
         `https://backendmcm.estelatechnologies.com/api/orders/banners/${updatedBanner.id}/`,
         updatedBanner
       )
-      await fetchBanners()
+      await fetchBanners(currentPage) // Refresh the current page after update
+      toast.success('Banner updated successfully!')
     } catch (error) {
       console.error('Error updating banner:', error)
+      toast.error('Failed to update banner')
     }
   }
+
+  useEffect(() => {
+    fetchBanners(1) // Initial fetch when component mounts
+  }, [])
 
   return (
     <ContainerDefault title="Banner Management">
@@ -74,11 +94,26 @@ const BannerPage = () => {
         </div>
 
         <div className="ps-section__content">
-          <TableBannerPage
-            banners={banners}
-            onDelete={handleDeleteBanner}
-            onUpdate={handleUpdateBanner}
-            onUpdated={handleBannersCreated}
+          {isLoading ? (
+            <div className="text-center p-5">Loading banners...</div>
+          ) : (
+            <TableBannerPage
+              banners={banners}
+              onDelete={handleDeleteBanner}
+              onUpdate={handleUpdateBanner}
+              onUpdated={() => fetchBanners(currentPage)}
+            />
+          )}
+        </div>
+
+        <div className="ps-section__footer">
+          <p>
+            Showing {banners.results.length} of {banners.count} banners.
+          </p>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
         </div>
       </section>
