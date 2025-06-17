@@ -88,10 +88,7 @@ export default function BottomNavbar() {
                       {category.sub_categories.map((subcategory) => (
                         <li key={subcategory.id} className="relative">
                           <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
-                            <Link
-                              href={`/category/${category.slug}/${subcategory.id}`}
-                              className="flex-grow"
-                            >
+                            <Link href={`/category`} className="flex-grow">
                               {subcategory.name}
                             </Link>
                             {subcategory.children?.length > 0 && (
@@ -121,7 +118,7 @@ export default function BottomNavbar() {
                                 {subcategory.children.map((child) => (
                                   <li key={child.id}>
                                     <Link
-                                      href={`/category/${category.slug}/${subcategory.id}/${child.id}`}
+                                      href={`/category`}
                                       className="block hover:bg-[var(--lightGray)] px-3 py-1"
                                     >
                                       {child.name}
