@@ -59,10 +59,7 @@ export default function BottomNavbar() {
             {categories.results.map((category) => (
               <li key={category.id} className="relative">
                 <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
-                  <Link
-                    href={`/category/${category.slug}`}
-                    className="flex-grow"
-                  >
+                  <Link href={`/category`} className="flex-grow">
                     {category.name}
                   </Link>
                   {category.sub_categories?.length > 0 && (
