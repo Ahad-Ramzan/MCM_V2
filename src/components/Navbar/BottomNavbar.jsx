@@ -18,8 +18,8 @@ export default function BottomNavbar() {
     previous: null,
     results: [],
   })
-  const [expandedCategory, setExpandedCategory] = useState(null)
-  const [expandedSubcategory, setExpandedSubcategory] = useState(null)
+  const [hoveredCategory, setHoveredCategory] = useState(null)
+  const [hoveredSubcategory, setHoveredSubcategory] = useState(null)
 
   // Get the store functions
   const {
@@ -41,17 +41,6 @@ export default function BottomNavbar() {
   useEffect(() => {
     fetchData()
   }, [])
-
-  const handleSubcategoryToggle = (categoryId) => {
-    setExpandedCategory((prev) => (prev === categoryId ? null : categoryId))
-    setExpandedSubcategory(null) // Close subcategory children when category changes
-  }
-
-  const handleChildToggle = (subcategoryId) => {
-    setExpandedSubcategory((prev) =>
-      prev === subcategoryId ? null : subcategoryId
-    )
-  }
 
   // Handle category selection
   const handleCategorySelect = async (categoryId, e) => {
@@ -83,7 +72,12 @@ export default function BottomNavbar() {
           {/* Dropdown on hover */}
           <ul className="absolute top-full left-0 bg-[var(--White)] border border-[var(--darkGray)] text-black rounded w-56 p-2 hidden group-hover:block z-50 shadow-lg">
             {categories.results.map((category) => (
-              <li key={category.id} className="relative">
+              <li
+                key={category.id}
+                className="relative"
+                onMouseEnter={() => setHoveredCategory(category.id)}
+                onMouseLeave={() => setHoveredCategory(null)}
+              >
                 <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
                   <Link
                     href={`/category?category=${category.id}`}
@@ -93,30 +87,29 @@ export default function BottomNavbar() {
                     {category.name}
                   </Link>
                   {category.sub_categories?.length > 0 && (
-                    <span
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        handleSubcategoryToggle(category.id)
-                      }}
-                      className="ml-2"
-                    >
-                      <MdKeyboardArrowRight
-                        size={16}
-                        className={`transition-transform ${
-                          expandedCategory === category.id ? 'rotate-90' : ''
-                        }`}
-                      />
+                    <span className="ml-2">
+                      <MdKeyboardArrowRight size={16} />
                     </span>
                   )}
                 </div>
 
-                {/* Subcategories */}
-                {expandedCategory === category.id &&
+                {/* Subcategories - Show on hover */}
+                {hoveredCategory === category.id &&
                   category.sub_categories?.length > 0 && (
-                    <ul className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg">
+                    <ul
+                      className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg"
+                      onMouseEnter={() => setHoveredCategory(category.id)}
+                      onMouseLeave={() => setHoveredCategory(null)}
+                    >
                       {category.sub_categories.map((subcategory) => (
-                        <li key={subcategory.id} className="relative">
+                        <li
+                          key={subcategory.id}
+                          className="relative"
+                          onMouseEnter={() =>
+                            setHoveredSubcategory(subcategory.id)
+                          }
+                          onMouseLeave={() => setHoveredSubcategory(null)}
+                        >
                           <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
                             <Link
                               href={`/category?category=${subcategory.id}`}
@@ -128,29 +121,22 @@ export default function BottomNavbar() {
                               {subcategory.name}
                             </Link>
                             {subcategory.children?.length > 0 && (
-                              <span
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  handleChildToggle(subcategory.id)
-                                }}
-                              >
-                                <MdKeyboardArrowRight
-                                  size={16}
-                                  className={`transition-transform ${
-                                    expandedSubcategory === subcategory.id
-                                      ? 'rotate-90'
-                                      : ''
-                                  }`}
-                                />
+                              <span>
+                                <MdKeyboardArrowRight size={16} />
                               </span>
                             )}
                           </div>
 
-                          {/* Children of Sub-category */}
-                          {expandedSubcategory === subcategory.id &&
+                          {/* Children of Sub-category - Show on hover */}
+                          {hoveredSubcategory === subcategory.id &&
                             subcategory.children?.length > 0 && (
-                              <ul className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg">
+                              <ul
+                                className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg"
+                                onMouseEnter={() =>
+                                  setHoveredSubcategory(subcategory.id)
+                                }
+                                onMouseLeave={() => setHoveredSubcategory(null)}
+                              >
                                 {subcategory.children.map((child) => (
                                   <li key={child.id}>
                                     <Link
