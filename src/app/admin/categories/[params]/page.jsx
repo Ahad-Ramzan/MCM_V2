@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
-import { updateCategories } from '@/apis/products'
+import { getSubCategoriesAllData, updateCategories } from '@/apis/products'
 
 const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
   const [name, setName] = useState('')
@@ -11,6 +11,7 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
   const [expanded, setExpanded] = useState({}) // { [id]: true/false }
   const [image, setImage] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
+  const [allsubcategory, setAllSubCategories] = useState([])
 
   useEffect(() => {
     if (category) {
@@ -23,9 +24,22 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           : []
       )
       setExpanded({})
-      setImagePreview(category.image || '') // if API returns image URL
+      setImagePreview(category.image || '')
     }
   }, [category])
+
+  // Fetch all subcategories when component mounts
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const response = await getSubCategoriesAllData()
+        setAllSubCategories(response)
+      } catch (error) {
+        console.error('Failed to fetch subcategories:', error)
+      }
+    }
+    fetchAllData()
+  }, [])
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -35,7 +49,7 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     }
   }
 
-  // Helper to find a category object by ID in the subcategory tree
+  // Helper to find a category object by ID in the allsubcategory tree
   const findCategoryById = (subs, id) => {
     for (const sub of subs) {
       if (sub.id === id) return sub
@@ -60,22 +74,23 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
 
   // Enhanced checkbox handler: checks/unchecks all descendants
   const handleCheckbox = (id, checked) => {
-    const categoryObj = findCategoryById(category.sub_categories, id)
+    const categoryObj = findCategoryById(allsubcategory, id)
     if (!categoryObj) return
 
     const idsToUpdate = getAllDescendantIds(categoryObj)
 
-    if (checked) {
-      setSubCategoryIds((prev) =>
-        Array.from(new Set([...prev, ...idsToUpdate]))
-      )
-    } else {
-      setSubCategoryIds((prev) =>
-        prev.filter((sid) => !idsToUpdate.includes(sid))
-      )
-    }
+    setSubCategoryIds((prev) => {
+      if (checked) {
+        // Add all new IDs (remove duplicates)
+        return Array.from(new Set([...prev, ...idsToUpdate]))
+      } else {
+        // Remove all IDs in the hierarchy
+        return prev.filter((sid) => !idsToUpdate.includes(sid))
+      }
+    })
   }
 
+  // Toggle expansion state for a category
   const handleToggle = (id) => {
     setExpanded((prev) => ({
       ...prev,
@@ -83,7 +98,18 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     }))
   }
 
-  // Recursive render for categories/subcategories
+  // Select/deselect all subcategories
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      // Get all subcategory IDs from the entire tree
+      const allIds = allsubcategory.flatMap(getAllDescendantIds)
+      setSubCategoryIds(Array.from(new Set(allIds)))
+    } else {
+      setSubCategoryIds([])
+    }
+  }
+
+  // Recursive render for categories/subcategories using allsubcategory
   const renderSubCategories = (subs, level = 0) => (
     <ul
       style={{
@@ -236,15 +262,32 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
             </div>
           </div>
 
-          {/* Subcategories with checkboxes and arrows */}
+          {/* Subcategories with checkboxes and arrows - using allsubcategory */}
           <div className="form-group">
-            <label>Select Sub Category</label>
+            <div className="subcategory-header">
+              <label>Select Sub Category</label>
+              <div className="select-all-options">
+                <button
+                  type="button"
+                  className="select-all-btn"
+                  onClick={() => handleSelectAll(true)}
+                >
+                  Select All
+                </button>
+                <button
+                  type="button"
+                  className="deselect-all-btn"
+                  onClick={() => handleSelectAll(false)}
+                >
+                  Deselect All
+                </button>
+              </div>
+            </div>
             <div className="subcategory-scroll">
-              {category?.sub_categories &&
-              category.sub_categories.length > 0 ? (
-                renderSubCategories(category.sub_categories)
+              {allsubcategory && allsubcategory.length > 0 ? (
+                renderSubCategories(allsubcategory)
               ) : (
-                <span>No sub-categories.</span>
+                <span>No sub-categories available.</span>
               )}
             </div>
           </div>
@@ -284,6 +327,33 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           max-height: 90vh;
           overflow-y: auto;
         }
+        .subcategory-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        .select-all-options {
+          display: flex;
+          gap: 8px;
+        }
+        .select-all-btn,
+        .deselect-all-btn {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          cursor: pointer;
+        }
+        .select-all-btn {
+          background: #4caf50;
+          color: white;
+          border: none;
+        }
+        .deselect-all-btn {
+          background: #f44336;
+          color: white;
+          border: none;
+        }
         .subcategory-scroll {
           border: 1px solid #ccc;
           border-radius: 6px;
@@ -299,7 +369,6 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
         .custom-upload-wrapper {
           margin-top: 8px;
         }
-
         .custom-upload-label {
           display: inline-block;
           background-color: #f5f5f5;
@@ -313,20 +382,16 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           transition: all 0.3s ease;
           width: 100%;
         }
-
         .custom-upload-label:hover {
           background-color: #eaeaea;
           border-color: #888;
         }
-
         .custom-upload-input {
           display: none;
         }
-
         .image-preview-box {
           margin-top: 12px;
         }
-
         .image-preview-box img {
           width: 100px;
           height: 100px;

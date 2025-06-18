@@ -131,6 +131,10 @@ const CreateProductPage = ({ onSuccess }) => {
     reader.readAsDataURL(file)
   }
 
+  const handleClose = () => {
+    if (onSuccess) onSuccess()
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -532,10 +536,14 @@ const CreateProductPage = ({ onSuccess }) => {
 
           {/* Bottom buttons - always visible */}
           <div className="ps-form__bottom mt-4">
-            <a className="ps-btn ps-btn--black" href="/products">
+            {/* <a className="ps-btn ps-btn--black" href="/products">
               Back
-            </a>
-            <button type="button" className="ps-btn ps-btn--gray">
+            </a> */}
+            <button
+              type="button"
+              className="ps-btn ps-btn--gray"
+              onClick={handleClose}
+            >
               Cancel
             </button>
             <button type="submit" className="ps-btn">

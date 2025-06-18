@@ -61,37 +61,9 @@ const EditProductPage = ({ productId, onUpdate }) => {
     }
   }
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const data = await getProductsById(productId)
-        setFormData({
-          name: data.product_name || '',
-          reference: data.reference || '',
-          summary: data.product_summary || '',
-          regularPrice: data.regular_price || '',
-          salePrice: data.sale_price || '',
-          saleQuantity: data.sale_quantity || '',
-          soldItems: data.sold_items || '',
-          stock: data.stock || '',
-          description: data.product_description || '',
-          thumbnail: null,
-          gallery: [],
-          video: null,
-          sku: data.SKU || '',
-          brand: data.brand?.toString() || '',
-          category: data.category?.toString() || '',
-        })
-      } catch (err) {
-        toast.error('Failed to fetch product')
-        console.error(err)
-      }
-    }
-
-    fetchProduct()
-    fetchAllCategories() // Fetch categories on mount
-    fetchBrandsData() // Fetch brands on mount
-  }, [productId])
+  const handleClose = () => {
+    if (onUpdate) onUpdate()
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -157,6 +129,9 @@ const EditProductPage = ({ productId, onUpdate }) => {
     const file = e.target.files[0]
     if (!file) return
 
+    // Clear any existing preview first
+    setVideoPreview(null)
+
     setFormData((prev) => ({ ...prev, video: file }))
 
     // Create preview
@@ -166,6 +141,135 @@ const EditProductPage = ({ productId, onUpdate }) => {
     }
     reader.readAsDataURL(file)
   }
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
+
+  //   if (!formData.name || !formData.reference || !formData.regularPrice) {
+  //     toast.error('Please fill all required fields.')
+  //     return
+  //   }
+
+  //   const productData = new FormData()
+  //   productData.append('product_name', formData.name)
+  //   productData.append('reference', formData.reference)
+  //   productData.append('regular_price', parseFloat(formData.regularPrice))
+  //   productData.append('sale_price', parseFloat(formData.salePrice))
+  //   productData.append('sale_quantity', parseInt(formData.saleQuantity))
+  //   productData.append('sold_items', parseInt(formData.soldItems))
+  //   productData.append('stock', parseInt(formData.stock))
+  //   productData.append('product_summary', formData.summary)
+  //   productData.append('product_description', formData.description)
+  //   productData.append('SKU', formData.sku)
+  //   productData.append('brand', formData.brand)
+  //   productData.append('category', formData.category)
+
+  //   // Handle thumbnail
+  //   if (formData.thumbnail) {
+  //     productData.append('product_thumbnail', formData.thumbnail)
+  //   } else if (thumbnailPreview && typeof thumbnailPreview === 'string') {
+  //     // Keep existing thumbnail if not changed
+  //     productData.append('product_thumbnail', thumbnailPreview)
+  //   }
+
+  //   // Handle gallery images
+  //   if (formData.gallery.length > 0) {
+  //     formData.gallery.forEach((file) => {
+  //       productData.append('product_gallery', file)
+  //     })
+  //   } else if (galleryPreview.length > 0) {
+  //     // Keep existing gallery images if not changed
+  //     galleryPreview.forEach((url) => {
+  //       if (typeof url === 'string') {
+  //         productData.append('product_gallery', url)
+  //       }
+  //     })
+  //   }
+
+  //   // Handle video
+  //   if (formData.video) {
+  //     productData.append('product_video', formData.video)
+  //   } else if (videoPreview && typeof videoPreview === 'string') {
+  //     // Keep existing video if not changed
+  //     productData.append('product_video', videoPreview)
+  //   }
+
+  //   try {
+  //     const loadingToast = toast.loading('Updating product...')
+
+  //     const response = await updateProducts(productId, productData)
+
+  //     if (!response || response.error) {
+  //       throw new Error(response?.message || 'Failed to update product')
+  //     }
+
+  //     toast.dismiss(loadingToast)
+  //     toast.success('Product updated successfully!')
+  //     onUpdate?.()
+  //     handleClose()
+  //   } catch (error) {
+  //     console.error('Update error:', error)
+  //     toast.error(error.message || 'Failed to update product.')
+  //   }
+  // }
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
+
+  //   if (!formData.name || !formData.reference || !formData.regularPrice) {
+  //     toast.error('Please fill all required fields.')
+  //     return
+  //   }
+
+  //   const productData = new FormData()
+  //   productData.append('product_name', formData.name)
+  //   productData.append('reference', formData.reference)
+  //   productData.append('regular_price', parseFloat(formData.regularPrice))
+  //   productData.append('sale_price', parseFloat(formData.salePrice))
+  //   productData.append('sale_quantity', parseInt(formData.saleQuantity))
+  //   productData.append('sold_items', parseInt(formData.soldItems))
+  //   productData.append('stock', parseInt(formData.stock))
+  //   productData.append('product_summary', formData.summary)
+  //   productData.append('product_description', formData.description)
+  //   productData.append('SKU', formData.sku)
+  //   productData.append('brand', formData.brand)
+  //   productData.append('category', formData.category)
+
+  //   if (formData.thumbnail) {
+  //     productData.append('product_thumbnail', formData.thumbnail)
+  //   }
+
+  //   if (formData.gallery.length > 0) {
+  //     Array.from(formData.gallery).forEach((file) => {
+  //       productData.append('product_gallery', file)
+  //     })
+  //   }
+
+  //   if (formData.video) {
+  //     productData.append('product_video', formData.video)
+  //   }
+
+  //   try {
+  //     const response = await updateProducts(productId, productData)
+
+  //     // Check if the response indicates success
+  //     if (!response || response.error) {
+  //       throw new Error(response?.message || 'Failed to update product')
+  //     }
+
+  //     toast.success('Product updated successfully!')
+  //     onUpdate() // Refresh data if needed
+  //     close()
+
+  //     // Only navigate if update was truly successful
+  //     router.push('/admin/products')
+  //   } catch (error) {
+  //     console.error('Update error:', error)
+  //     toast.error(error.message || 'Failed to update product.')
+  //   }
+  // }
+
+  // new submit
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -189,21 +293,54 @@ const EditProductPage = ({ productId, onUpdate }) => {
     productData.append('brand', formData.brand)
     productData.append('category', formData.category)
 
+    // Handle thumbnail
     if (formData.thumbnail) {
+      // If new thumbnail is uploaded
       productData.append('product_thumbnail', formData.thumbnail)
+    } else if (thumbnailPreview) {
+      // If using existing thumbnail
+      productData.append('existing_thumbnail', thumbnailPreview)
     }
 
-    if (formData.gallery.length > 0) {
+    // Handle gallery images
+    // 1. First handle existing gallery images
+    if (galleryPreview && galleryPreview.length > 0) {
+      // Filter to get only string URLs (existing images)
+      const existingGalleryUrls = galleryPreview.filter(
+        (url) => typeof url === 'string'
+      )
+      if (existingGalleryUrls.length > 0) {
+        // Send existing gallery images as a JSON array of URLs
+        productData.append(
+          'existing_gallery',
+          JSON.stringify(existingGalleryUrls)
+        )
+      }
+    }
+
+    // 2. Handle new gallery images (binary files)
+    if (formData.gallery && formData.gallery.length > 0) {
+      // Send each new gallery image as a separate file in the FormData
       Array.from(formData.gallery).forEach((file) => {
         productData.append('product_gallery', file)
       })
     }
 
+    // Handle video
     if (formData.video) {
+      // If new video is uploaded
       productData.append('product_video', formData.video)
+    } else if (videoPreview) {
+      // If using existing video
+      productData.append('existing_video', videoPreview)
+    } else {
+      // If no video (explicitly set to null)
+      productData.append('product_video', null)
     }
 
     try {
+      const loadingToast = toast.loading('Updating product...')
+
       const response = await updateProducts(productId, productData)
 
       // Check if the response indicates success
@@ -211,11 +348,9 @@ const EditProductPage = ({ productId, onUpdate }) => {
         throw new Error(response?.message || 'Failed to update product')
       }
 
+      toast.dismiss(loadingToast)
       toast.success('Product updated successfully!')
-      onUpdate() // Refresh data if needed
-      close()
-
-      // Only navigate if update was truly successful
+      onUpdate?.()
       router.push('/admin/products')
     } catch (error) {
       console.error('Update error:', error)
@@ -223,12 +358,62 @@ const EditProductPage = ({ productId, onUpdate }) => {
     }
   }
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        // Reset all preview states before loading new data
+        setThumbnailPreview(null)
+        setGalleryPreview([])
+        setVideoPreview(null)
+
+        const data = await getProductsById(productId)
+
+        // Extract gallery image URLs from the response
+        const galleryUrls = data.gallery?.map((item) => item.image) || []
+
+        setFormData({
+          name: data.product_name || '',
+          reference: data.reference || '',
+          summary: data.product_summary || '',
+          regularPrice: data.regular_price || '',
+          salePrice: data.sale_price || '',
+          saleQuantity: data.sale_quantity || '',
+          soldItems: data.sold_items || '',
+          stock: data.stock || '',
+          description: data.product_description || '',
+          thumbnail: null,
+          gallery: [],
+          video: null,
+          sku: data.SKU || '',
+          brand: data.brand?.toString() || '',
+          category: data.category?.toString() || '',
+        })
+
+        // Set previews for existing media
+        if (data.product_thumbnail) {
+          setThumbnailPreview(data.product_thumbnail)
+        }
+
+        if (galleryUrls.length > 0) {
+          setGalleryPreview(galleryUrls)
+        }
+
+        if (data.product_video) {
+          setVideoPreview(data.product_video)
+        }
+      } catch (err) {
+        toast.error('Failed to fetch product')
+        console.error(err)
+      }
+    }
+
+    fetchProduct()
+    fetchAllCategories()
+    fetchBrandsData()
+  }, [productId])
+
   return (
     <>
-      {/* <HeaderDashboard
-        title="Edit Product"
-        description="Update product details"
-      /> */}
       <Toaster
         position="top-center"
         toastOptions={{
@@ -416,13 +601,15 @@ const EditProductPage = ({ productId, onUpdate }) => {
                   </div>
                   {thumbnailPreview && (
                     <div className="preview-container mt-3">
-                      <div className="image-preview">
-                        <img
-                          src={thumbnailPreview}
-                          alt="Thumbnail preview"
-                          className="img-thumbnail"
-                        />
-                      </div>
+                      <img
+                        src={
+                          typeof thumbnailPreview === 'string'
+                            ? thumbnailPreview
+                            : URL.createObjectURL(thumbnailPreview)
+                        }
+                        alt="Thumbnail preview"
+                        className="img-thumbnail"
+                      />
                     </div>
                   )}
                 </div>
@@ -459,7 +646,11 @@ const EditProductPage = ({ productId, onUpdate }) => {
                             key={index}
                           >
                             <img
-                              src={src}
+                              src={
+                                typeof src === 'string'
+                                  ? src
+                                  : URL.createObjectURL(src)
+                              }
                               alt={`Gallery preview ${index}`}
                               className="img-thumbnail w-100"
                               style={{ height: '80px', objectFit: 'cover' }}
@@ -502,8 +693,16 @@ const EditProductPage = ({ productId, onUpdate }) => {
                         controls
                         className="img-thumbnail w-100"
                         style={{ maxHeight: '200px' }}
+                        key={videoPreview} // Add a key to force re-render when preview changes
                       >
-                        <source src={videoPreview} type="video/mp4" />
+                        <source
+                          src={
+                            typeof videoPreview === 'string'
+                              ? videoPreview
+                              : URL.createObjectURL(videoPreview)
+                          }
+                          type="video/mp4"
+                        />
                         Your browser does not support the video tag.
                       </video>
                     </div>
@@ -561,14 +760,18 @@ const EditProductPage = ({ productId, onUpdate }) => {
 
         {/* Bottom buttons - always visible */}
         <div className="ps-form__bottom mt-4">
-          <button
+          {/* <button
             type="button"
             className="ps-btn ps-btn--black"
             onClick={() => router.push('/admin/products')}
           >
             Back
-          </button>
-          <button type="button" className="ps-btn ps-btn--gray">
+          </button> */}
+          <button
+            type="button"
+            className="ps-btn ps-btn--gray"
+            onClick={handleClose}
+          >
             Cancel
           </button>
           <button type="submit" className="ps-btn">
