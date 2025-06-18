@@ -6,9 +6,12 @@ import Image from 'next/image'
 import { FaBars } from 'react-icons/fa'
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'
 import { PTflag, USflag } from '@/assets/icons/index'
-import { getAllCategories } from '@/apis/products'
+import { getAllCategories, getAllProducts } from '@/apis/products'
+import useProductsStore from '@/store/productsStore'
+import { useRouter } from 'next/navigation'
 
 export default function BottomNavbar() {
+  const router = useRouter()
   const [categories, setCategories] = useState({
     count: 0,
     next: null,
@@ -18,10 +21,18 @@ export default function BottomNavbar() {
   const [expandedCategory, setExpandedCategory] = useState(null)
   const [expandedSubcategory, setExpandedSubcategory] = useState(null)
 
+  // Get the store functions
+  const {
+    setCategories: setStoreCategories,
+    setSelectedCategory,
+    fetchFilteredProducts,
+  } = useProductsStore()
+
   const fetchData = async (page = 1, search = '') => {
     try {
       const response = await getAllCategories(page, search)
       setCategories(response)
+      setStoreCategories(response.results || []) // Also update the store
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     }
@@ -42,6 +53,21 @@ export default function BottomNavbar() {
     )
   }
 
+  // Handle category selection
+  const handleCategorySelect = async (categoryId, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Update the store with the selected category
+    setSelectedCategory(categoryId)
+
+    // Fetch products with the selected category
+    await fetchFilteredProducts(getAllProducts)
+
+    // Navigate to the category page with the category parameter
+    router.push(`/categoryById?category=${categoryId}`)
+  }
+
   return (
     <div className="bg-[var(--primary)] text-[var(--White)] text-sm relative z-50">
       <nav className="Container flex items-center justify-between py-2">
@@ -59,7 +85,11 @@ export default function BottomNavbar() {
             {categories.results.map((category) => (
               <li key={category.id} className="relative">
                 <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
-                  <Link href={`/category`} className="flex-grow">
+                  <Link
+                    href={`/category?category=${category.id}`}
+                    className="flex-grow"
+                    onClick={(e) => handleCategorySelect(category.id, e)}
+                  >
                     {category.name}
                   </Link>
                   {category.sub_categories?.length > 0 && (
@@ -88,7 +118,13 @@ export default function BottomNavbar() {
                       {category.sub_categories.map((subcategory) => (
                         <li key={subcategory.id} className="relative">
                           <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
-                            <Link href={`/category`} className="flex-grow">
+                            <Link
+                              href={`/category?category=${subcategory.id}`}
+                              className="flex-grow"
+                              onClick={(e) =>
+                                handleCategorySelect(subcategory.id, e)
+                              }
+                            >
                               {subcategory.name}
                             </Link>
                             {subcategory.children?.length > 0 && (
@@ -118,8 +154,11 @@ export default function BottomNavbar() {
                                 {subcategory.children.map((child) => (
                                   <li key={child.id}>
                                     <Link
-                                      href={`/category`}
+                                      href={`/category?category=${child.id}`}
                                       className="block hover:bg-[var(--lightGray)] px-3 py-1"
+                                      onClick={(e) =>
+                                        handleCategorySelect(child.id, e)
+                                      }
                                     >
                                       {child.name}
                                     </Link>

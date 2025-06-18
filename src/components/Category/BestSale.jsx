@@ -5,11 +5,15 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import ProductCardStar from '@/ui/ProductCardStar'
 import { getAllProducts } from '@/apis/products'
 import Pagination from '../SuperAdmin/elements/basic/Pagination'
+import useProductsStore from '@/store/productsStore'
 
 const BestSale = () => {
   const [startIndex, setStartIndex] = useState(0)
-    const [currentPage, setCurrentPage] = useState(1)
-  
+  const [currentPage, setCurrentPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+
+  // Get the selected category from the Zustand store
+  const { selectedCategory, products } = useProductsStore()
 
   const [productsData, setProductsData] = useState({
     count: 0,
@@ -17,46 +21,44 @@ const BestSale = () => {
     previous: null,
     results: [],
   })
-  console.log(productsData, 'final products')
-
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       const response = await getAllProducts()
-  //       setProductsData(response)
-  //     } catch (error) {
-  //       console.error('Error fetching products:', error)
-  //     }
-  //   }
-
-  //   fetchProducts()
-  // }, [])
 
   const fetchData = async (
-      page = 1,
-      search = '',
-      brand = '',
-      category = '',
-      status = ''
-    ) => {
-      try {
-        const response = await getAllProducts(
-          page,
-          search,
-          brand,
-          category,
-          status
-        )
-        setProductsData(response)
-        setCurrentPage(page)
-      } catch (error) {
-        toast.error('Failed to fetch products')
-      }
+    page = 1,
+    search = '',
+    brand = '',
+    category = selectedCategory || '',
+    status = ''
+  ) => {
+    try {
+      setLoading(true)
+      const response = await getAllProducts(
+        page,
+        search,
+        brand,
+        category,
+        status
+      )
+      setProductsData(response)
+      setCurrentPage(page)
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    } finally {
+      setLoading(false)
     }
-  
-    useEffect(() => {
+  }
+
+  // Fetch products when selectedCategory changes
+  useEffect(() => {
+    fetchData(1, '', '', selectedCategory || '')
+  }, [selectedCategory])
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    if (!selectedCategory) {
       fetchData()
-    }, [])
+    }
+  }, [])
+
   const itemsPerPage = 5
 
   const handlePrev = () => {
@@ -75,22 +77,19 @@ const BestSale = () => {
     startIndex,
     startIndex + itemsPerPage
   )
+
   const handlePageChange = (page) => {
-      fetchData(page)
-    }
-  
-    const totalPages = Math.ceil(productsData.count / 10)
-  
-    useEffect(() => {
-      fetchData()
-    }, [])
+    fetchData(page, '', '', selectedCategory || '')
+  }
+
+  const totalPages = Math.ceil(productsData.count / 10)
 
   return (
     <div className="hidden xl:block w-full ml-4 py-5">
       {/* Header */}
-      <div className=" flex justify-between items-center border-b border-[var(--lightGray4)] mb-4">
+      <div className="flex justify-between items-center border-b border-[var(--lightGray4)] mb-4">
         <h1 className="text-lg text-[var(--darkGray4)] font-semibold">
-          Mais Vendidos
+          {selectedCategory ? 'Produtos da Categoria' : 'Mais Vendidos'}
         </h1>
 
         {/* Arrows */}
@@ -98,49 +97,64 @@ const BestSale = () => {
           <button
             onClick={handlePrev}
             disabled={startIndex === 0}
-            className=" p-2 rounded-full disabled:opacity-50"
+            className="p-2 rounded-full disabled:opacity-50"
           >
             <FaChevronLeft />
           </button>
           <button
             onClick={handleNext}
             disabled={startIndex + itemsPerPage >= productsData.results.length}
-            className=" p-2 rounded-full disabled:opacity-50"
+            className="p-2 rounded-full disabled:opacity-50"
           >
             <FaChevronRight />
           </button>
         </div>
       </div>
 
-      {/* Product grid */}
-      <div className="grid grid-cols-5 gap-4">
-        {visibleProducts.map((product, index) => (
-          <ProductCardStar
-            key={product.id || index}
-            productId={product.id}
-            image={product.product_thumbnail}
-            brand={product.brand}
-            title={product.product_name}
-            price={product.regular_price + '€'}
-            sold={product.sold_items}
-            discount={calculateDiscount(
-              product.regular_price,
-              product.sale_price
+      {/* Loading state */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--secondary)]"></div>
+        </div>
+      ) : (
+        <>
+          {/* Product grid */}
+          <div className="grid grid-cols-5 gap-4">
+            {visibleProducts.length > 0 ? (
+              visibleProducts.map((product, index) => (
+                <ProductCardStar
+                  key={product.id || index}
+                  productId={product.id}
+                  image={product.product_thumbnail}
+                  brand={product.brand}
+                  title={product.product_name}
+                  price={product.regular_price + '€'}
+                  sold={product.sold_items}
+                  discount={calculateDiscount(
+                    product.regular_price,
+                    product.sale_price
+                  )}
+                />
+              ))
+            ) : (
+              <div className="col-span-5 text-center py-10 text-gray-500">
+                Nenhum produto encontrado para esta categoria.
+              </div>
             )}
-          />
-        ))}
-      </div>
-      <div className="ps-section__footer">
-        {/* <p>
-          Mostrar {productsData.results.length} de {productsData.count}{' '}
-          Produtos.
-        </p> */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
+          </div>
+
+          {/* Pagination */}
+          {productsData.results.length > 0 && (
+            <div className="ps-section__footer mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

@@ -157,6 +157,10 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
     }
   }
 
+  const handleClose = () => {
+    if (onSuccess) onSuccess()
+  }
+
   return (
     <form className="ps-form ps-form--new" onSubmit={handleSubmit}>
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
@@ -253,6 +257,9 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
         </button>
         <button type="submit" className="ps-btn ps-btn--submit">
           Add
+        </button>
+        <button onClick={handleClose} className="ps-btn ps-btn--gray">
+          Cancel
         </button>
       </div>
 
