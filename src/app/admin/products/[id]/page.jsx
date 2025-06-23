@@ -39,7 +39,6 @@ const EditProductPage = ({ productId, onUpdate }) => {
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
   const [activeTab, setActiveTab] = useState('general')
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const fetchAllCategories = async () => {
     try {
@@ -76,11 +75,8 @@ const EditProductPage = ({ productId, onUpdate }) => {
 
     setFormData((prev) => ({ ...prev, thumbnail: file }))
 
-    // Create preview
     const reader = new FileReader()
-    reader.onload = () => {
-      setThumbnailPreview(reader.result)
-    }
+    reader.onload = () => setThumbnailPreview(reader.result)
     reader.readAsDataURL(file)
   }
 
@@ -88,7 +84,6 @@ const EditProductPage = ({ productId, onUpdate }) => {
     const files = e.target.files
     if (!files.length) return
 
-    // Limit to 4 images
     const selectedFiles = Array.from(files).slice(0, 4 - galleryPreview.length)
     if (selectedFiles.length === 0) {
       toast.error('You can upload a maximum of 4 images')
@@ -100,7 +95,6 @@ const EditProductPage = ({ productId, onUpdate }) => {
       gallery: [...prev.gallery, ...selectedFiles],
     }))
 
-    // Create previews
     const newPreviews = []
     selectedFiles.forEach((file) => {
       const reader = new FileReader()
@@ -117,10 +111,8 @@ const EditProductPage = ({ productId, onUpdate }) => {
   const removeGalleryImage = (index) => {
     const newGallery = [...formData.gallery]
     const newPreviews = [...galleryPreview]
-
     newGallery.splice(index, 1)
     newPreviews.splice(index, 1)
-
     setFormData((prev) => ({ ...prev, gallery: newGallery }))
     setGalleryPreview(newPreviews)
   }
@@ -129,147 +121,18 @@ const EditProductPage = ({ productId, onUpdate }) => {
     const file = e.target.files[0]
     if (!file) return
 
-    // Clear any existing preview first
     setVideoPreview(null)
-
     setFormData((prev) => ({ ...prev, video: file }))
 
-    // Create preview
     const reader = new FileReader()
-    reader.onload = () => {
-      setVideoPreview(reader.result)
-    }
+    reader.onload = () => setVideoPreview(reader.result)
     reader.readAsDataURL(file)
   }
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault()
-
-  //   if (!formData.name || !formData.reference || !formData.regularPrice) {
-  //     toast.error('Please fill all required fields.')
-  //     return
-  //   }
-
-  //   const productData = new FormData()
-  //   productData.append('product_name', formData.name)
-  //   productData.append('reference', formData.reference)
-  //   productData.append('regular_price', parseFloat(formData.regularPrice))
-  //   productData.append('sale_price', parseFloat(formData.salePrice))
-  //   productData.append('sale_quantity', parseInt(formData.saleQuantity))
-  //   productData.append('sold_items', parseInt(formData.soldItems))
-  //   productData.append('stock', parseInt(formData.stock))
-  //   productData.append('product_summary', formData.summary)
-  //   productData.append('product_description', formData.description)
-  //   productData.append('SKU', formData.sku)
-  //   productData.append('brand', formData.brand)
-  //   productData.append('category', formData.category)
-
-  //   // Handle thumbnail
-  //   if (formData.thumbnail) {
-  //     productData.append('product_thumbnail', formData.thumbnail)
-  //   } else if (thumbnailPreview && typeof thumbnailPreview === 'string') {
-  //     // Keep existing thumbnail if not changed
-  //     productData.append('product_thumbnail', thumbnailPreview)
-  //   }
-
-  //   // Handle gallery images
-  //   if (formData.gallery.length > 0) {
-  //     formData.gallery.forEach((file) => {
-  //       productData.append('product_gallery', file)
-  //     })
-  //   } else if (galleryPreview.length > 0) {
-  //     // Keep existing gallery images if not changed
-  //     galleryPreview.forEach((url) => {
-  //       if (typeof url === 'string') {
-  //         productData.append('product_gallery', url)
-  //       }
-  //     })
-  //   }
-
-  //   // Handle video
-  //   if (formData.video) {
-  //     productData.append('product_video', formData.video)
-  //   } else if (videoPreview && typeof videoPreview === 'string') {
-  //     // Keep existing video if not changed
-  //     productData.append('product_video', videoPreview)
-  //   }
-
-  //   try {
-  //     const loadingToast = toast.loading('Updating product...')
-
-  //     const response = await updateProducts(productId, productData)
-
-  //     if (!response || response.error) {
-  //       throw new Error(response?.message || 'Failed to update product')
-  //     }
-
-  //     toast.dismiss(loadingToast)
-  //     toast.success('Product updated successfully!')
-  //     onUpdate?.()
-  //     handleClose()
-  //   } catch (error) {
-  //     console.error('Update error:', error)
-  //     toast.error(error.message || 'Failed to update product.')
-  //   }
-  // }
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault()
-
-  //   if (!formData.name || !formData.reference || !formData.regularPrice) {
-  //     toast.error('Please fill all required fields.')
-  //     return
-  //   }
-
-  //   const productData = new FormData()
-  //   productData.append('product_name', formData.name)
-  //   productData.append('reference', formData.reference)
-  //   productData.append('regular_price', parseFloat(formData.regularPrice))
-  //   productData.append('sale_price', parseFloat(formData.salePrice))
-  //   productData.append('sale_quantity', parseInt(formData.saleQuantity))
-  //   productData.append('sold_items', parseInt(formData.soldItems))
-  //   productData.append('stock', parseInt(formData.stock))
-  //   productData.append('product_summary', formData.summary)
-  //   productData.append('product_description', formData.description)
-  //   productData.append('SKU', formData.sku)
-  //   productData.append('brand', formData.brand)
-  //   productData.append('category', formData.category)
-
-  //   if (formData.thumbnail) {
-  //     productData.append('product_thumbnail', formData.thumbnail)
-  //   }
-
-  //   if (formData.gallery.length > 0) {
-  //     Array.from(formData.gallery).forEach((file) => {
-  //       productData.append('product_gallery', file)
-  //     })
-  //   }
-
-  //   if (formData.video) {
-  //     productData.append('product_video', formData.video)
-  //   }
-
-  //   try {
-  //     const response = await updateProducts(productId, productData)
-
-  //     // Check if the response indicates success
-  //     if (!response || response.error) {
-  //       throw new Error(response?.message || 'Failed to update product')
-  //     }
-
-  //     toast.success('Product updated successfully!')
-  //     onUpdate() // Refresh data if needed
-  //     close()
-
-  //     // Only navigate if update was truly successful
-  //     router.push('/admin/products')
-  //   } catch (error) {
-  //     console.error('Update error:', error)
-  //     toast.error(error.message || 'Failed to update product.')
-  //   }
-  // }
-
-  // new submit
+  const removeVideo = () => {
+    setFormData((prev) => ({ ...prev, video: null }))
+    setVideoPreview(null)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -283,67 +146,50 @@ const EditProductPage = ({ productId, onUpdate }) => {
     productData.append('product_name', formData.name)
     productData.append('reference', formData.reference)
     productData.append('regular_price', parseFloat(formData.regularPrice))
-    productData.append('sale_price', parseFloat(formData.salePrice))
-    productData.append('sale_quantity', parseInt(formData.saleQuantity))
-    productData.append('sold_items', parseInt(formData.soldItems))
-    productData.append('stock', parseInt(formData.stock))
-    productData.append('product_summary', formData.summary)
-    productData.append('product_description', formData.description)
-    productData.append('SKU', formData.sku)
-    productData.append('brand', formData.brand)
-    productData.append('category', formData.category)
+    productData.append('sale_price', parseFloat(formData.salePrice || 0))
+    productData.append('sale_quantity', parseInt(formData.saleQuantity || 0))
+    productData.append('sold_items', parseInt(formData.soldItems || 0))
+    productData.append('stock', parseInt(formData.stock || 0))
+    productData.append('product_summary', formData.summary || '')
+    productData.append('product_description', formData.description || '')
+    productData.append('SKU', formData.sku || '')
+    productData.append('brand', formData.brand || '')
+    productData.append('category', formData.category || '')
 
     // Handle thumbnail
     if (formData.thumbnail) {
-      // If new thumbnail is uploaded
       productData.append('product_thumbnail', formData.thumbnail)
     } else if (thumbnailPreview) {
-      // If using existing thumbnail
       productData.append('existing_thumbnail', thumbnailPreview)
     }
 
-    // Handle gallery images
-    // 1. First handle existing gallery images
-    if (galleryPreview && galleryPreview.length > 0) {
-      // Filter to get only string URLs (existing images)
-      const existingGalleryUrls = galleryPreview.filter(
-        (url) => typeof url === 'string'
+    // Handle gallery
+    if (galleryPreview?.length > 0) {
+      const existingGallery = galleryPreview.filter(
+        (img) => typeof img === 'string'
       )
-      if (existingGalleryUrls.length > 0) {
-        // Send existing gallery images as a JSON array of URLs
-        productData.append(
-          'existing_gallery',
-          JSON.stringify(existingGalleryUrls)
-        )
+      if (existingGallery.length > 0) {
+        productData.append('existing_gallery', JSON.stringify(existingGallery))
       }
     }
-
-    // 2. Handle new gallery images (binary files)
-    if (formData.gallery && formData.gallery.length > 0) {
-      // Send each new gallery image as a separate file in the FormData
-      Array.from(formData.gallery).forEach((file) => {
+    if (formData.gallery?.length > 0) {
+      formData.gallery.forEach((file) => {
         productData.append('product_gallery', file)
       })
     }
 
-    // Handle video
+    // Handle video - only if exists
     if (formData.video) {
-      // If new video is uploaded
       productData.append('product_video', formData.video)
     } else if (videoPreview) {
-      // If using existing video
       productData.append('existing_video', videoPreview)
-    } else {
-      // If no video (explicitly set to null)
-      productData.append('product_video', null)
     }
+    // Don't send video field if none exists
 
     try {
       const loadingToast = toast.loading('Updating product...')
-
       const response = await updateProducts(productId, productData)
 
-      // Check if the response indicates success
       if (!response || response.error) {
         throw new Error(response?.message || 'Failed to update product')
       }
@@ -361,14 +207,11 @@ const EditProductPage = ({ productId, onUpdate }) => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        // Reset all preview states before loading new data
         setThumbnailPreview(null)
         setGalleryPreview([])
         setVideoPreview(null)
 
         const data = await getProductsById(productId)
-
-        // Extract gallery image URLs from the response
         const galleryUrls = data.gallery?.map((item) => item.image) || []
 
         setFormData({
@@ -389,18 +232,9 @@ const EditProductPage = ({ productId, onUpdate }) => {
           category: data.category?.toString() || '',
         })
 
-        // Set previews for existing media
-        if (data.product_thumbnail) {
-          setThumbnailPreview(data.product_thumbnail)
-        }
-
-        if (galleryUrls.length > 0) {
-          setGalleryPreview(galleryUrls)
-        }
-
-        if (data.product_video) {
-          setVideoPreview(data.product_video)
-        }
+        if (data.product_thumbnail) setThumbnailPreview(data.product_thumbnail)
+        if (galleryUrls.length > 0) setGalleryPreview(galleryUrls)
+        if (data.product_video) setVideoPreview(data.product_video)
       } catch (err) {
         toast.error('Failed to fetch product')
         console.error(err)
@@ -414,12 +248,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
 
   return (
     <>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 3000,
-        }}
-      />
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <form
         className="ps-form ps-form--new-product"
         onSubmit={handleSubmit}
@@ -455,14 +284,11 @@ const EditProductPage = ({ productId, onUpdate }) => {
         <div className="ps-form__content">
           {/* General Tab Content */}
           <div
-            className={`tab-pane fade ${
-              activeTab === 'general' ? 'show active' : 'd-none'
-            }`}
+            className={`tab-pane fade ${activeTab === 'general' ? 'show active' : 'd-none'}`}
           >
             <figure className="ps-block--form-box">
               <div className="ps-block__content">
                 <div className="row">
-                  {/* First Column */}
                   <div className="col-md-6">
                     <div className="form-group">
                       <label>Product Name *</label>
@@ -472,41 +298,46 @@ const EditProductPage = ({ productId, onUpdate }) => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        required
                       />
                     </div>
                     <div className="form-group">
                       <label>Regular Price *</label>
                       <input
                         className="form-control"
-                        type="text"
+                        type="number"
                         name="regularPrice"
                         value={formData.regularPrice}
                         onChange={handleChange}
+                        required
+                        min="0"
+                        step="0.01"
                       />
                     </div>
                     <div className="form-group">
                       <label>Sale Quantity</label>
                       <input
                         className="form-control"
-                        type="text"
+                        type="number"
                         name="saleQuantity"
                         value={formData.saleQuantity}
                         onChange={handleChange}
+                        min="0"
                       />
                     </div>
                     <div className="form-group">
                       <label>Stock</label>
                       <input
                         className="form-control"
-                        type="text"
+                        type="number"
                         name="stock"
                         value={formData.stock}
                         onChange={handleChange}
+                        min="0"
                       />
                     </div>
                   </div>
 
-                  {/* Second Column */}
                   <div className="col-md-6">
                     <div className="form-group">
                       <label>Reference *</label>
@@ -516,26 +347,30 @@ const EditProductPage = ({ productId, onUpdate }) => {
                         name="reference"
                         value={formData.reference}
                         onChange={handleChange}
+                        required
                       />
                     </div>
                     <div className="form-group">
                       <label>Sale Price</label>
                       <input
                         className="form-control"
-                        type="text"
+                        type="number"
                         name="salePrice"
                         value={formData.salePrice}
                         onChange={handleChange}
+                        min="0"
+                        step="0.01"
                       />
                     </div>
                     <div className="form-group">
                       <label>Sold Items</label>
                       <input
                         className="form-control"
-                        type="text"
+                        type="number"
                         name="soldItems"
                         value={formData.soldItems}
                         onChange={handleChange}
+                        min="0"
                       />
                     </div>
                     <div className="form-group">
@@ -576,9 +411,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
 
           {/* Product Images Tab Content */}
           <div
-            className={`tab-pane fade ${
-              activeTab === 'images' ? 'show active' : 'd-none'
-            }`}
+            className={`tab-pane fade ${activeTab === 'images' ? 'show active' : 'd-none'}`}
           >
             <figure className="ps-block--form-box">
               <div className="ps-block__content">
@@ -688,12 +521,11 @@ const EditProductPage = ({ productId, onUpdate }) => {
                     </label>
                   </div>
                   {videoPreview && (
-                    <div className="preview-container mt-3">
+                    <div className="preview-container mt-3 position-relative">
                       <video
                         controls
                         className="img-thumbnail w-100"
                         style={{ maxHeight: '200px' }}
-                        key={videoPreview} // Add a key to force re-render when preview changes
                       >
                         <source
                           src={
@@ -703,8 +535,15 @@ const EditProductPage = ({ productId, onUpdate }) => {
                           }
                           type="video/mp4"
                         />
-                        Your browser does not support the video tag.
                       </video>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm position-absolute top-0 end-0"
+                        style={{ transform: 'translate(30%, -30%)' }}
+                        onClick={removeVideo}
+                      >
+                        <FiX />
+                      </button>
                     </div>
                   )}
                 </div>
@@ -714,9 +553,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
 
           {/* Meta Tab Content */}
           <div
-            className={`tab-pane fade ${
-              activeTab === 'meta' ? 'show active' : 'd-none'
-            }`}
+            className={`tab-pane fade ${activeTab === 'meta' ? 'show active' : 'd-none'}`}
           >
             <figure className="ps-block--form-box">
               <div className="ps-block__content">
@@ -758,15 +595,8 @@ const EditProductPage = ({ productId, onUpdate }) => {
           </div>
         </div>
 
-        {/* Bottom buttons - always visible */}
+        {/* Bottom buttons */}
         <div className="ps-form__bottom mt-4">
-          {/* <button
-            type="button"
-            className="ps-btn ps-btn--black"
-            onClick={() => router.push('/admin/products')}
-          >
-            Back
-          </button> */}
           <button
             type="button"
             className="ps-btn ps-btn--gray"
@@ -851,11 +681,6 @@ const EditProductPage = ({ productId, onUpdate }) => {
           padding: 10px;
           border-radius: 5px;
           background: #f9f9f9;
-        }
-        .image-preview img {
-          max-width: 100%;
-          max-height: 200px;
-          display: block;
         }
         .gallery-preview {
           border: 1px solid #eee;
