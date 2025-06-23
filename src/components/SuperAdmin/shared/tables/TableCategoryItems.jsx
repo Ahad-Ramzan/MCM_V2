@@ -75,6 +75,7 @@ const TableCategoryItems = ({ categories, onDelete, onUpdate }) => {
         category={selectedCategory}
         // onUpdate={onUpdate}
         onUpdate={handleSuccessfulUpdate}
+        width={800}
       />
     </div>
   )

@@ -148,6 +148,7 @@ const CategoriesPage = () => {
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
+        width={800}
       >
         <FormCreateSubCategory
           categories={subcategories}

@@ -290,12 +290,12 @@ const EditSubCategoryModal = ({
         }
         .modal-content {
           background: #fff;
-          padding: 2rem;
-          border-radius: 8px;
-          max-width: 600px;
-          width: 100%;
+          border-radius: 12px;
+          width: 800px;
           max-height: 90vh;
           overflow-y: auto;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          padding: 30px;
         }
       `}</style>
     </div>
