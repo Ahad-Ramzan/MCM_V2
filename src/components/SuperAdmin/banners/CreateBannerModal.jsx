@@ -10,6 +10,7 @@ import toast, { Toaster } from 'react-hot-toast'
 const BannerUploadPage = ({ onSuccess }) => {
   const [imageFile, setImageFile] = useState(null)
   const [position, setPosition] = useState('')
+  const [link, setLink] = useState('') // New state for link
 
   const handleImageChange = (e) => {
     setImageFile(e.target.files[0])
@@ -17,6 +18,11 @@ const BannerUploadPage = ({ onSuccess }) => {
 
   const handlePositionChange = (e) => {
     setPosition(e.target.value)
+  }
+
+  const handleLinkChange = (e) => {
+    // New handler for link
+    setLink(e.target.value)
   }
 
   const handleBannerUpload = async () => {
@@ -29,6 +35,7 @@ const BannerUploadPage = ({ onSuccess }) => {
       const formData = new FormData()
       formData.append('image', imageFile)
       formData.append('position', position)
+      formData.append('link', link) // Add link to form data
 
       await createOrderBanner(formData)
       toast.success('Banner uploaded successfully')
@@ -36,8 +43,10 @@ const BannerUploadPage = ({ onSuccess }) => {
         onSuccess()
       }
 
+      // Reset form
       setImageFile(null)
       setPosition('')
+      setLink('')
     } catch (error) {
       toast.error('Error uploading banner')
       console.error('Error uploading banner:', error)
@@ -52,7 +61,6 @@ const BannerUploadPage = ({ onSuccess }) => {
           duration: 3000,
         }}
       />
-      {/* <h1 className="mb-4">Upload Banner</h1> */}
       <div className="card">
         <div className="card-body">
           <div className="form-group">
@@ -80,10 +88,17 @@ const BannerUploadPage = ({ onSuccess }) => {
               onChange={handlePositionChange}
               placeholder="Enter position (e.g., slider_1, top_1, home_1)"
             />
-            {/* <small className="form-text text-muted">
-              Example positions: slider_1, slider_2, slider_3, top_1, top_2,
-              home_1, home_2, home_3, footer_1, footer_2
-            </small> */}
+          </div>
+          <div className="form-group">
+            <label htmlFor="link-input">Link (Optional)</label>
+            <input
+              type="text"
+              className="form-control"
+              id="link-input"
+              value={link}
+              onChange={handleLinkChange}
+              placeholder="Enter link URL (e.g., https://example.com)"
+            />
           </div>
 
           <div className="ps-section__actions">

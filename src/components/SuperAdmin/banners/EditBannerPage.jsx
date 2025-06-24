@@ -7,18 +7,21 @@ import { toast, Toaster } from 'react-hot-toast'
 const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
   const [imageFile, setImageFile] = useState(null)
   const [position, setPosition] = useState('')
+  const [link, setLink] = useState('') // New state for link
   const [isLoading, setIsLoading] = useState(false)
 
-  // Set position from bannerData when component mounts or bannerData changes
+  // Set initial values from bannerData when component mounts or bannerData changes
   useEffect(() => {
-    if (bannerData && bannerData.position) {
-      setPosition(bannerData.position)
+    if (bannerData) {
+      if (bannerData.position) setPosition(bannerData.position)
+      if (bannerData.link) setLink(bannerData.link) // Set link from bannerData
     }
 
     // Cleanup function to reset state when component unmounts
     return () => {
       setImageFile(null)
       setPosition('')
+      setLink('')
     }
   }, [bannerData])
 
@@ -30,6 +33,11 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
     setPosition(e.target.value)
   }
 
+  const handleLinkChange = (e) => {
+    // New handler for link
+    setLink(e.target.value)
+  }
+
   const handleBannerUpdate = async () => {
     try {
       setIsLoading(true)
@@ -39,8 +47,7 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
       if (imageFile) {
         formData.append('image', imageFile)
       } else if (bannerData.image) {
-        // If no new image is selected, we need to handle the existing image
-        // Option 1: Try to fetch the existing image and append it
+        // Handle existing image if no new image is selected
         try {
           const response = await fetch(bannerData.image)
           const blob = await response.blob()
@@ -51,12 +58,12 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
           formData.append('image', existingImageFile)
         } catch (error) {
           console.error('Error fetching existing image:', error)
-          // Option 2: If fetching fails, send the image URL as a string
           formData.append('image_url', bannerData.image)
         }
       }
 
       formData.append('position', position)
+      formData.append('link', link) // Add link to form data
 
       await axios.put(
         `https://backendmcm.estelatechnologies.com/api/orders/banners/${bannerData.id}/`,
@@ -84,6 +91,7 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
     // Reset state when closing
     setImageFile(null)
     setPosition('')
+    setLink('')
     if (onClose) {
       onClose()
     }
@@ -92,7 +100,6 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
   return (
     <div className="container my-5">
       <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
-      {/* <h1 className="mb-4">Edit Banner</h1> */}
       <div className="card">
         <div className="card-body">
           <div className="form-group">
@@ -128,6 +135,17 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
               value={position}
               onChange={handlePositionChange}
               placeholder="Enter position (e.g., slider_1, top_1, home_1)"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="link-input">Link</label>
+            <input
+              type="text"
+              className="form-control"
+              id="link-input"
+              value={link}
+              onChange={handleLinkChange}
+              placeholder="Enter link URL (e.g., https://example.com)"
             />
           </div>
 

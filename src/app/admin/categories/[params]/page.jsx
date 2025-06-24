@@ -8,10 +8,14 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
   const [subCategoryIds, setSubCategoryIds] = useState([])
-  const [expanded, setExpanded] = useState({}) // { [id]: true/false }
+  const [expanded, setExpanded] = useState({})
   const [image, setImage] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
   const [allsubcategory, setAllSubCategories] = useState([])
+  // Add feature states
+  const [feature1, setFeature1] = useState(false)
+  const [feature2, setFeature2] = useState(false)
+  const [feature3, setFeature3] = useState(false)
 
   useEffect(() => {
     if (category) {
@@ -25,6 +29,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
       )
       setExpanded({})
       setImagePreview(category.image || '')
+      // Initialize feature states from category data
+      setFeature1(category.feature1 || false)
+      setFeature2(category.feature2 || false)
+      setFeature3(category.feature3 || false)
     }
   }, [category])
 
@@ -190,6 +198,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     formData.append('slug', slug)
     formData.append('description', description)
     subCategoryIds.forEach((id) => formData.append('sub_category_ids', id))
+    // Add features to form data
+    formData.append('feature1', feature1)
+    formData.append('feature2', feature2)
+    formData.append('feature3', feature3)
 
     if (image) {
       formData.append('image', image)
@@ -262,7 +274,43 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
             </div>
           </div>
 
-          {/* Subcategories with checkboxes and arrows - using allsubcategory */}
+          {/* Add Feature Checkboxes Section */}
+          <div className="form-group">
+            <label>Features</label>
+            <div className="feature-checkboxes">
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={feature1}
+                    onChange={(e) => setFeature1(e.target.checked)}
+                  />
+                  <span>Feature 1</span>
+                </label>
+              </div>
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={feature2}
+                    onChange={(e) => setFeature2(e.target.checked)}
+                  />
+                  <span>Feature 2</span>
+                </label>
+              </div>
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={feature3}
+                    onChange={(e) => setFeature3(e.target.checked)}
+                  />
+                  <span>Feature 3</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className="form-group">
             <div className="subcategory-header">
               <label>Select Sub Category</label>
@@ -398,6 +446,28 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           border-radius: 8px;
           object-fit: cover;
           border: 1px solid #ddd;
+        }
+        /* Feature checkboxes styles */
+        .feature-checkboxes {
+          border: 1px solid #e5e5e5;
+          padding: 15px;
+          border-radius: 5px;
+        }
+        .feature-item {
+          margin-bottom: 10px;
+        }
+        .feature-item:last-child {
+          margin-bottom: 0;
+        }
+        .feature-item label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+        }
+        .feature-item input[type='checkbox'] {
+          width: 16px;
+          height: 16px;
         }
       `}</style>
     </div>
