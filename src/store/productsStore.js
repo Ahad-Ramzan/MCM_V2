@@ -5,13 +5,19 @@ const useProductsStore = create((set) => ({
   brands: [],
   categories: [],
   selectedCategory: null,
+  selectedCategoryName: '',
   selectedBrand: null,
   priceRange: [0, 10000],
 
   setProducts: (data) => set({ products: data }),
   setBrands: (data) => set({ brands: data }),
   setCategories: (data) => set({ categories: data }),
-  setSelectedCategory: (categoryId) => set({ selectedCategory: categoryId }),
+  setSelectedCategory: (categoryId, categoryName) =>
+    set({
+      selectedCategory: categoryId,
+      selectedCategoryName: categoryName || '',
+    }),
+
   setSelectedBrand: (brandId) => set({ selectedBrand: brandId }),
   setPriceRange: (range) => set({ priceRange: range }),
 

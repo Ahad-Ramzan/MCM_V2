@@ -5,8 +5,6 @@ import { ProductInfoTabs } from '@/components/Product/product-info-tabs'
 import ProductDetails from '@/components/Product/ProductDetails'
 import RightSideBar from '@/components/Product/RightSideBar'
 import React, { useEffect, useState } from 'react'
-// import { useRouter } from '../../../../node_modules/next/router'
-// import { useParams } from '../../../../node_modules/next/navigation'
 import { useParams, useRouter } from 'next/navigation'
 
 export default function Product() {
@@ -14,39 +12,38 @@ export default function Product() {
   const params = useParams()
   const productId = params.id
   const [productData, setProductsData] = useState(null)
-  console.log(productData)
-  console.log(productId, 'productId------test')
+
+  useEffect(() => {
+    if (productData?.product_name) {
+      document.title = `'${productData.product_name}' - MCM - Materiais Construção`
+    }
+  }, [productData?.product_name])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getProductsById(productId)
-        console.log(response, 'respnse------------------------')
-        console.log(response, 'ressprod')
-        setProductsData(response) // Store in state
+        setProductsData(response)
       } catch (error) {
-        console.error('Failed to fetch categories:', error)
+        console.error('Failed to fetch product:', error)
       }
     }
-
     if (productId) {
       fetchData()
     }
-  }, [])
+  }, [productId])
+
   return (
     <div>
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
           { label: 'Categorea', href: '/' },
-          { label: 'Placa de Gesso' }, // No href means current page
+          { label: productData?.product_name || 'Placa de Gesso' },
         ]}
       />
-
       <div className="Container flex  flex-col lg:flex-row w-full mt-20 ">
-        {/* Main Content Area */}
         <div className="flex-1 p-4">
-          {/* Your product list, filter, header etc. goes here */}
           {productData && <ProductDetails productData={productData} />}
           {productData && <ProductInfoTabs productData={productData} />}
         </div>
