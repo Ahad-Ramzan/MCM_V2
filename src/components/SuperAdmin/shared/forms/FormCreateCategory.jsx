@@ -11,6 +11,8 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
   const [expandedNodes, setExpandedNodes] = useState({})
   const [image, setImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  // New feature states
+  const [selectedFeature, setSelectedFeature] = useState(null)
 
   const toggleExpand = (id) => {
     setExpandedNodes((prev) => ({
@@ -133,14 +135,18 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
     formData.append('name', name)
     formData.append('slug', slug)
     formData.append('description', description)
-    formData.append('image', image)
+    if (image) formData.append('image', image)
     selectedSubCategoryIds.forEach((id) =>
       formData.append('sub_category_ids', id)
     )
-
+    // Add features to form data
+    if (selectedFeature) {
+      formData.append('feature', selectedFeature) // Sends 'feature1', 'feature2' or 'feature3'
+    }
     try {
       await createCategory(formData)
       toast.success('Category created successfully!')
+      // Reset form
       setName('')
       setSlug('')
       setDescription('')
@@ -148,6 +154,7 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
       setExpandedNodes({})
       setImage(null)
       setImagePreview(null)
+      setSelectedFeature(null)
 
       if (onSuccess) {
         onSuccess()
@@ -226,6 +233,46 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
           </div>
         </div>
 
+        {/* New Feature Checkboxes */}
+        <div className="form-group">
+          <label>Features</label>
+          <div className="feature-checkboxes">
+            <div className="feature-item">
+              <label>
+                <input
+                  type="radio"
+                  name="feature"
+                  checked={selectedFeature === 'feature1'}
+                  onChange={() => setSelectedFeature('feature1')}
+                />
+                <span>Feature 1</span>
+              </label>
+            </div>
+            <div className="feature-item">
+              <label>
+                <input
+                  type="radio"
+                  name="feature"
+                  checked={selectedFeature === 'feature2'}
+                  onChange={() => setSelectedFeature('feature2')}
+                />
+                <span>Feature 2</span>
+              </label>
+            </div>
+            <div className="feature-item">
+              <label>
+                <input
+                  type="radio"
+                  name="feature"
+                  checked={selectedFeature === 'feature3'}
+                  onChange={() => setSelectedFeature('feature3')}
+                />
+                <span>Feature 3</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div className="form-group">
           <label>Select Sub-Categories</label>
           <div
@@ -251,6 +298,9 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
             setDescription('')
             setSelectedSubCategoryIds([])
             setExpandedNodes({})
+            setFeature1(false)
+            setFeature2(false)
+            setFeature3(false)
           }}
         >
           Clean
@@ -302,6 +352,33 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
           border-radius: 8px;
           object-fit: cover;
           border: 1px solid #ddd;
+        }
+
+        /* New feature checkboxes styles */
+        .feature-checkboxes {
+          border: 1px solid #e5e5e5;
+          padding: 15px;
+          border-radius: 5px;
+        }
+
+        .feature-item {
+          margin-bottom: 10px;
+        }
+
+        .feature-item:last-child {
+          margin-bottom: 0;
+        }
+
+        .feature-item label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+        }
+
+        .feature-item input[type='checkbox'] {
+          width: 16px;
+          height: 16px;
         }
       `}</style>
     </form>

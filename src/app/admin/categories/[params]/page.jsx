@@ -8,25 +8,12 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
   const [subCategoryIds, setSubCategoryIds] = useState([])
-  const [expanded, setExpanded] = useState({}) // { [id]: true/false }
+  const [expanded, setExpanded] = useState({})
   const [image, setImage] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
   const [allsubcategory, setAllSubCategories] = useState([])
-
-  useEffect(() => {
-    if (category) {
-      setName(category.name || '')
-      setSlug(category.slug || '')
-      setDescription(category.description || '')
-      setSubCategoryIds(
-        category.sub_categories
-          ? category.sub_categories.map((sc) => sc.id)
-          : []
-      )
-      setExpanded({})
-      setImagePreview(category.image || '')
-    }
-  }, [category])
+  // Add feature states
+  const [selectedFeature, setSelectedFeature] = useState(null)
 
   // Fetch all subcategories when component mounts
   useEffect(() => {
@@ -190,6 +177,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     formData.append('slug', slug)
     formData.append('description', description)
     subCategoryIds.forEach((id) => formData.append('sub_category_ids', id))
+    // Add features to form data
+    if (selectedFeature) {
+      formData.append('feature', selectedFeature)
+    }
 
     if (image) {
       formData.append('image', image)
@@ -204,6 +195,32 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
       toast.error('Failed to Update Category.')
     }
   }
+
+  useEffect(() => {
+    if (category) {
+      setName(category.name || '')
+      setSlug(category.slug || '')
+      setDescription(category.description || '')
+      setSubCategoryIds(
+        category.sub_categories
+          ? category.sub_categories.map((sc) => sc.id)
+          : []
+      )
+      setExpanded({})
+      setImagePreview(category.image || '')
+
+      // Determine which feature is currently set (if any)
+      if (category.feature === 'feature1') {
+        setSelectedFeature('feature1')
+      } else if (category.feature === 'feature2') {
+        setSelectedFeature('feature2')
+      } else if (category.feature === 'feature3') {
+        setSelectedFeature('feature3')
+      } else {
+        setSelectedFeature(null)
+      }
+    }
+  }, [category])
 
   if (!isOpen) return null
 
@@ -262,7 +279,46 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
             </div>
           </div>
 
-          {/* Subcategories with checkboxes and arrows - using allsubcategory */}
+          {/* Add Feature Checkboxes Section */}
+          <div className="form-group">
+            <label>Features</label>
+            <div className="feature-checkboxes">
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === 'feature1'}
+                    onChange={() => setSelectedFeature('feature1')}
+                  />
+                  <span>Feature 1</span>
+                </label>
+              </div>
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === 'feature2'}
+                    onChange={() => setSelectedFeature('feature2')}
+                  />
+                  <span>Feature 2</span>
+                </label>
+              </div>
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === 'feature3'}
+                    onChange={() => setSelectedFeature('feature3')}
+                  />
+                  <span>Feature 3</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className="form-group">
             <div className="subcategory-header">
               <label>Select Sub Category</label>
@@ -398,6 +454,27 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           border-radius: 8px;
           object-fit: cover;
           border: 1px solid #ddd;
+        }
+        .feature-checkboxes {
+          border: 1px solid #e5e5e5;
+          padding: 15px;
+          border-radius: 5px;
+        }
+        .feature-item {
+          margin-bottom: 10px;
+        }
+        .feature-item:last-child {
+          margin-bottom: 0;
+        }
+        .feature-item label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+        }
+        .feature-item input[type='radio'] {
+          width: 16px;
+          height: 16px;
         }
       `}</style>
     </div>
