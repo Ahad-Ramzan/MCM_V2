@@ -9,12 +9,10 @@ const Sliderhome = () => {
   const [mounted, setMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Handle mounting for hydration
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Filter and sort slider images from banners
   const sliderImages = banners
     .filter((banner) => banner.position.startsWith('slider_'))
     .sort((a, b) => {
@@ -23,7 +21,6 @@ const Sliderhome = () => {
       return aNum - bNum
     })
 
-  // Get top banners
   const topBanner1 = banners.find((banner) => banner.position === 'top_1')
   const topBanner2 = banners.find((banner) => banner.position === 'top_2')
 
@@ -44,7 +41,7 @@ const Sliderhome = () => {
       setIsLoading(true)
       const response = await getbanner()
       setBanners(response.results || [])
-      setCurrent(0) // Reset to first slide
+      setCurrent(0)
     } catch (error) {
       console.error('Error fetching banners:', error)
       setBanners([])
@@ -59,7 +56,6 @@ const Sliderhome = () => {
     }
   }, [mounted])
 
-  // Auto-rotate slides
   useEffect(() => {
     if (totalSlides > 1 && mounted && !isLoading) {
       const interval = setInterval(() => {
@@ -69,7 +65,6 @@ const Sliderhome = () => {
     }
   }, [totalSlides, mounted, isLoading])
 
-  // Don't render until mounted (prevents hydration error)
   if (!mounted) {
     return null
   }
@@ -80,18 +75,15 @@ const Sliderhome = () => {
         {/* Main Slider */}
         <div className="w-full xl:w-2/3 bg-gray-100 h-[400px] relative overflow-hidden">
           {isLoading ? (
-            // Loading state
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
           ) : totalSlides === 0 ? (
-            // No slides available
             <div className="flex items-center justify-center h-full text-gray-500">
               No slider images available
             </div>
           ) : (
             <>
-              {/* Left arrow - Only show if more than 1 slide */}
               {totalSlides > 1 && (
                 <button
                   onClick={handlePrev}
@@ -102,22 +94,26 @@ const Sliderhome = () => {
                 </button>
               )}
 
-              {/* Slide Content */}
               <div className="relative w-full h-full">
-                {/* Background Image */}
                 {sliderImages[current]?.image && (
-                  <img
-                    src={sliderImages[current].image}
-                    alt={`Slider ${current + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                    }}
-                  />
+                  <a
+                    href={sliderImages[current]?.link || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full h-full"
+                  >
+                    <img
+                      src={sliderImages[current].image}
+                      alt={`Slider ${current + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none'
+                      }}
+                    />
+                  </a>
                 )}
               </div>
 
-              {/* Right arrow - Only show if more than 1 slide */}
               {totalSlides > 1 && (
                 <button
                   onClick={handleNext}
@@ -128,7 +124,6 @@ const Sliderhome = () => {
                 </button>
               )}
 
-              {/* Slide Indicators - Only show if more than 1 slide */}
               {totalSlides > 1 && (
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
                   {sliderImages.map((_, index) => (
@@ -155,9 +150,13 @@ const Sliderhome = () => {
 
         {/* Right-side banners */}
         <div className="flex xl:flex-col w-full xl:w-1/3 gap-4">
-          {/* Top 1 Banner */}
           {!isLoading && topBanner1?.image && (
-            <div className="h-[190px] w-full relative overflow-hidden bg-gray-100">
+            <a
+              href={topBanner1?.link || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-[190px] w-full relative overflow-hidden bg-gray-100 block"
+            >
               <img
                 src={topBanner1.image}
                 alt="Top Banner 1"
@@ -166,12 +165,16 @@ const Sliderhome = () => {
                   e.target.parentElement.style.display = 'none'
                 }}
               />
-            </div>
+            </a>
           )}
 
-          {/* Top 2 Banner */}
           {!isLoading && topBanner2?.image && (
-            <div className="h-[190px] w-full relative overflow-hidden bg-gray-100">
+            <a
+              href={topBanner2?.link || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-[190px] w-full relative overflow-hidden bg-gray-100 block"
+            >
               <img
                 src={topBanner2.image}
                 alt="Top Banner 2"
@@ -180,10 +183,9 @@ const Sliderhome = () => {
                   e.target.parentElement.style.display = 'none'
                 }}
               />
-            </div>
+            </a>
           )}
 
-          {/* Show placeholder if no banners available */}
           {!isLoading && !topBanner1?.image && !topBanner2?.image && (
             <div className="h-[190px] w-full bg-gray-100 flex items-center justify-center text-gray-500">
               No side banners available
