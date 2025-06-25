@@ -43,17 +43,31 @@ export default function BottomNavbar() {
   }, [])
 
   // Handle category selection
-  const handleCategorySelect = async (categoryId, e) => {
+  // const handleCategorySelect = async (categoryId, e) => {
+  //   e.preventDefault()
+  //   e.stopPropagation()
+
+  //   // Update the store with the selected category
+  //   setSelectedCategory(categoryId)
+
+  //   // Fetch products with the selected category
+  //   await fetchFilteredProducts(getAllProducts)
+
+  //   // Navigate to the category page with the category parameter
+  //   router.push(`/categoryById?category=${categoryId}`)
+  // }
+
+  const handleCategorySelect = async (categoryId, categoryName, e) => {
     e.preventDefault()
     e.stopPropagation()
 
-    // Update the store with the selected category
-    setSelectedCategory(categoryId)
+    // Update the store with the selected category ID and name
+    setSelectedCategory(categoryId, categoryName)
 
     // Fetch products with the selected category
     await fetchFilteredProducts(getAllProducts)
 
-    // Navigate to the category page with the category parameter
+    // Navigate to the category page
     router.push(`/categoryById?category=${categoryId}`)
   }
 
@@ -82,7 +96,9 @@ export default function BottomNavbar() {
                   <Link
                     href={`/category?category=${category.id}`}
                     className="flex-grow"
-                    onClick={(e) => handleCategorySelect(category.id, e)}
+                    onClick={(e) =>
+                      handleCategorySelect(category.id, category.name, e)
+                    }
                   >
                     {category.name}
                   </Link>
