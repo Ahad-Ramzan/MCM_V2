@@ -12,9 +12,7 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
   const [image, setImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   // New feature states
-  const [feature1, setFeature1] = useState(false)
-  const [feature2, setFeature2] = useState(false)
-  const [feature3, setFeature3] = useState(false)
+  const [selectedFeature, setSelectedFeature] = useState(null)
 
   const toggleExpand = (id) => {
     setExpandedNodes((prev) => ({
@@ -142,10 +140,9 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
       formData.append('sub_category_ids', id)
     )
     // Add features to form data
-    formData.append('feature1', feature1)
-    formData.append('feature2', feature2)
-    formData.append('feature3', feature3)
-
+    if (selectedFeature) {
+      formData.append('feature', selectedFeature) // Sends 'feature1', 'feature2' or 'feature3'
+    }
     try {
       await createCategory(formData)
       toast.success('Category created successfully!')
@@ -157,9 +154,7 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
       setExpandedNodes({})
       setImage(null)
       setImagePreview(null)
-      setFeature1(false)
-      setFeature2(false)
-      setFeature3(false)
+      setSelectedFeature(null)
 
       if (onSuccess) {
         onSuccess()
@@ -245,9 +240,10 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
             <div className="feature-item">
               <label>
                 <input
-                  type="checkbox"
-                  checked={feature1}
-                  onChange={(e) => setFeature1(e.target.checked)}
+                  type="radio"
+                  name="feature"
+                  checked={selectedFeature === 'feature1'}
+                  onChange={() => setSelectedFeature('feature1')}
                 />
                 <span>Feature 1</span>
               </label>
@@ -255,9 +251,10 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
             <div className="feature-item">
               <label>
                 <input
-                  type="checkbox"
-                  checked={feature2}
-                  onChange={(e) => setFeature2(e.target.checked)}
+                  type="radio"
+                  name="feature"
+                  checked={selectedFeature === 'feature2'}
+                  onChange={() => setSelectedFeature('feature2')}
                 />
                 <span>Feature 2</span>
               </label>
@@ -265,9 +262,10 @@ const FormCreateCategory = ({ categories, onSuccess }) => {
             <div className="feature-item">
               <label>
                 <input
-                  type="checkbox"
-                  checked={feature3}
-                  onChange={(e) => setFeature3(e.target.checked)}
+                  type="radio"
+                  name="feature"
+                  checked={selectedFeature === 'feature3'}
+                  onChange={() => setSelectedFeature('feature3')}
                 />
                 <span>Feature 3</span>
               </label>

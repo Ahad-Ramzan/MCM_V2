@@ -13,28 +13,7 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
   const [imagePreview, setImagePreview] = useState('')
   const [allsubcategory, setAllSubCategories] = useState([])
   // Add feature states
-  const [feature1, setFeature1] = useState(false)
-  const [feature2, setFeature2] = useState(false)
-  const [feature3, setFeature3] = useState(false)
-
-  useEffect(() => {
-    if (category) {
-      setName(category.name || '')
-      setSlug(category.slug || '')
-      setDescription(category.description || '')
-      setSubCategoryIds(
-        category.sub_categories
-          ? category.sub_categories.map((sc) => sc.id)
-          : []
-      )
-      setExpanded({})
-      setImagePreview(category.image || '')
-      // Initialize feature states from category data
-      setFeature1(category.feature1 || false)
-      setFeature2(category.feature2 || false)
-      setFeature3(category.feature3 || false)
-    }
-  }, [category])
+  const [selectedFeature, setSelectedFeature] = useState(null)
 
   // Fetch all subcategories when component mounts
   useEffect(() => {
@@ -199,9 +178,9 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     formData.append('description', description)
     subCategoryIds.forEach((id) => formData.append('sub_category_ids', id))
     // Add features to form data
-    formData.append('feature1', feature1)
-    formData.append('feature2', feature2)
-    formData.append('feature3', feature3)
+    if (selectedFeature) {
+      formData.append('feature', selectedFeature)
+    }
 
     if (image) {
       formData.append('image', image)
@@ -216,6 +195,32 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
       toast.error('Failed to Update Category.')
     }
   }
+
+  useEffect(() => {
+    if (category) {
+      setName(category.name || '')
+      setSlug(category.slug || '')
+      setDescription(category.description || '')
+      setSubCategoryIds(
+        category.sub_categories
+          ? category.sub_categories.map((sc) => sc.id)
+          : []
+      )
+      setExpanded({})
+      setImagePreview(category.image || '')
+
+      // Determine which feature is currently set (if any)
+      if (category.feature === 'feature1') {
+        setSelectedFeature('feature1')
+      } else if (category.feature === 'feature2') {
+        setSelectedFeature('feature2')
+      } else if (category.feature === 'feature3') {
+        setSelectedFeature('feature3')
+      } else {
+        setSelectedFeature(null)
+      }
+    }
+  }, [category])
 
   if (!isOpen) return null
 
@@ -281,9 +286,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
               <div className="feature-item">
                 <label>
                   <input
-                    type="checkbox"
-                    checked={feature1}
-                    onChange={(e) => setFeature1(e.target.checked)}
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === 'feature1'}
+                    onChange={() => setSelectedFeature('feature1')}
                   />
                   <span>Feature 1</span>
                 </label>
@@ -291,9 +297,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
               <div className="feature-item">
                 <label>
                   <input
-                    type="checkbox"
-                    checked={feature2}
-                    onChange={(e) => setFeature2(e.target.checked)}
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === 'feature2'}
+                    onChange={() => setSelectedFeature('feature2')}
                   />
                   <span>Feature 2</span>
                 </label>
@@ -301,9 +308,10 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
               <div className="feature-item">
                 <label>
                   <input
-                    type="checkbox"
-                    checked={feature3}
-                    onChange={(e) => setFeature3(e.target.checked)}
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === 'feature3'}
+                    onChange={() => setSelectedFeature('feature3')}
                   />
                   <span>Feature 3</span>
                 </label>
@@ -447,7 +455,6 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           object-fit: cover;
           border: 1px solid #ddd;
         }
-        /* Feature checkboxes styles */
         .feature-checkboxes {
           border: 1px solid #e5e5e5;
           padding: 15px;
@@ -465,7 +472,7 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
           gap: 8px;
           cursor: pointer;
         }
-        .feature-item input[type='checkbox'] {
+        .feature-item input[type='radio'] {
           width: 16px;
           height: 16px;
         }
