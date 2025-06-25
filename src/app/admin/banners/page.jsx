@@ -69,7 +69,7 @@ const BannerPage = () => {
       toast.success('Banner updated successfully!')
     } catch (error) {
       console.error('Error updating banner:', error)
-      toast.error('Failed to update banner')
+      // toast.error('Failed to update banner')
     }
   }
 

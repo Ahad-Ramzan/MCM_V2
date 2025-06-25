@@ -99,13 +99,20 @@ const Sliderhome = () => {
           </div>
         ) : (
           <>
-            {/* Background Image */}
+            {/* Background Image with clickable link */}
             {sliderBanners[current]?.image && (
-              <img
-                src={sliderBanners[current].image}
-                alt={`Category Slider ${current + 1}`}
-                className="absolute w-full h-full object-cover"
-              />
+              <a
+                href={sliderBanners[current]?.link || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute w-full h-full"
+              >
+                <img
+                  src={sliderBanners[current].image}
+                  alt={`Category Slider ${current + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </a>
             )}
 
             {/* Navigation Arrows */}
