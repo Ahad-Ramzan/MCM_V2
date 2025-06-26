@@ -234,32 +234,49 @@ const CreateProductPage = ({ onSuccess }) => {
         ...prev,
         category: category.id.toString(),
       }))
-      // Remove any subcategories that might belong to this parent
-      const subCategoryIdsToRemove = collectAllChildIds(category)
-      setSelectedSubCategoryIds((prev) =>
-        prev.filter((id) => !subCategoryIdsToRemove.includes(id))
-      )
+      // Clear all subcategory selections when a parent is selected
+      setSelectedSubCategoryIds([])
     } else {
-      // For subcategories, use the existing logic
-      const allChildIds = collectAllChildIds(category)
-      const parentPathIds = subcategories.flatMap(
-        (cat) => findParentIds(cat, category.id) || []
-      )
+      // For subcategories, find the direct parent only
+      let parentId = null
 
-      const alreadySelected = allChildIds.every((id) =>
-        selectedSubCategoryIds.includes(id)
-      )
+      // Find the direct parent of this subcategory
+      categories.forEach((cat) => {
+        if (cat.sub_categories) {
+          const found = cat.sub_categories.find((sub) => sub.id === category.id)
+          if (found) parentId = cat.id
+        }
+      })
 
-      if (alreadySelected) {
-        setSelectedSubCategoryIds((prev) =>
-          prev.filter(
-            (id) => !allChildIds.includes(id) && !parentPathIds.includes(id)
-          )
+      // Check if this subcategory is already selected
+      const isSelected = selectedSubCategoryIds.includes(category.id)
+
+      if (isSelected) {
+        // If already selected, remove it and keep parent if no other subcategories are selected
+        const newSubCategories = selectedSubCategoryIds.filter(
+          (id) => id !== category.id
         )
+        setSelectedSubCategoryIds(newSubCategories)
+
+        // If no subcategories left for this parent, keep the parent selection
+        if (
+          parentId &&
+          !newSubCategories.some((id) => {
+            // Check if any remaining subcategories belong to this parent
+            const parent = categories.find((cat) => cat.id === parentId)
+            return parent?.sub_categories?.some((sub) => sub.id === id)
+          })
+        ) {
+          setFormData((prev) => ({ ...prev, category: '' }))
+        }
       } else {
-        setSelectedSubCategoryIds((prev) =>
-          Array.from(new Set([...prev, ...allChildIds, ...parentPathIds]))
-        )
+        // If not selected, add it and set the parent
+        setSelectedSubCategoryIds((prev) => [...prev, category.id])
+
+        // Set the direct parent category
+        if (parentId) {
+          setFormData((prev) => ({ ...prev, category: parentId.toString() }))
+        }
       }
     }
   }
