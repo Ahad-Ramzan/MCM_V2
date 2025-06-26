@@ -154,7 +154,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
     const isParentCategory = categories.some((cat) => cat.id === category.id)
 
     if (isParentCategory) {
-      // For parent categories, update the main category field
+      // For parent categories, toggle the selection
       setFormData((prev) => ({
         ...prev,
         category:
@@ -162,27 +162,36 @@ const EditProductPage = ({ productId, onUpdate }) => {
             ? ''
             : category.id.toString(),
       }))
-      // Clear any subcategories that might belong to this parent
-      const subCategoryIdsToRemove = collectAllChildIds(category)
-      setSelectedSubCategoryIds((prev) =>
-        prev.filter((id) => !subCategoryIdsToRemove.includes(id))
-      )
+      // Clear all subcategory selections when a parent is selected
+      setSelectedSubCategoryIds([])
     } else {
-      // For subcategories, use the existing logic
-      const allChildIds = collectAllChildIds(category)
-      const alreadySelected = allChildIds.every((id) =>
-        selectedSubCategoryIds.includes(id)
-      )
+      // For subcategories, toggle the selection
+      setSelectedSubCategoryIds((prev) => {
+        const newSelected = [...prev]
+        const index = newSelected.indexOf(category.id.toString())
 
-      if (alreadySelected) {
-        setSelectedSubCategoryIds((prev) =>
-          prev.filter((id) => !allChildIds.includes(id))
-        )
-      } else {
-        setSelectedSubCategoryIds((prev) => [
-          ...new Set([...prev, ...allChildIds]),
-        ])
-      }
+        if (index > -1) {
+          // If already selected, remove it
+          newSelected.splice(index, 1)
+        } else {
+          // If not selected, add it
+          newSelected.push(category.id.toString())
+        }
+
+        // Find and set the parent category
+        let parentId = null
+        categories.forEach((cat) => {
+          if (cat.sub_categories?.some((sub) => sub.id === category.id)) {
+            parentId = cat.id
+          }
+        })
+
+        if (parentId) {
+          setFormData((prev) => ({ ...prev, category: parentId.toString() }))
+        }
+
+        return newSelected
+      })
     }
   }
 
@@ -208,7 +217,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
       const isParentCategory = categories.some((c) => c.id === cat.id)
       const isChecked = isParentCategory
         ? formData.category === cat.id.toString()
-        : selectedSubCategoryIds.includes(cat.id)
+        : selectedSubCategoryIds.includes(cat.id.toString()) // Ensure string comparison
 
       const hasChildren = cat.sub_categories && cat.sub_categories.length > 0
       const isExpanded = expandedNodes[cat.id]
@@ -259,7 +268,9 @@ const EditProductPage = ({ productId, onUpdate }) => {
                 const hasSubChildren =
                   subCat.children && subCat.children.length > 0
                 const isSubExpanded = expandedNodes[subCat.id]
-                const isSubChecked = selectedSubCategoryIds.includes(subCat.id)
+                const isSubChecked = selectedSubCategoryIds.includes(
+                  subCat.id.toString()
+                ) // Ensure string comparison
 
                 return (
                   <div
@@ -351,7 +362,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
 
     // Append selected subcategories
     selectedSubCategoryIds.forEach((id) => {
-      productData.append('sub_categories[]', id)
+      productData.append('sub_categories', id)
     })
 
     // Handle gallery
@@ -400,6 +411,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
         setVideoPreview(null)
 
         const data = await getProductsById(productId)
+        console.log(data, 'edit product data---')
         const galleryUrls = data.gallery?.map((item) => item.image) || []
 
         setFormData({
@@ -429,6 +441,17 @@ const EditProductPage = ({ productId, onUpdate }) => {
           setSelectedSubCategoryIds(
             data.sub_categories.map((id) => id.toString())
           )
+
+          // Expand all parent categories of selected subcategories
+          const expanded = {}
+          data.sub_categories.forEach((subCatId) => {
+            categories.forEach((cat) => {
+              if (cat.sub_categories?.some((sub) => sub.id === subCatId)) {
+                expanded[cat.id] = true
+              }
+            })
+          })
+          setExpandedNodes(expanded)
         }
 
         // Expand parent category if it exists
