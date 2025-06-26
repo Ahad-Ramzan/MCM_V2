@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from 'react'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 import {
   createProducts,
   getAllCategories,
   getBrandAllData,
   getCategoriesAllData,
+  getSubCategoriesAllData,
 } from '@/apis/products'
 import toast, { Toaster } from 'react-hot-toast'
 import { FiUpload, FiX, FiImage, FiVideo } from 'react-icons/fi'
@@ -38,6 +40,9 @@ const CreateProductPage = ({ onSuccess }) => {
   const [galleryPreview, setGalleryPreview] = useState([])
   const [videoPreview, setVideoPreview] = useState(null)
   const [activeTab, setActiveTab] = useState('general')
+  const [selectedSubCategoryIds, setSelectedSubCategoryIds] = useState([])
+  const [expandedNodes, setExpandedNodes] = useState({})
+  const [subcategories, setAllSubCategories] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -49,7 +54,7 @@ const CreateProductPage = ({ onSuccess }) => {
       const response = await getCategoriesAllData()
       setCategories(response)
     } catch (error) {
-      throw new Error('failed to fetch data')
+      throw new Error('Failed to fetch categories')
     }
   }
 
@@ -58,7 +63,7 @@ const CreateProductPage = ({ onSuccess }) => {
       const response = await getBrandAllData()
       setBrandsData(response)
     } catch (error) {
-      throw new Error('failed to fetch the data')
+      throw new Error('Failed to fetch brands')
     }
   }
 
@@ -68,7 +73,6 @@ const CreateProductPage = ({ onSuccess }) => {
 
     setFormData((prev) => ({ ...prev, thumbnail: file }))
 
-    // Create preview
     const reader = new FileReader()
     reader.onload = () => {
       setThumbnailPreview(reader.result)
@@ -80,10 +84,9 @@ const CreateProductPage = ({ onSuccess }) => {
     const files = e.target.files
     if (!files.length) return
 
-    // Limit to 4 images
     const selectedFiles = Array.from(files).slice(0, 4 - galleryPreview.length)
     if (selectedFiles.length === 0) {
-      toast.error('You can upload maximum 4 images')
+      toast.error('You can upload a maximum of 4 images')
       return
     }
 
@@ -92,7 +95,6 @@ const CreateProductPage = ({ onSuccess }) => {
       gallery: [...prev.gallery, ...selectedFiles],
     }))
 
-    // Create previews
     const newPreviews = []
     selectedFiles.forEach((file) => {
       const reader = new FileReader()
@@ -123,7 +125,6 @@ const CreateProductPage = ({ onSuccess }) => {
 
     setFormData((prev) => ({ ...prev, video: file }))
 
-    // Create preview
     const reader = new FileReader()
     reader.onload = () => {
       setVideoPreview(reader.result)
@@ -158,6 +159,14 @@ const CreateProductPage = ({ onSuccess }) => {
     productData.append('SKU', formData.sku)
     productData.append('brand', parseInt(formData.brand))
     productData.append('category', parseInt(formData.category))
+    // productData.append('category', formData.category)
+
+    // Append subcategories
+    if (selectedSubCategoryIds.length > 0) {
+      selectedSubCategoryIds.forEach((id) => {
+        productData.append('sub_categories', id) // Append selected subcategory IDs
+      })
+    }
 
     // Append thumbnail
     if (formData.thumbnail) {
@@ -166,8 +175,8 @@ const CreateProductPage = ({ onSuccess }) => {
 
     // Append gallery
     if (formData.gallery.length > 0) {
-      Array.from(formData.gallery).forEach((file, index) => {
-        productData.append(`product_gallery`, file)
+      Array.from(formData.gallery).forEach((file) => {
+        productData.append('product_gallery', file)
       })
     }
 
@@ -186,10 +195,215 @@ const CreateProductPage = ({ onSuccess }) => {
       setThumbnailPreview(null)
       setGalleryPreview([])
       setVideoPreview(null)
+      setSelectedSubCategoryIds([]) // Reset selected subcategories
     } catch (error) {
       toast.error('Failed to create product.')
     }
   }
+
+  const collectAllChildIds = (node) => {
+    let ids = [node.id]
+    if (node.children) {
+      node.children.forEach((child) => {
+        ids = ids.concat(collectAllChildIds(child))
+      })
+    }
+    return ids
+  }
+
+  const findParentIds = (node, id) => {
+    if (node.children) {
+      for (const child of node.children) {
+        if (child.id === id) {
+          return [node.id] // Return parent ID
+        }
+        const parentIds = findParentIds(child, id)
+        if (parentIds.length) return [node.id, ...parentIds]
+      }
+    }
+    return []
+  }
+
+  const handleCheckboxChange = (category) => {
+    // Check if this is a top-level category (parent category)
+    const isParentCategory = categories.some((cat) => cat.id === category.id)
+
+    if (isParentCategory) {
+      // For parent categories, just update the main category field
+      setFormData((prev) => ({
+        ...prev,
+        category: category.id.toString(),
+      }))
+      // Remove any subcategories that might belong to this parent
+      const subCategoryIdsToRemove = collectAllChildIds(category)
+      setSelectedSubCategoryIds((prev) =>
+        prev.filter((id) => !subCategoryIdsToRemove.includes(id))
+      )
+    } else {
+      // For subcategories, use the existing logic
+      const allChildIds = collectAllChildIds(category)
+      const parentPathIds = subcategories.flatMap(
+        (cat) => findParentIds(cat, category.id) || []
+      )
+
+      const alreadySelected = allChildIds.every((id) =>
+        selectedSubCategoryIds.includes(id)
+      )
+
+      if (alreadySelected) {
+        setSelectedSubCategoryIds((prev) =>
+          prev.filter(
+            (id) => !allChildIds.includes(id) && !parentPathIds.includes(id)
+          )
+        )
+      } else {
+        setSelectedSubCategoryIds((prev) =>
+          Array.from(new Set([...prev, ...allChildIds, ...parentPathIds]))
+        )
+      }
+    }
+  }
+
+  const toggleExpand = (id) => {
+    setExpandedNodes((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
+  }
+
+  const renderCategoryTree = (nodes) => {
+    return nodes.map((cat) => {
+      const isParentCategory = categories.some((c) => c.id === cat.id)
+      const isChecked = isParentCategory
+        ? formData.category === cat.id.toString()
+        : selectedSubCategoryIds.includes(cat.id)
+
+      const hasChildren = cat.sub_categories && cat.sub_categories.length > 0
+      const isExpanded = expandedNodes[cat.id]
+
+      return (
+        <div key={cat.id} style={{ marginLeft: '20px', marginBottom: '5px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                flex: 1,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => handleCheckboxChange(cat)}
+              />
+              {cat.name}
+            </label>
+
+            {hasChildren && (
+              <span
+                onClick={() => toggleExpand(cat.id)}
+                style={{
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  userSelect: 'none',
+                }}
+                title={isExpanded ? 'Collapse' : 'Expand'}
+              >
+                {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+              </span>
+            )}
+          </div>
+
+          {/* Render sub_categories if expanded */}
+          {hasChildren && isExpanded && (
+            <div style={{ marginLeft: '20px' }}>
+              {cat.sub_categories.map((subCat) => {
+                const hasSubChildren =
+                  subCat.children && subCat.children.length > 0
+                const isSubExpanded = expandedNodes[subCat.id]
+
+                return (
+                  <div
+                    key={subCat.id}
+                    style={{ marginLeft: '20px', marginBottom: '5px' }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <label
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          flex: 1,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedSubCategoryIds.includes(subCat.id)}
+                          onChange={() => handleCheckboxChange(subCat)}
+                        />
+                        {subCat.name}
+                      </label>
+
+                      {hasSubChildren && (
+                        <span
+                          onClick={() => toggleExpand(subCat.id)}
+                          style={{
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            userSelect: 'none',
+                          }}
+                          title={isSubExpanded ? 'Collapse' : 'Expand'}
+                        >
+                          {isSubExpanded ? (
+                            <FaChevronDown />
+                          ) : (
+                            <FaChevronRight />
+                          )}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Render children if sub category is expanded */}
+                    {hasSubChildren && isSubExpanded && (
+                      <div style={{ marginLeft: '20px' }}>
+                        {renderCategoryTree(subCat.children)}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )
+    })
+  }
+
+  const fetchAllData = async (page = 1, search = '') => {
+    try {
+      const response = await getSubCategoriesAllData(page, search)
+      setAllSubCategories(response) // Store in state
+    } catch (error) {
+      console.error('Failed to fetch subcategories:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchAllData()
+  }, [])
 
   useEffect(() => {
     fetchAllCategories()
@@ -361,7 +575,7 @@ const CreateProductPage = ({ onSuccess }) => {
               </figure>
             </div>
 
-            {/* Product Images Tab Content (unchanged) */}
+            {/* Product Images Tab Content */}
             <div
               className={`tab-pane fade ${
                 activeTab === 'images' ? 'show active' : 'd-none'
@@ -487,7 +701,7 @@ const CreateProductPage = ({ onSuccess }) => {
               </figure>
             </div>
 
-            {/* Meta Tab Content (unchanged) */}
+            {/* Meta Tab Content */}
             <div
               className={`tab-pane fade ${
                 activeTab === 'meta' ? 'show active' : 'd-none'
@@ -512,7 +726,7 @@ const CreateProductPage = ({ onSuccess }) => {
                         ))}
                     </select>
                   </div>
-                  <div className="form-group">
+                  {/* <div className="form-group">
                     <label>Category *</label>
                     <select
                       className="form-control"
@@ -528,6 +742,20 @@ const CreateProductPage = ({ onSuccess }) => {
                         </option>
                       ))}
                     </select>
+                  </div> */}
+
+                  <div className="form-group">
+                    <label>Select Categories & Sub-Categories</label>
+                    <div
+                      style={{
+                        border: '1px solid #e5e5e5',
+                        padding: '10px',
+                        maxHeight: '300px',
+                        overflowY: 'auto',
+                      }}
+                    >
+                      {renderCategoryTree(categories)}
+                    </div>
                   </div>
                 </div>
               </figure>
@@ -536,9 +764,6 @@ const CreateProductPage = ({ onSuccess }) => {
 
           {/* Bottom buttons - always visible */}
           <div className="ps-form__bottom mt-4">
-            {/* <a className="ps-btn ps-btn--black" href="/products">
-              Back
-            </a> */}
             <button
               type="button"
               className="ps-btn ps-btn--gray"

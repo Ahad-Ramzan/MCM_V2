@@ -5,13 +5,11 @@ import { FaTh, FaBars } from 'react-icons/fa'
 import { getAllProducts } from '@/apis/products'
 import Pagination from '../SuperAdmin/elements/basic/Pagination'
 import useProductsStore from '@/store/productsStore'
-
-const itemsPerPage = 15
+import { toast } from 'react-toastify'
 
 const ProductListPage = () => {
-  const [currentPages, setCurrentPages] = useState(1)
   const [currentPage, setCurrentPage] = useState(1)
-
+  const [loading, setLoading] = useState(false)
   const [productsData, setProductsData] = useState({
     count: 0,
     next: null,
@@ -19,39 +17,34 @@ const ProductListPage = () => {
     results: [],
   })
 
-  const { products, brands, categories } = useProductsStore()
+  // Get state from store
+  const {
+    products,
+    selectedCategory,
+    selectedCategoryName,
+    selectedSubcategory,
+    selectedSubcategoryName,
+    fetchFilteredProducts,
+  } = useProductsStore()
 
-  useEffect(() => {
-    console.log('Products: find out prod---', products)
-    console.log('Brands:', brands)
-    console.log('Categories:', categories)
-  }, [products, brands, categories])
-
-  const fetchData = async (
-    page = 1,
-    search = '',
-    brand = '',
-    category = '',
-    status = ''
-  ) => {
+  // Fetch data function
+  const fetchData = async (page = 1) => {
     try {
-      const response = await getAllProducts(
-        page,
-        search,
-        brand,
-        category,
-        status
-      )
-      setProductsData(response)
+      setLoading(true)
+      const data = await fetchFilteredProducts(getAllProducts, page)
+      setProductsData(data)
       setCurrentPage(page)
     } catch (error) {
       toast.error('Failed to fetch products')
+    } finally {
+      setLoading(false)
     }
   }
 
+  // Fetch products when filters change
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData(1)
+  }, [selectedCategory, selectedSubcategory])
 
   const handlePageChange = (page) => {
     fetchData(page)
@@ -59,34 +52,22 @@ const ProductListPage = () => {
 
   const totalPages = Math.ceil(productsData.count / 10)
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const totalPage = Math.ceil(productsData.results.length / itemsPerPage)
-
-  const handlePageChanges = (page) => {
-    if (page >= 1 && page <= totalPage) {
-      setCurrentPages(page)
-    }
-  }
-
-  const visibleProducts = productsData.results.slice(
-    (currentPages - 1) * itemsPerPage,
-    currentPages * itemsPerPage
-  )
-  console.log(visibleProducts, 'visible product brands')
-  useEffect(() => {
-    console.log('Visible products:', visibleProducts)
-  }, [visibleProducts])
-
   return (
     <div className="w-full lg:px-4 py-6 bg-white">
       {/* Top bar */}
       <div className="flex flex-wrap w-full justify-between items-center border border-gray-100 p-3 bg-gray-50 mb-6">
-        <p className="text-sm text-gray-700">
-          <strong>{productsData.results.length}</strong> Produtos encontrados
-        </p>
+        <div>
+          <h2 className="text-lg font-semibold">
+            {selectedCategory
+              ? selectedCategoryName
+              : selectedSubcategory
+                ? selectedSubcategoryName
+                : 'Todos os Produtos'}
+          </h2>
+          <p className="text-sm text-gray-700">
+            <strong>{productsData.count}</strong> Produtos encontrados
+          </p>
+        </div>
 
         <div className="flex gap-4 flex-wrap items-center justify-between">
           <select className="text-sm border border-gray-300 rounded px-2 py-1 mt-2">
@@ -103,69 +84,48 @@ const ProductListPage = () => {
         </div>
       </div>
 
-      {/* Product grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {products.map((product, index) => (
-          <ProductCardStar
-            key={product.id || index}
-            productId={product.id}
-            image={product.product_thumbnail}
-            brand={product.brand}
-            title={product.product_name}
-            price={product.regular_price + '€'}
-            sold={product.sold_items}
-            discount={calculateDiscount(
-              product.regular_price,
-              product.sale_price
+      {/* Loading state */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--secondary)]"></div>
+        </div>
+      ) : (
+        <>
+          {/* Product grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {products.length > 0 ? (
+              products.map((product, index) => (
+                <ProductCardStar
+                  key={product.id || index}
+                  productId={product.id}
+                  image={product.product_thumbnail}
+                  brand={product.brand}
+                  title={product.product_name}
+                  price={product.regular_price + '€'}
+                  sold={product.sold_items}
+                  discount={calculateDiscount(
+                    product.regular_price,
+                    product.sale_price
+                  )}
+                />
+              ))
+            ) : (
+              <div className="col-span-5 text-center py-10 text-gray-500">
+                Nenhum produto encontrado.
+              </div>
             )}
-          />
-        ))}
-      </div>
+          </div>
 
-      <div className="ps-section__footer">
-        {/* <p>
-          Mostrar {productsData.results.length} de {productsData.count}{' '}
-          Produtos.
-        </p> */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center items-center mt-6 gap-2 flex-wrap">
-        {/* <button
-          onClick={() => handlePageChanges(currentPages - 1)}
-          disabled={currentPages === 1}
-          className="px-3 py-1 text-sm  disabled:opacity-50"
-        >
-          &lt;
-        </button> */}
-
-        {/* {Array.from({ length: totalPage }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => handlePageChanges(i + 1)}
-            className={`px-3 py-1 text-sm ${
-              currentPages === i + 1
-                ? 'text-black'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            {i + 1}
-          </button>
-        ))} */}
-
-        {/* <button
-          onClick={() => handlePageChanges(currentPages + 1)}
-          disabled={currentPages === totalPage}
-          className="px-3 py-1 text-sm  disabled:opacity-50"
-        >
-          &gt;
-        </button> */}
-      </div>
+          {/* Pagination */}
+          <div className="ps-section__footer mt-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }

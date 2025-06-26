@@ -6,11 +6,13 @@ import {
   getCategoriesAllData,
   getProductsById,
   updateProducts,
+  getSubCategoriesAllData,
 } from '@/apis/products'
 import ContainerDefault from '@/components/SuperAdmin/layouts/ContainerDefault'
 import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
 import toast, { Toaster } from 'react-hot-toast'
 import { FiUpload, FiX, FiImage, FiVideo } from 'react-icons/fi'
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
 const initialFormState = {
   name: '',
@@ -39,6 +41,9 @@ const EditProductPage = ({ productId, onUpdate }) => {
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
   const [activeTab, setActiveTab] = useState('general')
+  const [subcategories, setSubCategories] = useState([])
+  const [selectedSubCategoryIds, setSelectedSubCategoryIds] = useState([])
+  const [expandedNodes, setExpandedNodes] = useState({})
 
   const fetchAllCategories = async () => {
     try {
@@ -46,6 +51,16 @@ const EditProductPage = ({ productId, onUpdate }) => {
       setCategories(response)
     } catch (error) {
       toast.error('Failed to fetch categories')
+      console.error(error)
+    }
+  }
+
+  const fetchSubCategories = async () => {
+    try {
+      const response = await getSubCategoriesAllData()
+      setSubCategories(response)
+    } catch (error) {
+      toast.error('Failed to fetch subcategories')
       console.error(error)
     }
   }
@@ -134,6 +149,179 @@ const EditProductPage = ({ productId, onUpdate }) => {
     setVideoPreview(null)
   }
 
+  const handleCheckboxChange = (category) => {
+    // Check if this is a top-level category
+    const isParentCategory = categories.some((cat) => cat.id === category.id)
+
+    if (isParentCategory) {
+      // For parent categories, update the main category field
+      setFormData((prev) => ({
+        ...prev,
+        category:
+          prev.category === category.id.toString()
+            ? ''
+            : category.id.toString(),
+      }))
+      // Clear any subcategories that might belong to this parent
+      const subCategoryIdsToRemove = collectAllChildIds(category)
+      setSelectedSubCategoryIds((prev) =>
+        prev.filter((id) => !subCategoryIdsToRemove.includes(id))
+      )
+    } else {
+      // For subcategories, use the existing logic
+      const allChildIds = collectAllChildIds(category)
+      const alreadySelected = allChildIds.every((id) =>
+        selectedSubCategoryIds.includes(id)
+      )
+
+      if (alreadySelected) {
+        setSelectedSubCategoryIds((prev) =>
+          prev.filter((id) => !allChildIds.includes(id))
+        )
+      } else {
+        setSelectedSubCategoryIds((prev) => [
+          ...new Set([...prev, ...allChildIds]),
+        ])
+      }
+    }
+  }
+
+  const collectAllChildIds = (node) => {
+    let ids = [node.id]
+    if (node.children) {
+      node.children.forEach((child) => {
+        ids = ids.concat(collectAllChildIds(child))
+      })
+    }
+    return ids
+  }
+
+  const toggleExpand = (id) => {
+    setExpandedNodes((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
+  }
+
+  const renderCategoryTree = (nodes) => {
+    return nodes.map((cat) => {
+      const isParentCategory = categories.some((c) => c.id === cat.id)
+      const isChecked = isParentCategory
+        ? formData.category === cat.id.toString()
+        : selectedSubCategoryIds.includes(cat.id)
+
+      const hasChildren = cat.sub_categories && cat.sub_categories.length > 0
+      const isExpanded = expandedNodes[cat.id]
+
+      return (
+        <div key={cat.id} style={{ marginLeft: '20px', marginBottom: '5px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                flex: 1,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => handleCheckboxChange(cat)}
+              />
+              {cat.name}
+            </label>
+
+            {hasChildren && (
+              <span
+                onClick={() => toggleExpand(cat.id)}
+                style={{
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  userSelect: 'none',
+                }}
+                title={isExpanded ? 'Collapse' : 'Expand'}
+              >
+                {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+              </span>
+            )}
+          </div>
+
+          {hasChildren && isExpanded && (
+            <div style={{ marginLeft: '20px' }}>
+              {cat.sub_categories.map((subCat) => {
+                const hasSubChildren =
+                  subCat.children && subCat.children.length > 0
+                const isSubExpanded = expandedNodes[subCat.id]
+                const isSubChecked = selectedSubCategoryIds.includes(subCat.id)
+
+                return (
+                  <div
+                    key={subCat.id}
+                    style={{ marginLeft: '20px', marginBottom: '5px' }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <label
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          flex: 1,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSubChecked}
+                          onChange={() => handleCheckboxChange(subCat)}
+                        />
+                        {subCat.name}
+                      </label>
+
+                      {hasSubChildren && (
+                        <span
+                          onClick={() => toggleExpand(subCat.id)}
+                          style={{
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            userSelect: 'none',
+                          }}
+                          title={isSubExpanded ? 'Collapse' : 'Expand'}
+                        >
+                          {isSubExpanded ? (
+                            <FaChevronDown />
+                          ) : (
+                            <FaChevronRight />
+                          )}
+                        </span>
+                      )}
+                    </div>
+
+                    {hasSubChildren && isSubExpanded && (
+                      <div style={{ marginLeft: '20px' }}>
+                        {renderCategoryTree(subCat.children)}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )
+    })
+  }
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -159,9 +347,12 @@ const EditProductPage = ({ productId, onUpdate }) => {
     // Handle thumbnail
     if (formData.thumbnail) {
       productData.append('product_thumbnail', formData.thumbnail)
-    } else if (thumbnailPreview) {
-      productData.append('existing_thumbnail', thumbnailPreview)
     }
+
+    // Append selected subcategories
+    selectedSubCategoryIds.forEach((id) => {
+      productData.append('sub_categories[]', id)
+    })
 
     // Handle gallery
     if (galleryPreview?.length > 0) {
@@ -181,10 +372,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
     // Handle video - only if exists
     if (formData.video) {
       productData.append('product_video', formData.video)
-    } else if (videoPreview) {
-      productData.append('existing_video', videoPreview)
     }
-    // Don't send video field if none exists
 
     try {
       const loadingToast = toast.loading('Updating product...')
@@ -235,6 +423,21 @@ const EditProductPage = ({ productId, onUpdate }) => {
         if (data.product_thumbnail) setThumbnailPreview(data.product_thumbnail)
         if (galleryUrls.length > 0) setGalleryPreview(galleryUrls)
         if (data.product_video) setVideoPreview(data.product_video)
+
+        // Set selected subcategories
+        if (data.sub_categories && data.sub_categories.length > 0) {
+          setSelectedSubCategoryIds(
+            data.sub_categories.map((id) => id.toString())
+          )
+        }
+
+        // Expand parent category if it exists
+        if (data.category) {
+          setExpandedNodes((prev) => ({
+            ...prev,
+            [data.category]: true,
+          }))
+        }
       } catch (err) {
         toast.error('Failed to fetch product')
         console.error(err)
@@ -244,6 +447,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
     fetchProduct()
     fetchAllCategories()
     fetchBrandsData()
+    fetchSubCategories()
   }, [productId])
 
   return (
@@ -573,7 +777,7 @@ const EditProductPage = ({ productId, onUpdate }) => {
                     ))}
                   </select>
                 </div>
-                <div className="form-group">
+                {/* <div className="form-group">
                   <label>Category *</label>
                   <select
                     className="form-control"
@@ -589,6 +793,19 @@ const EditProductPage = ({ productId, onUpdate }) => {
                       </option>
                     ))}
                   </select>
+                </div> */}
+                <div className="form-group">
+                  <label>Select Categories & Sub-Categories</label>
+                  <div
+                    style={{
+                      border: '1px solid #e5e5e5',
+                      padding: '10px',
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {renderCategoryTree(categories)}
+                  </div>
                 </div>
               </div>
             </figure>

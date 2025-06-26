@@ -24,7 +24,7 @@ export default function Category() {
         <div className="flex ">
           <SidebarFilter />
           <div className="flex-1 px-4 py-6 bg-white">
-            <BestSale />
+            {/* <BestSale /> */}
             {/* <Recomended /> */}
             <ProductListPage />
           </div>

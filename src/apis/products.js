@@ -73,7 +73,8 @@ export const getAllProducts = async (
   category = '',
   status = '',
   sale_price_min = '',
-  sale_price_max = ''
+  sale_price_max = '',
+  sub_categories = ''
 ) => {
   try {
     const response = await ESTORE_API.get(`products/`, {
@@ -85,6 +86,7 @@ export const getAllProducts = async (
         status,
         sale_price_min,
         sale_price_max,
+        sub_categories,
       },
     })
     return response.data
@@ -97,10 +99,78 @@ export const getAllProducts = async (
   }
 }
 
-export const getAllCategories = async (page = 1, search = '') => {
+export const getAllCategories = async (page = 1, search = '', feature = '') => {
   try {
     const response = await ESTORE_API.get(`categories/`, {
-      params: { page, search },
+      params: { page, search, feature },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error fetching categories:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to fetch categories')
+  }
+}
+
+export const getAllBestSellers = async (category = '') => {
+  try {
+    const response = await ESTORE_API.get(`products/best-sellers/`, {
+      params: { category },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error fetching categories:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to fetch categories')
+  }
+}
+
+
+
+
+export const getAllNewProducts = async (category = '') => {
+  try {
+    const response = await ESTORE_API.get(`products/new/`, {
+      params: { category },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error fetching categories:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to fetch categories')
+  }
+}
+
+
+
+
+export const getAllPopularProducts = async (category = '') => {
+  try {
+    const response = await ESTORE_API.get(`products/popular/`, {
+      params: { category },
+    })
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error fetching categories:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to fetch categories')
+  }
+}
+
+
+
+export const getAllListAllProducts = async (category = '') => {
+  try {
+    const response = await ESTORE_API.get(`products/list-all/`, {
+      params: { category },
     })
     return response.data
   } catch (error) {

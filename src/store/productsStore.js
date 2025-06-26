@@ -6,6 +6,8 @@ const useProductsStore = create((set) => ({
   categories: [],
   selectedCategory: null,
   selectedCategoryName: '',
+  selectedSubcategory: null, // Add this
+  selectedSubcategoryName: '', // Add this
   selectedBrand: null,
   priceRange: [0, 10000],
 
@@ -16,14 +18,25 @@ const useProductsStore = create((set) => ({
     set({
       selectedCategory: categoryId,
       selectedCategoryName: categoryName || '',
+      selectedSubcategory: null, // Reset subcategory when category changes
+      selectedSubcategoryName: '', // Reset subcategory name
+    }),
+
+  // Add these new actions
+  setSelectedSubcategory: (subcategoryId, subcategoryName) =>
+    set({
+      selectedSubcategory: subcategoryId,
+      selectedSubcategoryName: subcategoryName || '',
+      selectedCategory: null, // Reset category when subcategory is selected
+      selectedCategoryName: '', // Reset category name
     }),
 
   setSelectedBrand: (brandId) => set({ selectedBrand: brandId }),
   setPriceRange: (range) => set({ priceRange: range }),
 
-  // Function to fetch products with the current filters
+  // Update the fetch function to include subcategory
   fetchFilteredProducts: async (getAllProducts) => {
-    const { selectedCategory, selectedBrand, priceRange } =
+    const { selectedCategory, selectedSubcategory, selectedBrand, priceRange } =
       useProductsStore.getState()
 
     try {
@@ -34,7 +47,8 @@ const useProductsStore = create((set) => ({
         selectedCategory || '',
         '', // status
         priceRange[0],
-        priceRange[1]
+        priceRange[1],
+        selectedSubcategory || '' // Add subcategory filter
       )
 
       set({ products: data.results || [] })
