@@ -12,8 +12,14 @@ const BestSale = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(false)
 
-  // Get the selected category from the Zustand store
-  const { selectedCategory, products } = useProductsStore()
+  // Get store state
+  const {
+    selectedCategory,
+    selectedCategoryName,
+    selectedSubcategory,
+    selectedSubcategoryName,
+    products,
+  } = useProductsStore()
 
   const [productsData, setProductsData] = useState({
     count: 0,
@@ -22,21 +28,18 @@ const BestSale = () => {
     results: [],
   })
 
-  const fetchData = async (
-    page = 1,
-    search = '',
-    brand = '',
-    category = selectedCategory || '',
-    status = ''
-  ) => {
+  const fetchData = async (page = 1) => {
     try {
       setLoading(true)
       const response = await getAllProducts(
         page,
-        search,
-        brand,
-        category,
-        status
+        '', // search
+        '', // brand
+        selectedCategory || '', // category
+        '', // status
+        '', // min price
+        '', // max price
+        selectedSubcategory || '' // subcategory
       )
       setProductsData(response)
       setCurrentPage(page)
@@ -47,17 +50,10 @@ const BestSale = () => {
     }
   }
 
-  // Fetch products when selectedCategory changes
+  // Fetch products when filters change
   useEffect(() => {
-    fetchData(1, '', '', selectedCategory || '')
-  }, [selectedCategory])
-
-  // Initial fetch on component mount
-  useEffect(() => {
-    if (!selectedCategory) {
-      fetchData()
-    }
-  }, [])
+    fetchData(1)
+  }, [selectedCategory, selectedSubcategory])
 
   const itemsPerPage = 5
 
@@ -79,7 +75,7 @@ const BestSale = () => {
   )
 
   const handlePageChange = (page) => {
-    fetchData(page, '', '', selectedCategory || '')
+    fetchData(page)
   }
 
   const totalPages = Math.ceil(productsData.count / 10)
@@ -89,7 +85,11 @@ const BestSale = () => {
       {/* Header */}
       <div className="flex justify-between items-center border-b border-[var(--lightGray4)] mb-4">
         <h1 className="text-lg text-[var(--darkGray4)] font-semibold">
-          {selectedCategory ? 'Produtos da Categoria' : 'Mais Vendidos'}
+          {selectedCategory
+            ? `Produtos da Categoria: ${selectedCategoryName}`
+            : selectedSubcategory
+              ? `Produtos da Subcategoria: ${selectedSubcategoryName}`
+              : 'Mais Vendidos'}
         </h1>
 
         {/* Arrows */}
@@ -138,7 +138,7 @@ const BestSale = () => {
               ))
             ) : (
               <div className="col-span-5 text-center py-10 text-gray-500">
-                Nenhum produto encontrado para esta categoria.
+                Nenhum produto encontrado.
               </div>
             )}
           </div>
@@ -159,7 +159,6 @@ const BestSale = () => {
   )
 }
 
-// Discount helper
 function calculateDiscount(original, sale) {
   const originalPrice = parseFloat(original)
   const salePrice = parseFloat(sale)

@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { FaBars } from 'react-icons/fa'
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'
 import { PTflag, USflag } from '@/assets/icons/index'
-import { getAllCategories, getAllProducts } from '@/apis/products'
+import { getAllCategories } from '@/apis/products'
 import useProductsStore from '@/store/productsStore'
 import { useRouter } from 'next/navigation'
 
@@ -21,69 +21,57 @@ export default function BottomNavbar() {
   const [hoveredCategory, setHoveredCategory] = useState(null)
   const [hoveredSubcategory, setHoveredSubcategory] = useState(null)
 
-  // Get the store functions
+  // Get store functions
   const {
     setCategories: setStoreCategories,
     setSelectedCategory,
+    setSelectedSubcategory,
     fetchFilteredProducts,
   } = useProductsStore()
 
-  const fetchData = async (page = 1, search = '') => {
+  const fetchCategories = async (page = 1, search = '') => {
     try {
       const response = await getAllCategories(page, search)
       setCategories(response)
-      setStoreCategories(response.results || []) // Also update the store
+      setStoreCategories(response.results || [])
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     }
   }
 
   useEffect(() => {
-    fetchData()
+    fetchCategories()
   }, [])
-
-  // Handle category selection
-  // const handleCategorySelect = async (categoryId, e) => {
-  //   e.preventDefault()
-  //   e.stopPropagation()
-
-  //   // Update the store with the selected category
-  //   setSelectedCategory(categoryId)
-
-  //   // Fetch products with the selected category
-  //   await fetchFilteredProducts(getAllProducts)
-
-  //   // Navigate to the category page with the category parameter
-  //   router.push(`/categoryById?category=${categoryId}`)
-  // }
 
   const handleCategorySelect = async (categoryId, categoryName, e) => {
     e.preventDefault()
     e.stopPropagation()
-
-    // Update the store with the selected category ID and name
     setSelectedCategory(categoryId, categoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?category=${categoryId}`)
+  }
 
-    // Fetch products with the selected category
-    await fetchFilteredProducts(getAllProducts)
-
-    // Navigate to the category page
-    router.push(`/categoryById?category=${categoryId}`)
+  const handleSubcategorySelect = async (subcategoryId, subcategoryName, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelectedSubcategory(subcategoryId, subcategoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?subcategory=${subcategoryId}`)
   }
 
   return (
     <div className="bg-[var(--primary)] text-[var(--White)] text-sm relative z-50">
       <nav className="Container flex items-center justify-between py-2">
-        {/* Left: Category Menu */}
+        {/* Category Menu */}
         <div className="relative group">
           <div className="flex items-center gap-2 font-semibold cursor-pointer">
             <FaBars size={25} />
-            <Link href="/category">
+            <Link href="/">
               <span>Comprar por Categoria</span>
             </Link>
           </div>
 
-          {/* Dropdown on hover */}
+          {/* Dropdown */}
           <ul className="absolute top-full left-0 bg-[var(--White)] border border-[var(--darkGray)] text-black rounded w-56 p-2 hidden group-hover:block z-50 shadow-lg">
             {categories.results.map((category) => (
               <li
@@ -109,7 +97,7 @@ export default function BottomNavbar() {
                   )}
                 </div>
 
-                {/* Subcategories - Show on hover */}
+                {/* Subcategories */}
                 {hoveredCategory === category.id &&
                   category.sub_categories?.length > 0 && (
                     <ul
@@ -128,10 +116,14 @@ export default function BottomNavbar() {
                         >
                           <div className="flex justify-between items-center hover:bg-[var(--lightGray)] px-3 py-1 cursor-pointer">
                             <Link
-                              href={`/category?category=${subcategory.id}`}
+                              href={`/category?subcategory=${subcategory.id}`}
                               className="flex-grow"
                               onClick={(e) =>
-                                handleCategorySelect(subcategory.id, e)
+                                handleSubcategorySelect(
+                                  subcategory.id,
+                                  subcategory.name,
+                                  e
+                                )
                               }
                             >
                               {subcategory.name}
@@ -143,7 +135,7 @@ export default function BottomNavbar() {
                             )}
                           </div>
 
-                          {/* Children of Sub-category - Show on hover */}
+                          {/* Child subcategories */}
                           {hoveredSubcategory === subcategory.id &&
                             subcategory.children?.length > 0 && (
                               <ul
@@ -156,10 +148,14 @@ export default function BottomNavbar() {
                                 {subcategory.children.map((child) => (
                                   <li key={child.id}>
                                     <Link
-                                      href={`/category?category=${child.id}`}
+                                      href={`/category?subcategory=${child.id}`}
                                       className="block hover:bg-[var(--lightGray)] px-3 py-1"
                                       onClick={(e) =>
-                                        handleCategorySelect(child.id, e)
+                                        handleSubcategorySelect(
+                                          child.id,
+                                          child.name,
+                                          e
+                                        )
                                       }
                                     >
                                       {child.name}
@@ -177,13 +173,10 @@ export default function BottomNavbar() {
           </ul>
         </div>
 
-        {/* Center: Navigation Links */}
+        {/* Navigation Links */}
         <ul className="flex items-center gap-6 font-medium">
           <li>
             <Link href="/">Home</Link>
-          </li>
-          <li>
-            <Link href="/category">Category</Link>
           </li>
           <li>
             <Link href="#">Serviços</Link>
@@ -193,7 +186,7 @@ export default function BottomNavbar() {
           </li>
         </ul>
 
-        {/* Right: Language Selector */}
+        {/* Language Selector */}
         <div className="flex items-center gap-4">
           <Link href="/trackorder" className="whitespace-nowrap">
             Acompanhar Encomenda
