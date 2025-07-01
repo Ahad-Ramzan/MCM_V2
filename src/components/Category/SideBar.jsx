@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { getAllBrands, getAllCategories, getAllProducts } from '@/apis/products'
 import { useRouter } from 'next/navigation'
 import useProductsStore from '@/store/productsStore'
+import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md'
 
 const SidebarFilter = () => {
   const router = useRouter()
@@ -14,21 +15,29 @@ const SidebarFilter = () => {
     products,
     brands,
     categories,
+    selectedCategory,
+    selectedSubcategory,
     setProducts,
     setBrands,
     setCategories,
+    setSelectedCategory,
+    setSelectedSubcategory,
   } = useProductsStore()
 
-  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [expandedCategories, setExpandedCategories] = useState({})
   const [selectedBrand, setSelectedBrand] = useState(null)
   const [price, setPrice] = useState([0, 10000])
   const [loading, setLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusQuery, setStatusQuery] = useState('')
-
-  // Debounce price changes to avoid too many API calls
   const [priceDebounceTimeout, setPriceDebounceTimeout] = useState(null)
+
+  // Toggle category expansion
+  const toggleCategory = useCallback((categoryId) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoryId]: !prev[categoryId],
+    }))
+  }, [])
 
   // Get current URL parameters
   const getCurrentParams = useCallback(() => {
@@ -37,6 +46,7 @@ const SidebarFilter = () => {
     const params = new URLSearchParams(window.location.search)
     return {
       category: params.get('category'),
+      subcategory: params.get('subcategory'),
       brand: params.get('brand'),
       sale_price_min: params.get('sale_price_min') || '0',
       sale_price_max: params.get('sale_price_max') || '10000',
@@ -47,7 +57,14 @@ const SidebarFilter = () => {
 
   // Memoized URL update function
   const updateUrlAndFetchProducts = useCallback(
-    (categoryId, brandId, minPrice, maxPrice, shouldFetch = true) => {
+    (
+      categoryId,
+      subcategoryId,
+      brandId,
+      minPrice,
+      maxPrice,
+      shouldFetch = true
+    ) => {
       if (typeof window === 'undefined') return
 
       const params = new URLSearchParams(window.location.search)
@@ -56,6 +73,12 @@ const SidebarFilter = () => {
         params.set('category', categoryId)
       } else {
         params.delete('category')
+      }
+
+      if (subcategoryId) {
+        params.set('subcategory', subcategoryId)
+      } else {
+        params.delete('subcategory')
       }
 
       if (brandId) {
@@ -71,7 +94,13 @@ const SidebarFilter = () => {
       window.history.replaceState({}, '', newUrl)
 
       if (shouldFetch) {
-        fetchProductsWithFilters(categoryId, brandId, minPrice, maxPrice)
+        fetchProductsWithFilters(
+          categoryId,
+          subcategoryId,
+          brandId,
+          minPrice,
+          maxPrice
+        )
       }
     },
     []
@@ -90,6 +119,7 @@ const SidebarFilter = () => {
       const timeout = setTimeout(() => {
         updateUrlAndFetchProducts(
           selectedCategory,
+          selectedSubcategory,
           selectedBrand,
           newPrice[0],
           newPrice[1]
@@ -101,6 +131,7 @@ const SidebarFilter = () => {
     [
       price,
       selectedCategory,
+      selectedSubcategory,
       selectedBrand,
       updateUrlAndFetchProducts,
       priceDebounceTimeout,
@@ -108,21 +139,94 @@ const SidebarFilter = () => {
   )
 
   const handleCategorySelect = useCallback(
-    (categoryId) => {
+    (categoryId, categoryName) => {
       const newCategory = selectedCategory === categoryId ? null : categoryId
-      setSelectedCategory(newCategory)
-      updateUrlAndFetchProducts(newCategory, selectedBrand, price[0], price[1])
+      const newCategoryName =
+        selectedCategory === categoryId ? '' : categoryName
+
+      setSelectedCategory(newCategory, newCategoryName)
+      // Do not clear subcategory when selecting a new category
+      updateUrlAndFetchProducts(
+        newCategory,
+        selectedSubcategory,
+        selectedBrand,
+        price[0],
+        price[1]
+      )
+
+      // Expand the selected category
+      if (newCategory) {
+        setExpandedCategories((prev) => ({
+          ...prev,
+          [newCategory]: true,
+        }))
+      }
     },
-    [selectedCategory, selectedBrand, price, updateUrlAndFetchProducts]
+    [
+      selectedCategory,
+      selectedSubcategory,
+      selectedBrand,
+      price,
+      updateUrlAndFetchProducts,
+      setSelectedCategory,
+    ]
+  )
+
+  const handleSubcategorySelect = useCallback(
+    (subcategoryId, subcategoryName) => {
+      const newSubcategory =
+        selectedSubcategory === subcategoryId ? null : subcategoryId
+      const newSubcategoryName =
+        selectedSubcategory === subcategoryId ? '' : subcategoryName
+
+      setSelectedSubcategory(newSubcategory, newSubcategoryName)
+      updateUrlAndFetchProducts(
+        selectedCategory,
+        newSubcategory,
+        selectedBrand,
+        price[0],
+        price[1]
+      )
+    },
+    [
+      selectedSubcategory,
+      selectedBrand,
+      price,
+      updateUrlAndFetchProducts,
+      setSelectedSubcategory,
+      selectedCategory,
+    ]
   )
 
   const handleBrandSelect = useCallback(
     (brandId) => {
       const newBrand = selectedBrand === brandId ? null : brandId
+
+      // If a brand is selected, ensure the category is set
+      if (newBrand) {
+        const defaultCategoryId = categories[0]?.id // Set to the first category or any logic you prefer
+        setSelectedCategory(defaultCategoryId, categories[0]?.name) // Set the default category
+      } else {
+        setSelectedCategory(null, '') // Clear category if brand is deselected
+      }
+
       setSelectedBrand(newBrand)
-      updateUrlAndFetchProducts(selectedCategory, newBrand, price[0], price[1])
+      updateUrlAndFetchProducts(
+        newBrand ? selectedCategory : null,
+        selectedSubcategory,
+        newBrand,
+        price[0],
+        price[1]
+      )
     },
-    [selectedCategory, selectedBrand, price, updateUrlAndFetchProducts]
+    [
+      selectedCategory,
+      selectedSubcategory,
+      selectedBrand,
+      price,
+      updateUrlAndFetchProducts,
+      categories,
+    ]
   )
 
   const fetchBrands = useCallback(async () => {
@@ -144,7 +248,7 @@ const SidebarFilter = () => {
   }, [setCategories])
 
   const fetchProductsWithFilters = useCallback(
-    async (categoryId, brandId, min, max) => {
+    async (categoryId, subcategoryId, brandId, min, max) => {
       try {
         setLoading(true)
         const currentParams = getCurrentParams()
@@ -155,7 +259,8 @@ const SidebarFilter = () => {
           categoryId || '',
           currentParams.status || '',
           min,
-          max
+          max,
+          subcategoryId || ''
         )
         setProducts(data.results || [])
       } catch (error) {
@@ -168,15 +273,22 @@ const SidebarFilter = () => {
   )
 
   const clearAllFilters = useCallback(() => {
-    setSelectedCategory(null)
+    setSelectedCategory(null, '')
+    setSelectedSubcategory(null, '')
     setSelectedBrand(null)
     setPrice([0, 10000])
-    updateUrlAndFetchProducts(null, null, 0, 10000)
-  }, [updateUrlAndFetchProducts])
+    updateUrlAndFetchProducts(null, null, null, 0, 10000)
+  }, [updateUrlAndFetchProducts, setSelectedCategory, setSelectedSubcategory])
 
   const hasActiveFilters = useMemo(() => {
-    return selectedCategory || selectedBrand || price[0] > 0 || price[1] < 10000
-  }, [selectedCategory, selectedBrand, price])
+    return (
+      selectedCategory ||
+      selectedSubcategory ||
+      selectedBrand ||
+      price[0] > 0 ||
+      price[1] < 10000
+    )
+  }, [selectedCategory, selectedSubcategory, selectedBrand, price])
 
   // Initialize filters from URL parameters only once
   useEffect(() => {
@@ -188,7 +300,14 @@ const SidebarFilter = () => {
         const currentParams = getCurrentParams()
 
         setSelectedCategory(
-          currentParams.category ? parseInt(currentParams.category) : null
+          currentParams.category ? parseInt(currentParams.category) : null,
+          ''
+        )
+        setSelectedSubcategory(
+          currentParams.subcategory
+            ? parseInt(currentParams.subcategory)
+            : null,
+          ''
         )
         setSelectedBrand(
           currentParams.brand ? parseInt(currentParams.brand) : null
@@ -197,11 +316,27 @@ const SidebarFilter = () => {
           parseInt(currentParams.sale_price_min),
           parseInt(currentParams.sale_price_max),
         ])
-        setSearchQuery(currentParams.search)
-        setStatusQuery(currentParams.status)
+
+        // Expand category if subcategory is selected
+        if (currentParams.subcategory) {
+          const parentCategory = categories.find((cat) =>
+            cat.sub_categories?.some(
+              (sub) => sub.id === parseInt(currentParams.subcategory)
+            )
+          )
+          if (parentCategory) {
+            setExpandedCategories((prev) => ({
+              ...prev,
+              [parentCategory.id]: true,
+            }))
+          }
+        }
 
         await fetchProductsWithFilters(
           currentParams.category ? parseInt(currentParams.category) : null,
+          currentParams.subcategory
+            ? parseInt(currentParams.subcategory)
+            : null,
           currentParams.brand ? parseInt(currentParams.brand) : null,
           currentParams.sale_price_min,
           currentParams.sale_price_max
@@ -218,6 +353,9 @@ const SidebarFilter = () => {
     fetchBrands,
     fetchCategories,
     fetchProductsWithFilters,
+    categories,
+    setSelectedCategory,
+    setSelectedSubcategory,
   ])
 
   // Cleanup timeout on unmount
@@ -243,56 +381,102 @@ const SidebarFilter = () => {
           <h3 className="font-semibold mb-6 text-md uppercase">Categorias</h3>
           <ul className="space-y-3 text-sm text-[var(--darkGray4)]">
             {categories.map((cat) => (
-              <li
-                key={cat.id}
-                className="flex items-center gap-2 cursor-pointer hover:text-black transition-colors"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleCategorySelect(cat.id)
-                }}
-              >
-                <div className="relative">
-                  <input
-                    type="radio"
-                    name="category"
-                    checked={selectedCategory === cat.id}
-                    onChange={(e) => {
-                      e.stopPropagation()
-                      handleCategorySelect(cat.id)
-                    }}
-                    className="w-4 h-4 bg-gray-100 border-gray-300 focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-gray-300 focus:shadow-none"
-                    style={{
-                      outline: 'none',
-                      boxShadow: 'none',
-                      border:
-                        selectedCategory === cat.id
-                          ? '2px solid var(--secondary)'
-                          : '2px solid #d1d5db',
-                    }}
-                  />
+              <li key={cat.id} className="space-y-3">
+                <div className="flex items-center gap-2 cursor-pointer hover:text-black transition-colors">
+                  <div className="relative">
+                    <input
+                      type="radio"
+                      name="category"
+                      checked={selectedCategory === cat.id}
+                      onChange={(e) => {
+                        e.stopPropagation()
+                        handleCategorySelect(cat.id, cat.name)
+                      }}
+                      className="w-4 h-4 bg-gray-100 border-gray-300 focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-gray-300 focus:shadow-none"
+                      style={{
+                        outline: 'none',
+                        boxShadow: 'none',
+                        border:
+                          selectedCategory === cat.id
+                            ? '2px solid var(--secondary)'
+                            : '2px solid #d1d5db',
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={`flex-1 ${selectedCategory === cat.id ? 'font-bold text-black' : ''}`}
+                    onClick={() => toggleCategory(cat.id)}
+                  >
+                    {cat.name}
+                  </span>
+                  {cat.sub_categories?.length > 0 && (
+                    <button onClick={() => toggleCategory(cat.id)}>
+                      {expandedCategories[cat.id] ? (
+                        <MdKeyboardArrowUp size={18} />
+                      ) : (
+                        <MdKeyboardArrowDown size={18} />
+                      )}
+                    </button>
+                  )}
                 </div>
-                <span
-                  className={`${
-                    selectedCategory === cat.id ? 'font-bold text-black' : ''
-                  }`}
-                >
-                  {cat.name}
-                </span>
+
+                {/* Subcategories */}
+                {expandedCategories[cat.id] &&
+                  cat.sub_categories?.length > 0 && (
+                    <ul className="ml-6 space-y-2">
+                      {cat.sub_categories.map((sub) => (
+                        <li
+                          key={sub.id}
+                          className="flex items-center gap-2 cursor-pointer hover:text-black transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleSubcategorySelect(sub.id, sub.name)
+                          }}
+                        >
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              name="subcategory"
+                              checked={selectedSubcategory === sub.id}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                handleSubcategorySelect(sub.id, sub.name)
+                              }}
+                              className="w-4 h-4 bg-gray-100 border-gray-300 focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-gray-300 focus:shadow-none"
+                              style={{
+                                outline: 'none',
+                                boxShadow: 'none',
+                                border:
+                                  selectedSubcategory === sub.id
+                                    ? '2px solid var(--secondary)'
+                                    : '2px solid #d1d5db',
+                              }}
+                            />
+                          </div>
+                          <span
+                            className={`${selectedSubcategory === sub.id ? 'font-bold text-black' : ''}`}
+                          >
+                            {sub.name}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
               </li>
             ))}
           </ul>
 
-          {selectedCategory && (
+          {(selectedCategory || selectedSubcategory) && (
             <button
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                handleCategorySelect(null)
+                clearAllFilters()
               }}
               className="mt-3 text-xs text-red-500 hover:text-red-700 underline"
             >
-              Limpar categoria
+              Limpar filtros
             </button>
           )}
         </div>
@@ -332,9 +516,7 @@ const SidebarFilter = () => {
                   />
                 </div>
                 <span
-                  className={`${
-                    selectedBrand === brand.id ? 'font-bold text-black' : ''
-                  }`}
+                  className={`${selectedBrand === brand.id ? 'font-bold text-black' : ''}`}
                 >
                   {brand.brand_name}
                 </span>

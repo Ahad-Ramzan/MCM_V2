@@ -3,29 +3,14 @@ import React, { useEffect, useState } from 'react'
 import CategoryCard from '@/ui/TopCategoryCard'
 import { getAllCategories } from '@/apis/products'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import useProductsStore from '@/store/productsStore'
+import { useRouter } from 'next/navigation'
 
 const TopCategories = ({ category }) => {
-  const [categories, setCategories] = useState({
-    count: 0,
-    next: null,
-    previous: null,
-    results: [],
-  })
+  const router = useRouter()
   const [currentPage, setCurrentPage] = useState(0)
   const cardsPerPage = 7
-
-  const fetchCategoryData = async () => {
-    try {
-      const response = await getAllCategories()
-      setCategories(response)
-    } catch (error) {
-      console.error('Failed to fetch categories:', error)
-    }
-  }
-
-  useEffect(() => {
-    fetchCategoryData()
-  }, [])
+  const { setSelectedCategory, fetchFilteredProducts } = useProductsStore()
 
   // Calculate total number of pages
   const totalPages = Math.ceil(category.length / cardsPerPage)
@@ -47,6 +32,15 @@ const TopCategories = ({ category }) => {
     return category.slice(startIndex, endIndex)
   }
 
+  // Handle category selection - same as BottomNavbar
+  const handleCategorySelect = async (categoryId, categoryName, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelectedCategory(categoryId, categoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?category=${categoryId}`)
+  }
+
   return (
     <div className="Container my-10 relative">
       <h2 className="text-lg font-semibold mb-4">Top Categorias</h2>
@@ -60,14 +54,15 @@ const TopCategories = ({ category }) => {
           <FaChevronLeft />
         </button>
 
-        {/* Cards Container - No scrolling */}
+        {/* Cards Container */}
         <div className="flex justify-center gap-4 transition-all duration-500 ease-in-out">
           {getVisibleCards().map((item, index) => (
             <div
               key={index + currentPage * cardsPerPage}
               className="w-[140px] sm:w-[160px] md:w-[180px] transition-all duration-300"
+              onClick={(e) => handleCategorySelect(item.id, item.name, e)}
             >
-              <CategoryCard title={item.name} image={item.image} />
+              <CategoryCard title={item.name} image={item.image} id={item.id} />
             </div>
           ))}
         </div>

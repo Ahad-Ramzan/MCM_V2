@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import ProductCardStar from '@/ui/ProductCardStar'
 import {
   getAllProducts,
@@ -17,6 +18,7 @@ import { toast } from 'react-toastify'
 import useProductsStore from '@/store/productsStore'
 
 const FlooringCoatingSection = () => {
+  const router = useRouter()
   const scrollRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(1)
@@ -29,17 +31,27 @@ const FlooringCoatingSection = () => {
     previous: null,
     results: [],
   })
-  
-  const { setSelectedCategory } = useProductsStore()
 
+  const { setSelectedCategory, fetchFilteredProducts } = useProductsStore()
   const [viewMode, setViewMode] = useState('default')
 
-  // Fetch featured category and its products
+  // Category selection handler (same as BottomNavbar)
+  const handleCategorySelect = async (categoryId, categoryName, e) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    setSelectedCategory(categoryId, categoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?category=${categoryId}`)
+  }
+
+  // Fetch featured category
   const fetchFeaturedCategory = async () => {
     try {
       const categoriesResponse = await getAllCategories()
       const featuredCat = categoriesResponse.results.find(
-        (cat) => cat.feature === 'feature3' // Changed from feature1 to feature3
+        (cat) => cat.feature === 'feature3'
       )
 
       if (!featuredCat) {
@@ -54,6 +66,7 @@ const FlooringCoatingSection = () => {
     }
   }
 
+  // Fetch products
   const fetchProducts = async (categoryId, page = 1) => {
     try {
       const response = await getAllProducts(
@@ -76,6 +89,7 @@ const FlooringCoatingSection = () => {
     }
   }
 
+  // Fetch best sellers
   const fetchBestSellers = async (categoryId) => {
     try {
       const response = await getAllBestSellers(categoryId)
@@ -141,7 +155,8 @@ const FlooringCoatingSection = () => {
     }
   }
 
-  const fetchallDataProducts = async (categoryId) => {
+  // Fetch all products
+  const fetchAllDataProducts = async (categoryId) => {
     try {
       const response = await getAllListAllProducts(categoryId)
       return {
@@ -151,8 +166,8 @@ const FlooringCoatingSection = () => {
         results: response.results,
       }
     } catch (error) {
-      console.error('Error fetching popular products:', error)
-      toast.error('Failed to load popular products')
+      console.error('Error fetching all products:', error)
+      toast.error('Failed to load products')
       return {
         count: 0,
         next: null,
@@ -162,11 +177,11 @@ const FlooringCoatingSection = () => {
     }
   }
 
+  // Initial data load
   useEffect(() => {
     const loadData = async () => {
       setLoading(true)
 
-      // 1. Get featured category
       const category = await fetchFeaturedCategory()
       if (!category) {
         setLoading(false)
@@ -176,16 +191,15 @@ const FlooringCoatingSection = () => {
       setFeaturedCategory(category)
       setSelectedCategory(category.id, category.name)
 
-      // 2. Get products for this category
       const products = await fetchProducts(category.id)
       setProductsData(products)
-
       setLoading(false)
     }
 
     loadData()
   }, [])
 
+  // Handle page change
   const handlePageChange = async (page) => {
     if (!featuredCategory) return
 
@@ -209,6 +223,7 @@ const FlooringCoatingSection = () => {
     }
   }
 
+  // Handle view mode change
   const handleViewModeChange = async (mode) => {
     if (!featuredCategory || mode === viewMode) return
 
@@ -228,9 +243,8 @@ const FlooringCoatingSection = () => {
           products = await fetchPopularProducts(featuredCategory.id)
           break
         case 'seeall':
-          products = await fetchallDataProducts(featuredCategory.id)
+          products = await fetchAllDataProducts(featuredCategory.id)
           break
-
         default:
           products = await fetchProducts(featuredCategory.id)
       }
@@ -281,7 +295,22 @@ const FlooringCoatingSection = () => {
       {/* Menu Bar */}
       <div className="w-full flex justify-between flex-wrap bg-gray-100 p-4 my-12">
         <h2 className="text-lg sm:text-xl font-normal">
-          {featuredCategory?.name || 'Pavimentos e Revestimentos'}
+          {featuredCategory ? (
+            <Link
+              href={`/category?category=${featuredCategory.id}`}
+              onClick={(e) =>
+                handleCategorySelect(
+                  featuredCategory.id,
+                  featuredCategory.name,
+                  e
+                )
+              }
+            >
+              {featuredCategory.name}
+            </Link>
+          ) : (
+            'Pavimentos e Revestimentos'
+          )}
         </h2>
         <div className="flex gap-4 flex-wrap items-center text-sm text-[var(--darkGray4)] text-nowrap">
           <Link
@@ -314,22 +343,21 @@ const FlooringCoatingSection = () => {
           >
             Populares
           </Link>
-
-          <Link
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              handleViewModeChange('seeall')
-            }}
-            className={viewMode === 'seeall' ? 'font-bold' : ''}
-          >
-            Ver todos
-          </Link>
-          {/* {featuredCategory && (
-                    <Link href={`/category?category=${featuredCategory.id}`}>
-                      Ver todos
-                    </Link>
-                  )} */}
+          {featuredCategory && (
+            <Link
+              href={`/category?category=${featuredCategory.id}`}
+              onClick={(e) =>
+                handleCategorySelect(
+                  featuredCategory.id,
+                  featuredCategory.name,
+                  e
+                )
+              }
+              className={viewMode === 'seeall' ? 'font-bold' : ''}
+            >
+              Ver todos
+            </Link>
+          )}
         </div>
       </div>
 
