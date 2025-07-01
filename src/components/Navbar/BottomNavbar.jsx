@@ -101,7 +101,7 @@ export default function BottomNavbar() {
                 {hoveredCategory === category.id &&
                   category.sub_categories?.length > 0 && (
                     <ul
-                      className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg"
+                      className="absolute left-full top-0 -ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg"
                       onMouseEnter={() => setHoveredCategory(category.id)}
                       onMouseLeave={() => setHoveredCategory(null)}
                     >
@@ -139,7 +139,7 @@ export default function BottomNavbar() {
                           {hoveredSubcategory === subcategory.id &&
                             subcategory.children?.length > 0 && (
                               <ul
-                                className="absolute left-full top-0 ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg"
+                                className="absolute left-full top-0 -ml-1 bg-[var(--White)] border border-[var(--darkGray)] rounded w-56 p-2 shadow-lg"
                                 onMouseEnter={() =>
                                   setHoveredSubcategory(subcategory.id)
                                 }

@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import Link from 'next/link'
 import ProductCardStar from '@/ui/ProductCardStar'
+import { useRouter } from 'next/navigation'
 import {
   getAllProducts,
   getAllCategories,
@@ -17,6 +18,7 @@ import { toast } from 'react-toastify'
 import useProductsStore from '@/store/productsStore'
 
 const InsulationSection = () => {
+  const router = useRouter()
   const scrollRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(1)
@@ -31,7 +33,18 @@ const InsulationSection = () => {
   })
   const [viewMode, setViewMode] = useState('default') // 'default', 'newProducts', 'bestSellers', or 'popularProducts'
 
-  const { setSelectedCategory } = useProductsStore()
+  const { setSelectedCategory, fetchFilteredProducts } = useProductsStore()
+
+  // Category selection handler (same as BottomNavbar)
+  const handleCategorySelect = async (categoryId, categoryName, e) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    setSelectedCategory(categoryId, categoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?category=${categoryId}`)
+  }
 
   // Fetch featured category
   const fetchFeaturedCategory = async () => {
@@ -298,7 +311,22 @@ const InsulationSection = () => {
       {/* Menu Bar */}
       <div className="w-full flex justify-between flex-wrap bg-gray-100 p-4 my-12">
         <h2 className="text-xl font-normal">
-          {featuredCategory?.name || 'Carregando...'}
+          {featuredCategory ? (
+            <Link
+              href={`/category?category=${featuredCategory.id}`}
+              onClick={(e) =>
+                handleCategorySelect(
+                  featuredCategory.id,
+                  featuredCategory.name,
+                  e
+                )
+              }
+            >
+              {featuredCategory.name}
+            </Link>
+          ) : (
+            'Revestimentos'
+          )}
         </h2>
         <div className="flex gap-4 flex-wrap items-center text-sm text-[var(--darkGray4)] text-nowrap">
           <Link
@@ -332,16 +360,21 @@ const InsulationSection = () => {
             Populares
           </Link>
 
-          <Link
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              handleViewModeChange('seeall')
-            }}
-            className={viewMode === 'seeall' ? 'font-bold' : ''}
-          >
-            Ver todos
-          </Link>
+          {featuredCategory && (
+            <Link
+              href={`/category?category=${featuredCategory.id}`}
+              onClick={(e) =>
+                handleCategorySelect(
+                  featuredCategory.id,
+                  featuredCategory.name,
+                  e
+                )
+              }
+              className={viewMode === 'seeall' ? 'font-bold' : ''}
+            >
+              Ver todos
+            </Link>
+          )}
           {/* {featuredCategory && (
             <Link href={`/category?category=${featuredCategory.id}`}>
               Ver todos

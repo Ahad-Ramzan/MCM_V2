@@ -3,8 +3,11 @@ import React, { useEffect, useState } from 'react'
 import CategoryCard from '@/ui/CategoryCard'
 import { getAllCategories } from '@/apis/products'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import useProductsStore from '@/store/productsStore'
+import { useRouter } from 'next/navigation'
 
 const CategoryGrid = () => {
+  const router = useRouter()
   const [categories, setCategories] = useState({
     count: 0,
     next: null,
@@ -14,10 +17,19 @@ const CategoryGrid = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const cardsPerPage = 5 // Number of cards to show at once
 
+  // Get store functions
+  const {
+    setCategories: setStoreCategories,
+    setSelectedCategory,
+    setSelectedSubcategory,
+    fetchFilteredProducts,
+  } = useProductsStore()
+
   const fetchCategoryData = async () => {
     try {
       const response = await getAllCategories()
       setCategories(response)
+      setStoreCategories(response.results || [])
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     }
@@ -26,6 +38,22 @@ const CategoryGrid = () => {
   useEffect(() => {
     fetchCategoryData()
   }, [])
+
+  const handleCategorySelect = async (categoryId, categoryName, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelectedCategory(categoryId, categoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?category=${categoryId}`)
+  }
+
+  const handleSubcategorySelect = async (subcategoryId, subcategoryName, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelectedSubcategory(subcategoryId, subcategoryName)
+    await fetchFilteredProducts()
+    router.push(`/category?subcategory=${subcategoryId}`)
+  }
 
   // Calculate total number of pages
   const totalPages = Math.ceil((categories.results?.length || 0) / cardsPerPage)
@@ -66,8 +94,11 @@ const CategoryGrid = () => {
             <div key={index} className="flex-1 min-w-0">
               <CategoryCard
                 title={category.name}
-                items={category.sub_categories.map((sub) => sub.name)}
+                items={category.sub_categories}
                 image={category.image}
+                onCategorySelect={handleCategorySelect}
+                onSubcategorySelect={handleSubcategorySelect}
+                categoryId={category.id}
               />
             </div>
           ))}
