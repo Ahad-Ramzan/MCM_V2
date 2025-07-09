@@ -100,6 +100,23 @@ export const loginUser = async (email, password) => {
   }
 }
 
+export const changepassword = async (changepsd) => {
+  try {
+    const response = await axiosInstance.post(
+      'user/change-password/',
+      changepsd
+    )
+    console.log('Change Password:', response.data)
+    return response.data
+  } catch (error) {
+    console.error(
+      'Error change password:',
+      error.response?.data || error.message
+    )
+    throw new Error('Failed to change password')
+  }
+}
+
 export const getCurrentUser = async () => {
   try {
     const response = await axiosInstance.get('user/me/')
