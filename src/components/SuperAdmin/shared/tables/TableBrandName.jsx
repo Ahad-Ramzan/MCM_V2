@@ -27,6 +27,7 @@ const TableBrandName = ({ productsData, onDelete, onUpdateBrand }) => {
         <thead>
           <tr>
             <th>ID</th>
+            <th>Image</th>
             <th>Brand Name</th>
             <th>Actions</th>
           </tr>
@@ -35,6 +36,9 @@ const TableBrandName = ({ productsData, onDelete, onUpdateBrand }) => {
           {productsData.map((brand) => (
             <tr key={brand.id}>
               <td>{brand.id}</td>
+              <td>
+                <img src={brand.image} alt={`Brand ${brand.id}`} width="100" />
+              </td>
               <td>{brand.brand_name}</td>
               <td>
                 <button

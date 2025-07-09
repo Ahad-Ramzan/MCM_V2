@@ -75,7 +75,7 @@ const EditBannerPage = ({ bannerData, onSuccess, onUpdated, onClose }) => {
         }
       )
 
-      toast.success('Banner updated successfully!')
+      toast.success('Banner updated successfully.')
       onSuccess()
       onUpdated()
       handleClose()

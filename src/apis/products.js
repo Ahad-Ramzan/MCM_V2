@@ -129,9 +129,6 @@ export const getAllBestSellers = async (category = '') => {
   }
 }
 
-
-
-
 export const getAllNewProducts = async (category = '') => {
   try {
     const response = await ESTORE_API.get(`products/new/`, {
@@ -147,9 +144,6 @@ export const getAllNewProducts = async (category = '') => {
   }
 }
 
-
-
-
 export const getAllPopularProducts = async (category = '') => {
   try {
     const response = await ESTORE_API.get(`products/popular/`, {
@@ -164,8 +158,6 @@ export const getAllPopularProducts = async (category = '') => {
     throw new Error('Failed to fetch categories')
   }
 }
-
-
 
 export const getAllListAllProducts = async (category = '') => {
   try {
