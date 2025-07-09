@@ -25,6 +25,12 @@ const useCartStore = create(
           cart: state.cart.filter((item) => item.id !== id),
         })),
       clearCart: () => set({ cart: [] }),
+      updateQuantity: (id, quantity) =>
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
+          ),
+        })),
     }),
     {
       name: 'cart-storage', // The name for the persisted state

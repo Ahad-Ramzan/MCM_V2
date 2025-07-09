@@ -44,7 +44,7 @@ export const AddAddress = async (addressPayload) => {
     const response = await axiosInstance.post('user/addresses/', addressPayload)
     return response.data
   } catch (e) {
-    throw new Error('Login Failed')
+    throw new Error('Address Failed')
   }
 }
 
