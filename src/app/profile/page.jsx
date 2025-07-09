@@ -7,6 +7,7 @@ import {
   AddAddress,
   deleteAddress,
   updateAddress,
+  changepassword, // Import change password API
 } from '@/apis/userApi'
 import React, { useEffect, useState } from 'react'
 import {
@@ -17,6 +18,7 @@ import {
   FaTrash,
   FaChevronLeft,
   FaChevronRight,
+  FaLock, // Import lock icon for change password
 } from 'react-icons/fa'
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -55,6 +57,11 @@ const SettingsPage = () => {
     postal_code: '',
     is_default: false,
   })
+
+  // New state for password change
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false)
 
   // Fetch user data
   const fetchUserData = async () => {
@@ -204,6 +211,26 @@ const SettingsPage = () => {
     setUserData({ ...userData, addresses: updatedAddresses })
   }
 
+  // Change password handler
+  const handleChangePassword = async (e) => {
+    e.preventDefault()
+    setIsPasswordLoading(true)
+    try {
+      await changepassword({
+        old_password: oldPassword,
+        new_password: newPassword,
+      })
+      toast.success('Password changed successfully!')
+      setOldPassword('')
+      setNewPassword('')
+    } catch (error) {
+      toast.error('Failed to change password')
+      console.error('Change Password Error:', error)
+    } finally {
+      setIsPasswordLoading(false)
+    }
+  }
+
   // Pagination rendering
   const renderPaginationButtons = () => {
     const buttons = []
@@ -249,22 +276,26 @@ const SettingsPage = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-semibold">User Profile</h2>
           <div className="flex flex-wrap gap-2">
-            {['profile', 'addresses', 'orders'].map((tab) => (
-              <button
-                key={tab}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
-                  activeTab === tab
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                }`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab === 'profile' && <FaUserCircle size={18} />}
-                {tab === 'addresses' && <FaMapMarkerAlt size={18} />}
-                {tab === 'orders' && <FaShoppingBag size={18} />}
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+            {['profile', 'addresses', 'orders', 'change-password'].map(
+              (tab) => (
+                <button
+                  key={tab}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
+                    activeTab === tab
+                      ? 'bg-blue-500 text-white hover:bg-blue-600'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab === 'profile' && <FaUserCircle size={18} />}
+                  {tab === 'addresses' && <FaMapMarkerAlt size={18} />}
+                  {tab === 'orders' && <FaShoppingBag size={18} />}
+                  {tab === 'change-password' && <FaLock size={18} />}{' '}
+                  {/* Lock icon for password change */}
+                  {tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ')}
+                </button>
+              )
+            )}
           </div>
         </div>
 
@@ -273,21 +304,25 @@ const SettingsPage = () => {
           <div className="bg-gray-100 p-4 md:p-6 rounded-lg md:w-1/4">
             <h3 className="text-lg font-semibold mb-4">Navigation</h3>
             <ul className="space-y-2">
-              {['profile', 'addresses', 'orders'].map((tab) => (
-                <li key={tab}>
-                  <button
-                    className={`flex items-center gap-2 w-full p-2 rounded text-gray-600 hover:text-gray-800 ${
-                      activeTab === tab ? 'text-blue-500 bg-blue-50' : ''
-                    }`}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {tab === 'profile' && <FaUserCircle size={16} />}
-                    {tab === 'addresses' && <FaMapMarkerAlt size={16} />}
-                    {tab === 'orders' && <FaShoppingBag size={16} />}
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                </li>
-              ))}
+              {['profile', 'addresses', 'orders', 'change-password'].map(
+                (tab) => (
+                  <li key={tab}>
+                    <button
+                      className={`flex items-center gap-2 w-full p-2 rounded text-gray-600 hover:text-gray-800 ${
+                        activeTab === tab ? 'text-blue-500 bg-blue-50' : ''
+                      }`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab === 'profile' && <FaUserCircle size={16} />}
+                      {tab === 'addresses' && <FaMapMarkerAlt size={16} />}
+                      {tab === 'orders' && <FaShoppingBag size={16} />}
+                      {tab === 'change-password' && <FaLock size={16} />}
+                      {tab.charAt(0).toUpperCase() +
+                        tab.slice(1).replace('-', ' ')}
+                    </button>
+                  </li>
+                )
+              )}
             </ul>
           </div>
 
@@ -379,18 +414,6 @@ const SettingsPage = () => {
                     className="w-full p-2 border border-gray-300 bg-gray-100 rounded"
                   />
                 </div>
-
-                {/* <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Bio</label>
-                  <textarea
-                    rows={3}
-                    value={userData.bio}
-                    onChange={(e) =>
-                      setUserData({ ...userData, bio: e.target.value })
-                    }
-                    className="w-full p-2 border border-gray-300 rounded resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  ></textarea>
-                </div> */}
 
                 <div className="md:col-span-2 flex justify-end">
                   <button
@@ -667,6 +690,49 @@ const SettingsPage = () => {
                   </>
                 )}
               </div>
+            )}
+
+            {/* Change Password Tab */}
+            {activeTab === 'change-password' && (
+              <form
+                onSubmit={handleChangePassword}
+                className="bg-gray-50 p-4 rounded-lg"
+              >
+                <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    Old Password
+                  </label>
+                  <input
+                    type="password"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isPasswordLoading}
+                    className="px-6 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 disabled:bg-blue-400"
+                  >
+                    {isPasswordLoading ? 'Changing...' : 'Change Password'}
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>
