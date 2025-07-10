@@ -348,7 +348,7 @@ import {
   updateAddress,
 } from '@/apis/userApi'
 import toast, { Toaster } from 'react-hot-toast'
-import { FaEdit, FaTrash, FaMapMarkerAlt, FaCheck } from 'react-icons/fa'
+import { FaEdit, FaTrash, FaMapMarkerAlt, FaPlus } from 'react-icons/fa'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -365,9 +365,12 @@ export default function CheckoutPage() {
     city: '',
     country: '',
     postal_code: '',
-    is_default: false,
+    adr_type: 'Billing',
   })
-  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [selectedShippingAddress, setSelectedShippingAddress] = useState(null)
+  const [selectedBillingAddress, setSelectedBillingAddress] = useState(null)
+  const [showAddressForm, setShowAddressForm] = useState(false)
+  const [addressFormType, setAddressFormType] = useState('Billing')
 
   const custosEnvio = 0
   const impostos = 0
@@ -383,13 +386,15 @@ export default function CheckoutPage() {
       try {
         const response = await getCurrentUser()
         setUserAddresses(response.addresses || [])
-        // Set the default address as selected if available
-        const defaultAddress = response.addresses.find(
-          (addr) => addr.is_default
+        // Set default addresses if available
+        const billingAddress = response.addresses.find(
+          (addr) => addr.adr_type === 'Billing'
         )
-        if (defaultAddress) {
-          setSelectedAddress(defaultAddress.id)
-        }
+        const shippingAddress = response.addresses.find(
+          (addr) => addr.adr_type === 'Shipping'
+        )
+        if (billingAddress) setSelectedBillingAddress(billingAddress.id)
+        if (shippingAddress) setSelectedShippingAddress(shippingAddress.id)
       } catch (error) {
         console.error('Failed to fetch user addresses:', error)
         toast.error('Failed to load addresses')
@@ -405,8 +410,13 @@ export default function CheckoutPage() {
       return
     }
 
-    if (!selectedAddress) {
+    if (!selectedShippingAddress) {
       toast.error('Por favor selecione um endereço de entrega')
+      return
+    }
+
+    if (!selectedBillingAddress) {
+      toast.error('Por favor selecione um endereço de faturação')
       return
     }
 
@@ -416,7 +426,8 @@ export default function CheckoutPage() {
           product_id: item.id,
           quantity: item.quantity,
         })),
-        shipping_address_id: selectedAddress,
+        shipping_address_id: selectedShippingAddress,
+        billing_address_id: selectedBillingAddress,
       }
 
       await createOrder(payload)
@@ -438,25 +449,48 @@ export default function CheckoutPage() {
         await updateAddress(editingAddress, newAddress)
         setUserAddresses(
           userAddresses.map((addr) =>
-            addr.id === editingAddress ? newAddress : addr
+            addr.id === editingAddress
+              ? { ...newAddress, id: editingAddress }
+              : addr
           )
         )
         toast.success('Endereço atualizado com sucesso!')
       } else {
+        // Check if address type already exists
+        const existingAddress = userAddresses.find(
+          (addr) => addr.adr_type === newAddress.adr_type
+        )
+        if (existingAddress) {
+          toast.error(
+            `Você já tem um endereço de ${newAddress.adr_type === 'Billing' ? 'faturação' : 'entrega'}`
+          )
+          return
+        }
+
         // Add new address
         const response = await AddAddress(newAddress)
         setUserAddresses([...userAddresses, response])
+
+        // Auto-select the new address
+        if (response.adr_type === 'Billing') {
+          setSelectedBillingAddress(response.id)
+        } else {
+          setSelectedShippingAddress(response.id)
+        }
+
         toast.success('Endereço adicionado com sucesso!')
       }
 
+      // Reset form
       setNewAddress({
         street_address: '',
         city: '',
         country: '',
         postal_code: '',
-        is_default: false,
+        adr_type: 'Billing',
       })
       setEditingAddress(null)
+      setShowAddressForm(false)
     } catch (error) {
       console.error('Address operation failed:', error)
       toast.error('Falha na operação de endereço')
@@ -470,6 +504,9 @@ export default function CheckoutPage() {
       try {
         await deleteAddress(id)
         setUserAddresses(userAddresses.filter((addr) => addr.id !== id))
+        // Reset selection if deleted address was selected
+        if (selectedBillingAddress === id) setSelectedBillingAddress(null)
+        if (selectedShippingAddress === id) setSelectedShippingAddress(null)
         toast.success('Endereço excluído com sucesso!')
       } catch (error) {
         console.error('Failed to delete address:', error)
@@ -485,27 +522,27 @@ export default function CheckoutPage() {
       city: address.city,
       country: address.country,
       postal_code: address.postal_code,
-      is_default: address.is_default,
+      adr_type: address.adr_type,
     })
+    setShowAddressForm(true)
+    setAddressFormType(address.adr_type)
   }
 
-  const handleSetDefaultAddress = async (id) => {
-    try {
-      await updateAddress(id, {
-        ...userAddresses.find((addr) => addr.id === id),
-        is_default: true,
-      })
-      setUserAddresses(
-        userAddresses.map((addr) => ({
-          ...addr,
-          is_default: addr.id === id,
-        }))
-      )
-      toast.success('Endereço padrão atualizado!')
-    } catch (error) {
-      console.error('Failed to set default address:', error)
-      toast.error('Falha ao definir endereço padrão')
-    }
+  const getAddressByType = (type) => {
+    return userAddresses.find((addr) => addr.adr_type === type)
+  }
+
+  const openAddressForm = (type) => {
+    setAddressFormType(type)
+    setNewAddress({
+      street_address: '',
+      city: '',
+      country: '',
+      postal_code: '',
+      adr_type: type,
+    })
+    setEditingAddress(null)
+    setShowAddressForm(true)
   }
 
   return (
@@ -520,7 +557,7 @@ export default function CheckoutPage() {
       </h1>
 
       <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
-        {/* Itens do Carrinho */}
+        {/* Cart Items */}
         <div className="flex-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100">
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
@@ -594,9 +631,221 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* Resumo da Encomenda */}
+        {/* Order Summary and Addresses */}
         <div className="w-full lg:w-[340px] flex flex-col gap-6">
           {/* Address Section */}
+          <div className="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl p-6 border border-blue-100">
+            <h2 className="text-xl font-bold mb-4 text-blue-700 flex items-center gap-2">
+              <FaMapMarkerAlt /> Endereços
+            </h2>
+
+            {/* Shipping Address */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium text-gray-700">
+                  Endereço de Entrega
+                </h3>
+                {!getAddressByType('Shipping') && (
+                  <button
+                    onClick={() => openAddressForm('Shipping')}
+                    className="text-xs flex items-center gap-1 text-blue-500 hover:text-blue-700"
+                  >
+                    <FaPlus size={10} /> Adicionar
+                  </button>
+                )}
+              </div>
+
+              {getAddressByType('Shipping') ? (
+                <div className="p-3 rounded-lg border border-blue-200 bg-blue-50">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium">
+                        {getAddressByType('Shipping').street_address}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {getAddressByType('Shipping').city},{' '}
+                        {getAddressByType('Shipping').postal_code},{' '}
+                        {getAddressByType('Shipping').country}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() =>
+                          handleEditAddress(getAddressByType('Shipping'))
+                        }
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleDeleteAddress(getAddressByType('Shipping').id)
+                        }
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-center">
+                  <p className="text-gray-500 text-sm">
+                    Nenhum endereço de entrega
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Billing Address */}
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium text-gray-700">
+                  Endereço de Faturação
+                </h3>
+                {!getAddressByType('Billing') && (
+                  <button
+                    onClick={() => openAddressForm('Billing')}
+                    className="text-xs flex items-center gap-1 text-blue-500 hover:text-blue-700"
+                  >
+                    <FaPlus size={10} /> Adicionar
+                  </button>
+                )}
+              </div>
+
+              {getAddressByType('Billing') ? (
+                <div className="p-3 rounded-lg border border-blue-200 bg-blue-50">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium">
+                        {getAddressByType('Billing').street_address}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {getAddressByType('Billing').city},{' '}
+                        {getAddressByType('Billing').postal_code},{' '}
+                        {getAddressByType('Billing').country}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() =>
+                          handleEditAddress(getAddressByType('Billing'))
+                        }
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleDeleteAddress(getAddressByType('Billing').id)
+                        }
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-center">
+                  <p className="text-gray-500 text-sm">
+                    Nenhum endereço de faturação
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Address Form */}
+            {showAddressForm && (
+              <div className="mt-6 border-t pt-4">
+                <h3 className="font-medium mb-2">
+                  {editingAddress
+                    ? `Editar Endereço de ${addressFormType === 'Billing' ? 'Faturação' : 'Entrega'}`
+                    : `Adicionar Endereço de ${addressFormType === 'Billing' ? 'Faturação' : 'Entrega'}`}
+                </h3>
+                <form onSubmit={handleAddressSubmit} className="space-y-3">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Endereço"
+                      value={newAddress.street_address}
+                      onChange={(e) =>
+                        setNewAddress({
+                          ...newAddress,
+                          street_address: e.target.value,
+                        })
+                      }
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Cidade"
+                      value={newAddress.city}
+                      onChange={(e) =>
+                        setNewAddress({ ...newAddress, city: e.target.value })
+                      }
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="CEP"
+                      value={newAddress.postal_code}
+                      onChange={(e) =>
+                        setNewAddress({
+                          ...newAddress,
+                          postal_code: e.target.value,
+                        })
+                      }
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="País"
+                      value={newAddress.country}
+                      onChange={(e) =>
+                        setNewAddress({
+                          ...newAddress,
+                          country: e.target.value,
+                        })
+                      }
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddressForm(false)
+                        setEditingAddress(null)
+                      }}
+                      className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      {isLoading
+                        ? 'Salvando...'
+                        : editingAddress
+                          ? 'Atualizar'
+                          : 'Adicionar'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
 
           {/* Order Summary */}
           <div className="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl p-6 border border-blue-100">
@@ -625,180 +874,17 @@ export default function CheckoutPage() {
             <button
               className="mt-4 w-full bg-gradient-to-r from-blue-500 to-pink-400 hover:from-blue-600 hover:to-pink-500 text-white font-bold py-3 rounded-xl shadow-lg transition"
               onClick={handleFinalizarClick}
-              disabled={cartItems.length === 0 || !selectedAddress}
+              disabled={
+                cartItems.length === 0 ||
+                !selectedShippingAddress ||
+                !selectedBillingAddress
+              }
             >
               Finalizar Encomenda
             </button>
             <p className="text-xs text-gray-400 text-center mt-3">
               Seu pagamento é seguro e criptografado.
             </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl p-6 border border-blue-100">
-            <h2 className="text-xl font-bold mb-4 text-blue-700 flex items-center gap-2">
-              <FaMapMarkerAlt /> Endereço de Entrega
-            </h2>
-
-            {/* Address List */}
-            <div className="space-y-4 max-h-60 overflow-y-auto mb-4">
-              {userAddresses.length === 0 ? (
-                <p className="text-gray-500 text-sm">
-                  Nenhum endereço cadastrado
-                </p>
-              ) : (
-                userAddresses.map((address) => (
-                  <div
-                    key={address.id}
-                    className={`p-3 rounded-lg border ${selectedAddress === address.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                    onClick={() => setSelectedAddress(address.id)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{address.street_address}</p>
-                        <p className="text-sm text-gray-600">
-                          {address.city}, {address.postal_code},{' '}
-                          {address.country}
-                        </p>
-                        {address.is_default && (
-                          <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
-                            Padrão
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEditAddress(address)
-                          }}
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          <FaEdit size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteAddress(address.id)
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <FaTrash size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Add/Edit Address Form */}
-            <div className="mt-4">
-              <h3 className="font-medium mb-2">
-                {editingAddress ? 'Editar Endereço' : 'Adicionar Novo Endereço'}
-              </h3>
-              <form onSubmit={handleAddressSubmit} className="space-y-3">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Endereço"
-                    value={newAddress.street_address}
-                    onChange={(e) =>
-                      setNewAddress({
-                        ...newAddress,
-                        street_address: e.target.value,
-                      })
-                    }
-                    className="w-full p-2 border border-gray-300 rounded text-sm"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Cidade"
-                    value={newAddress.city}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, city: e.target.value })
-                    }
-                    className="w-full p-2 border border-gray-300 rounded text-sm"
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="CEP"
-                    value={newAddress.postal_code}
-                    onChange={(e) =>
-                      setNewAddress({
-                        ...newAddress,
-                        postal_code: e.target.value,
-                      })
-                    }
-                    className="w-full p-2 border border-gray-300 rounded text-sm"
-                    required
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="País"
-                    value={newAddress.country}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, country: e.target.value })
-                    }
-                    className="w-full p-2 border border-gray-300 rounded text-sm"
-                    required
-                  />
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="defaultAddress"
-                    checked={newAddress.is_default}
-                    onChange={(e) =>
-                      setNewAddress({
-                        ...newAddress,
-                        is_default: e.target.checked,
-                      })
-                    }
-                    className="mr-2"
-                  />
-                  <label htmlFor="defaultAddress" className="text-sm">
-                    Definir como endereço padrão
-                  </label>
-                </div>
-                <div className="flex justify-end gap-2">
-                  {editingAddress && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingAddress(null)
-                        setNewAddress({
-                          street_address: '',
-                          city: '',
-                          country: '',
-                          postal_code: '',
-                          is_default: false,
-                        })
-                      }}
-                      className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
-                    >
-                      Cancelar
-                    </button>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    {isLoading
-                      ? 'Salvando...'
-                      : editingAddress
-                        ? 'Atualizar'
-                        : 'Adicionar'}
-                  </button>
-                </div>
-              </form>
-            </div>
           </div>
         </div>
       </div>
