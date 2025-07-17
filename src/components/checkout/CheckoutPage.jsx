@@ -552,7 +552,7 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-extrabold text-center mb-6 text-blue-700 tracking-tight drop-shadow-sm">
         🛒 Seu Carrinho{' '}
         <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-base ml-2">
-          {cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}
+          {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
         </span>
       </h1>
 

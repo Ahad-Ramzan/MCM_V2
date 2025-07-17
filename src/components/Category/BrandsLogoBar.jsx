@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { Brandimg } from '@/assets/images/index'
 import { getBrandAllData } from '@/apis/products'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import useProductsStore from '@/store/productsStore'
+import { getAllProducts } from '@/apis/products'
+import { useRouter } from 'next/navigation'
 
 const BrandsLogoBar = () => {
   const [brands, setBrands] = useState([])
@@ -10,6 +13,17 @@ const BrandsLogoBar = () => {
   const [error, setError] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const visibleCount = 5 // Number of brands to show at once
+
+  // Zustand store hooks
+  const { setSelectedBrand, selectedBrand, fetchFilteredProducts } = useProductsStore()
+
+  const router = useRouter()
+
+  const handleBrandClick = (brandId, brandName) => {
+    setSelectedBrand(brandId, brandName)
+    console.log([brandId, brandName], 'brand store details....')
+    router.push(`/category?brand=${brandId}`)
+  }
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -25,6 +39,13 @@ const BrandsLogoBar = () => {
     }
     fetchBrands()
   }, [])
+
+  // Fetch products when selectedBrand changes
+  useEffect(() => {
+    if (selectedBrand) {
+      fetchFilteredProducts(getAllProducts, 1)
+    }
+  }, [selectedBrand])
 
   const nextBrand = () => {
     setCurrentIndex((prev) =>
@@ -68,7 +89,12 @@ const BrandsLogoBar = () => {
             {getVisibleBrands().map((brand) => (
               <div
                 key={brand.id}
-                className="flex-shrink-0 w-64 rounded-lg border border-gray-100 hover:border-blue-200 transition-all"
+                className={`flex-shrink-0 w-64 rounded-lg border transition-all cursor-pointer ${
+                  selectedBrand === brand.id
+                    ? 'border-blue-500 ring-2 ring-blue-200'
+                    : 'border-gray-100 hover:border-blue-200'
+                }`}
+                onClick={() => handleBrandClick(brand.id, brand.brand_name)}
               >
                 <div className="flex items-center p-4">
                   <div className="w-16 h-16 flex items-center justify-center">
