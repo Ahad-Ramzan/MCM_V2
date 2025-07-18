@@ -205,12 +205,7 @@ const SidebarFilter = () => {
       const newBrand = selectedBrand === brandId ? null : brandId
       const newBrandName = selectedBrand === brandId ? '' : brandName
 
-      if (newBrand) {
-        const defaultCategoryId = categories[0]?.id // Set to the first category or any logic you prefer
-        setSelectedCategory(defaultCategoryId, categories[0]?.name) // Set the default category
-      } else {
-        setSelectedCategory(null, '') // Clear category if brand is deselected
-      }
+      // Remove auto-selecting a default category when a brand is selected
       setSelectedBrand(newBrand, newBrandName)
       updateUrlAndFetchProducts(
         selectedCategory,
