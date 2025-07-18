@@ -9,6 +9,7 @@ const useProductsStore = create((set) => ({
   selectedSubcategory: null, // Add this
   selectedSubcategoryName: '', // Add this
   selectedBrand: null,
+  selectedBrandName: '',
   priceRange: [0, 10000],
 
   setProducts: (data) => set({ products: data }),
@@ -31,26 +32,33 @@ const useProductsStore = create((set) => ({
       selectedCategoryName: '', // Reset category name
     }),
 
-  setSelectedBrand: (brandId) => set({ selectedBrand: brandId }),
+  setSelectedBrand: (brandId, brandName) =>
+    set({
+      selectedBrand: brandId,
+      selectedBrandName: brandName || '',
+    }),
   setPriceRange: (range) => set({ priceRange: range }),
 
   // Update the fetch function to include subcategory
-  fetchFilteredProducts: async (getAllProducts) => {
-    const { selectedCategory, selectedSubcategory, selectedBrand, priceRange } =
-      useProductsStore.getState()
+  fetchFilteredProducts: async (getAllProducts, page = 1) => {
+    const {
+      selectedCategory,
+      selectedSubcategory,
+      selectedBrand,
+      priceRange,
+    } = useProductsStore.getState()
 
     try {
       const data = await getAllProducts(
-        1,
+        page,
         '', // search
         selectedBrand || '',
         selectedCategory || '',
         '', // status
         priceRange[0],
         priceRange[1],
-        selectedSubcategory || '' // Add subcategory filter
+        selectedSubcategory || ''
       )
-
       set({ products: data.results || [] })
       return data
     } catch (error) {

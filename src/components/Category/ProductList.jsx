@@ -24,6 +24,8 @@ const ProductListPage = () => {
     selectedCategoryName,
     selectedSubcategory,
     selectedSubcategoryName,
+    selectedBrand,
+    selectedBrandName,
     fetchFilteredProducts,
   } = useProductsStore()
 
@@ -44,7 +46,7 @@ const ProductListPage = () => {
   // Fetch products when filters change
   useEffect(() => {
     fetchData(1)
-  }, [selectedCategory, selectedSubcategory])
+  }, [selectedCategory, selectedSubcategory, selectedBrand])
 
   const handlePageChange = (page) => {
     fetchData(page)
@@ -58,11 +60,13 @@ const ProductListPage = () => {
       <div className="flex flex-wrap w-full justify-between items-center border border-gray-100 p-3 bg-gray-50 mb-6">
         <div>
           <h2 className="text-lg font-semibold">
-            {selectedCategory
-              ? selectedCategoryName
-              : selectedSubcategory
-                ? selectedSubcategoryName
-                : 'Todos os Produtos'}
+            {selectedBrand
+              ? selectedBrandName
+              : selectedCategory
+                ? selectedCategoryName
+                : selectedSubcategory
+                  ? selectedSubcategoryName
+                  : 'Todos os Produtos'}
           </h2>
           <p className="text-sm text-gray-700">
             <strong>{productsData.count}</strong> Produtos encontrados

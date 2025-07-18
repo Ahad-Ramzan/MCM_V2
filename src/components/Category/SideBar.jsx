@@ -17,15 +17,16 @@ const SidebarFilter = () => {
     categories,
     selectedCategory,
     selectedSubcategory,
+    selectedBrand,
     setProducts,
     setBrands,
     setCategories,
     setSelectedCategory,
     setSelectedSubcategory,
+    setSelectedBrand,
   } = useProductsStore()
 
   const [expandedCategories, setExpandedCategories] = useState({})
-  const [selectedBrand, setSelectedBrand] = useState(null)
   const [price, setPrice] = useState([0, 10000])
   const [loading, setLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
@@ -198,21 +199,16 @@ const SidebarFilter = () => {
     ]
   )
 
+  // In handleBrandSelect, always set both ID and name
   const handleBrandSelect = useCallback(
-    (brandId) => {
+    (brandId, brandName) => {
       const newBrand = selectedBrand === brandId ? null : brandId
+      const newBrandName = selectedBrand === brandId ? '' : brandName
 
-      // If a brand is selected, ensure the category is set
-      if (newBrand) {
-        const defaultCategoryId = categories[0]?.id // Set to the first category or any logic you prefer
-        setSelectedCategory(defaultCategoryId, categories[0]?.name) // Set the default category
-      } else {
-        setSelectedCategory(null, '') // Clear category if brand is deselected
-      }
-
-      setSelectedBrand(newBrand)
+      // Remove auto-selecting a default category when a brand is selected
+      setSelectedBrand(newBrand, newBrandName)
       updateUrlAndFetchProducts(
-        newBrand ? selectedCategory : null,
+        selectedCategory,
         selectedSubcategory,
         newBrand,
         price[0],
@@ -225,7 +221,7 @@ const SidebarFilter = () => {
       selectedBrand,
       price,
       updateUrlAndFetchProducts,
-      categories,
+      setSelectedBrand,
     ]
   )
 
@@ -275,7 +271,7 @@ const SidebarFilter = () => {
   const clearAllFilters = useCallback(() => {
     setSelectedCategory(null, '')
     setSelectedSubcategory(null, '')
-    setSelectedBrand(null)
+    setSelectedBrand(null, '')
     setPrice([0, 10000])
     updateUrlAndFetchProducts(null, null, null, 0, 10000)
   }, [updateUrlAndFetchProducts, setSelectedCategory, setSelectedSubcategory])
@@ -296,7 +292,10 @@ const SidebarFilter = () => {
 
     if (!isInitialized && typeof window !== 'undefined') {
       const initializeFilters = async () => {
-        await Promise.all([fetchBrands(), fetchCategories()])
+        const [responseBrands, responseCategories] = await Promise.all([
+          fetchBrands(),
+          fetchCategories(),
+        ])
         const currentParams = getCurrentParams()
 
         setSelectedCategory(
@@ -309,9 +308,17 @@ const SidebarFilter = () => {
             : null,
           ''
         )
-        setSelectedBrand(
-          currentParams.brand ? parseInt(currentParams.brand) : null
-        )
+        // Find brand name from fetched brands
+        let brandName = ''
+        if (currentParams.brand) {
+          const brandObj = (
+            brands.length ? brands : responseBrands?.results || []
+          ).find((b) => b.id === parseInt(currentParams.brand))
+          brandName = brandObj ? brandObj.brand_name : ''
+          setSelectedBrand(parseInt(currentParams.brand), brandName)
+        } else {
+          setSelectedBrand(null, '')
+        }
         setPrice([
           parseInt(currentParams.sale_price_min),
           parseInt(currentParams.sale_price_max),
@@ -356,6 +363,8 @@ const SidebarFilter = () => {
     categories,
     setSelectedCategory,
     setSelectedSubcategory,
+    setSelectedBrand,
+    brands,
   ])
 
   // Cleanup timeout on unmount
@@ -492,7 +501,7 @@ const SidebarFilter = () => {
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  handleBrandSelect(brand.id)
+                  handleBrandSelect(brand.id, brand.brand_name)
                 }}
               >
                 <div className="relative">
@@ -502,7 +511,7 @@ const SidebarFilter = () => {
                     checked={selectedBrand === brand.id}
                     onChange={(e) => {
                       e.stopPropagation()
-                      handleBrandSelect(brand.id)
+                      handleBrandSelect(brand.id, brand.brand_name)
                     }}
                     className="w-4 h-4 bg-gray-100 border-gray-300 focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-gray-300 focus:shadow-none"
                     style={{
@@ -529,7 +538,7 @@ const SidebarFilter = () => {
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                handleBrandSelect(null)
+                handleBrandSelect(null, '')
               }}
               className="mt-3 text-xs text-red-500 hover:text-red-700 underline"
             >
