@@ -1,340 +1,3 @@
-// import React from 'react'
-// import useCartStore from '@/cartstore/estore'
-// import { useRouter } from 'next/navigation'
-// import { createOrder } from '@/apis/products'
-// import toast, { Toaster } from 'react-hot-toast'
-
-// export default function CheckoutPage() {
-//   const router = useRouter()
-//   const cartItems = useCartStore((state) => state.cart)
-//   const removeFromCart = useCartStore((state) => state.removeFromCart)
-//   const clearCart = useCartStore((state) => state.clearCart)
-//   const updateQuantity = useCartStore((state) => state.updateQuantity)
-
-//   const shippingCost = 5.99
-//   const tax = 3.51
-
-//   const subtotal = cartItems.reduce(
-//     (sum, item) => sum + item.price * item.quantity,
-//     0
-//   )
-//   const total = subtotal + shippingCost + tax
-
-//   const handleRemove = (id) => {
-//     removeFromCart(id)
-//   }
-
-//   const handleFinalizeOrder = async () => {
-//     if (!cartItems.length) {
-//       toast.error('Your cart is empty!')
-//       return
-//     }
-//     try {
-//       const payload = {
-//         product_items: cartItems.map((item) => ({
-//           product_id: item.id,
-//           quantity: item.quantity,
-//         })),
-//       }
-//       await createOrder(payload)
-//       clearCart()
-//       toast.success('Order placed successfully!')
-//       router.push('/checkout')
-//     } catch (e) {
-//       toast.error('Failed to place order.')
-//     }
-//   }
-
-//   return (
-//     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 px-2 sm:px-8 py-10 flex flex-col gap-8">
-//       <Toaster position="top-center" />
-//       <h1 className="text-3xl font-extrabold text-center mb-6 text-blue-700 tracking-tight drop-shadow-sm">
-//         🛒 Seu Carrinho{' '}
-//         <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-base ml-2">
-//           {cartItems.length} items
-//         </span>
-//       </h1>
-//       <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
-//         {/* Cart Items */}
-//         <div className="flex-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100">
-//           {cartItems.length === 0 ? (
-//             <div className="flex flex-col items-center justify-center py-16">
-//               <img
-//                 src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
-//                 alt="Empty Cart"
-//                 className="w-28 mb-6 opacity-70"
-//               />
-//               <p className="text-gray-500 text-xl">Seu carrinho está vazio.</p>
-//             </div>
-//           ) : (
-//             cartItems.map((item) => (
-//               <div
-//                 key={item.id}
-//                 className="flex items-center gap-4 border-b last:border-b-0 border-gray-200 py-6 group transition"
-//               >
-//                 <img
-//                   src={item.image}
-//                   alt={item.product_name}
-//                   className="w-20 h-20 object-cover rounded-xl border border-gray-100 shadow"
-//                 />
-//                 <div className="flex-1">
-//                   <div className="font-bold text-lg text-gray-800 mb-1">
-//                     {item.product_name}
-//                   </div>
-//                   <div className="flex items-center gap-2 mt-1">
-//                     <button
-//                       className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-lg hover:bg-blue-200 transition disabled:opacity-50"
-//                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-//                       disabled={item.quantity <= 1}
-//                       aria-label="Decrease quantity"
-//                     >
-//                       −
-//                     </button>
-//                     <input
-//                       type="text"
-//                       value={item.quantity}
-//                       className="w-12 text-center outline-none border-none bg-transparent font-semibold text-lg"
-//                       readOnly
-//                       aria-label="Quantity"
-//                     />
-//                     <button
-//                       className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-lg hover:bg-blue-200 transition"
-//                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-//                       aria-label="Increase quantity"
-//                     >
-//                       +
-//                     </button>
-//                   </div>
-//                 </div>
-//                 <div className="font-bold text-xl text-pink-500 min-w-[80px] text-right">
-//                   €{(item.price * item.quantity).toFixed(2)}
-//                 </div>
-//                 <button
-//                   className="ml-4 text-sm px-3 py-1 rounded-full bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition font-semibold shadow-sm"
-//                   onClick={() => handleRemove(item.id)}
-//                 >
-//                   Remover
-//                 </button>
-//               </div>
-//             ))
-//           )}
-//         </div>
-
-//         {/* Order Summary */}
-//         <div className="w-full lg:w-[340px]">
-//           <div className="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl p-8 border border-blue-100 sticky top-10">
-//             <h2 className="text-xl font-bold mb-6 text-blue-700 flex items-center gap-2">
-//               <span className="text-2xl">🧾</span> Resumo do pedido
-//             </h2>
-//             <div className="flex justify-between mb-2 text-gray-700">
-//               <span>Sub Total:</span>
-//               <span className="font-medium">€{subtotal.toFixed(2)}</span>
-//             </div>
-//             <div className="flex justify-between mb-2 text-gray-700">
-//               <span>Custos de envio :</span>
-//               <span className="font-medium">€{shippingCost.toFixed(2)}</span>
-//             </div>
-//             <div className="flex justify-between mb-2 text-gray-700">
-//               <span>Impostos:</span>
-//               <span className="font-medium">€{tax.toFixed(2)}</span>
-//             </div>
-//             <div className="border-t border-blue-200 my-4"></div>
-//             <div className="flex justify-between font-extrabold text-xl text-blue-900 mb-4">
-//               <span>Total :</span>
-//               <span>€{total.toFixed(2)}</span>
-//             </div>
-//             <button
-//               className="mt-2 w-full bg-gradient-to-r from-blue-500 to-pink-400 hover:from-blue-600 hover:to-pink-500 text-white font-bold py-3 rounded-xl shadow-lg transition text-lg tracking-wide"
-//               onClick={handleFinalizeOrder}
-//             >
-//               Finalizar Encomenda
-//             </button>
-//             <p className="text-xs text-gray-400 text-center mt-3">
-//               Seu pagamento é seguro e criptografado.
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-//
-
-// import React, { useState } from 'react'
-// import useCartStore from '@/cartstore/estore'
-// import { useRouter } from 'next/navigation'
-// import { createOrder } from '@/apis/products'
-// import toast, { Toaster } from 'react-hot-toast'
-
-// export default function CheckoutPage() {
-//   const router = useRouter()
-//   const cartItems = useCartStore((state) => state.cart)
-//   const removeFromCart = useCartStore((state) => state.removeFromCart)
-//   const clearCart = useCartStore((state) => state.clearCart)
-//   const updateQuantity = useCartStore((state) => state.updateQuantity)
-
-//   const custosEnvio = 0
-//   const impostos = 0
-
-//   const subtotal = cartItems.reduce(
-//     (sum, item) => sum + item.price * item.quantity,
-//     0
-//   )
-//   const total = subtotal + custosEnvio + impostos
-
-//   const removerItem = (id) => {
-//     removeFromCart(id)
-//   }
-
-//   const handleFinalizarClick = async () => {
-//     if (!cartItems.length) {
-//       toast.error('Seu carrinho está vazio!')
-//       return
-//     }
-
-//     try {
-//       const payload = {
-//         product_items: cartItems.map((item) => ({
-//           product_id: item.id,
-//           quantity: item.quantity,
-//         })),
-//       }
-
-//       await createOrder(payload)
-//       clearCart()
-//       toast.success('Encomenda realizada com sucesso!')
-//       // router.push('/encomendas')
-//     } catch (e) {
-//       toast.error('Falha ao finalizar encomenda.')
-//     }
-//   }
-
-//   return (
-//     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 px-2 sm:px-8 py-10 flex flex-col gap-8 relative">
-//       <Toaster position="top-center" />
-
-//       <h1 className="text-3xl font-extrabold text-center mb-6 text-blue-700 tracking-tight drop-shadow-sm">
-//         🛒 Seu Carrinho{' '}
-//         <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-base ml-2">
-//           {cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}
-//         </span>
-//       </h1>
-
-//       <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
-//         {/* Itens do Carrinho */}
-//         <div className="flex-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100">
-//           {cartItems.length === 0 ? (
-//             <div className="flex flex-col items-center justify-center py-16">
-//               <img
-//                 src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
-//                 alt="Carrinho Vazio"
-//                 className="w-28 mb-6 opacity-70"
-//               />
-//               <p className="text-gray-500 text-xl">Seu carrinho está vazio.</p>
-//               <button
-//                 onClick={() => router.push('/')}
-//                 className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-//               >
-//                 Continuar Comprando
-//               </button>
-//             </div>
-//           ) : (
-//             cartItems.map((item) => (
-//               <div
-//                 key={item.id}
-//                 className="flex items-center gap-4 border-b last:border-b-0 border-gray-200 py-6 group transition"
-//               >
-//                 <img
-//                   src={item.image}
-//                   alt={item.product_name}
-//                   className="w-20 h-20 object-cover rounded-xl border border-gray-100 shadow"
-//                 />
-//                 <div className="flex-1">
-//                   <div className="font-bold text-lg text-gray-800 mb-1">
-//                     {item.product_name}
-//                   </div>
-//                   <div className="text-gray-500 text-sm mb-2">
-//                     {item.category}
-//                   </div>
-//                   <div className="flex items-center gap-2 mt-1">
-//                     <button
-//                       className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-lg hover:bg-blue-200 transition disabled:opacity-50"
-//                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-//                       disabled={item.quantity <= 1}
-//                       aria-label="Diminuir quantidade"
-//                     >
-//                       −
-//                     </button>
-//                     <input
-//                       type="text"
-//                       value={item.quantity}
-//                       className="w-12 text-center outline-none border-none bg-transparent font-semibold text-lg"
-//                       readOnly
-//                       aria-label="Quantidade"
-//                     />
-//                     <button
-//                       className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-lg hover:bg-blue-200 transition"
-//                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-//                       aria-label="Aumentar quantidade"
-//                     >
-//                       +
-//                     </button>
-//                   </div>
-//                 </div>
-//                 <div className="font-bold text-xl text-pink-500 min-w-[80px] text-right">
-//                   €{(item.price * item.quantity).toFixed(2)}
-//                 </div>
-//                 <button
-//                   className="ml-4 text-sm px-3 py-1 rounded-full bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition font-semibold shadow-sm"
-//                   onClick={() => removerItem(item.id)}
-//                 >
-//                   Remover
-//                 </button>
-//               </div>
-//             ))
-//           )}
-//         </div>
-
-//         {/* Resumo da Encomenda */}
-//         <div className="w-full lg:w-[340px]">
-//           <div className="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl p-8 border border-blue-100 sticky top-10">
-//             <h2 className="text-xl font-bold mb-6 text-blue-700 flex items-center gap-2">
-//               <span className="text-2xl">🧾</span> Resumo do Pedido
-//             </h2>
-//             <div className="flex justify-between mb-2 text-gray-700">
-//               <span>Subtotal:</span>
-//               <span className="font-medium">€{subtotal.toFixed(2)}</span>
-//             </div>
-//             <div className="flex justify-between mb-2 text-gray-700">
-//               <span>Portes de Envio:</span>
-//               <span className="font-medium">€{custosEnvio.toFixed(2)}</span>
-//             </div>
-//             <div className="flex justify-between mb-2 text-gray-700">
-//               <span>Impostos:</span>
-//               <span className="font-medium">€{impostos.toFixed(2)}</span>
-//             </div>
-//             <div className="border-t border-blue-200 my-4"></div>
-//             <div className="flex justify-between font-extrabold text-xl text-blue-900 mb-4">
-//               <span>Total:</span>
-//               <span>€{total.toFixed(2)}</span>
-//             </div>
-//             <button
-//               className="mt-2 w-full bg-gradient-to-r from-blue-500 to-pink-400 hover:from-blue-600 hover:to-pink-500 text-white font-bold py-3 rounded-xl shadow-lg transition text-lg tracking-wide"
-//               onClick={handleFinalizarClick}
-//             >
-//               Finalizar Encomenda
-//             </button>
-//             <p className="text-xs text-gray-400 text-center mt-3">
-//               Seu pagamento é seguro e criptografado.
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -386,7 +49,6 @@ export default function CheckoutPage() {
       try {
         const response = await getCurrentUser()
         setUserAddresses(response.addresses || [])
-        // Set default addresses if available
         const billingAddress = response.addresses.find(
           (addr) => addr.adr_type === 'Billing'
         )
@@ -445,7 +107,6 @@ export default function CheckoutPage() {
 
     try {
       if (editingAddress !== null) {
-        // Update existing address
         await updateAddress(editingAddress, newAddress)
         setUserAddresses(
           userAddresses.map((addr) =>
@@ -456,7 +117,6 @@ export default function CheckoutPage() {
         )
         toast.success('Endereço atualizado com sucesso!')
       } else {
-        // Check if address type already exists
         const existingAddress = userAddresses.find(
           (addr) => addr.adr_type === newAddress.adr_type
         )
@@ -467,11 +127,9 @@ export default function CheckoutPage() {
           return
         }
 
-        // Add new address
         const response = await AddAddress(newAddress)
         setUserAddresses([...userAddresses, response])
 
-        // Auto-select the new address
         if (response.adr_type === 'Billing') {
           setSelectedBillingAddress(response.id)
         } else {
@@ -481,7 +139,6 @@ export default function CheckoutPage() {
         toast.success('Endereço adicionado com sucesso!')
       }
 
-      // Reset form
       setNewAddress({
         street_address: '',
         city: '',
@@ -504,7 +161,6 @@ export default function CheckoutPage() {
       try {
         await deleteAddress(id)
         setUserAddresses(userAddresses.filter((addr) => addr.id !== id))
-        // Reset selection if deleted address was selected
         if (selectedBillingAddress === id) setSelectedBillingAddress(null)
         if (selectedShippingAddress === id) setSelectedShippingAddress(null)
         toast.success('Endereço excluído com sucesso!')
@@ -546,19 +202,19 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 px-2 sm:px-8 py-10 flex flex-col gap-8 relative">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 px-4 sm:px-12 py-10 flex flex-col gap-8 relative">
       <Toaster position="top-center" />
 
       <h1 className="text-3xl font-extrabold text-center mb-6 text-blue-700 tracking-tight drop-shadow-sm">
         🛒 Seu Carrinho{' '}
         <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-base ml-2">
-          {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+          {cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}
         </span>
       </h1>
 
-      <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
+      <div className="flex flex-col lg:flex-row gap-8 w-full max-w-6xl mx-auto">
         {/* Cart Items */}
-        <div className="flex-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100">
+        <div className="flex-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100 lg:max-w-2xl">
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
               <img
@@ -632,7 +288,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Order Summary and Addresses */}
-        <div className="w-full lg:w-[340px] flex flex-col gap-6">
+        <div className="w-full lg:w-[400px] flex flex-col gap-6">
           {/* Address Section */}
           <div className="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl p-6 border border-blue-100">
             <h2 className="text-xl font-bold mb-4 text-blue-700 flex items-center gap-2">

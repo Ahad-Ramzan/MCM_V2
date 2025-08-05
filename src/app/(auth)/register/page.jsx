@@ -48,7 +48,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f5f7ff]">
-      <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md text-center">
+      <div className="bg-white mt-20 mb-40 p-10 rounded-xl shadow-lg w-full max-w-xl text-center">
         <img src="/img/logo.png" alt="Logo" className="h-16 mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-4">Create Account</h2>
 
@@ -70,7 +70,6 @@ export default function RegisterPage() {
             value={displayName}
             onChange={setDisplayName}
           />
-
           <InputField
             label="Full Name"
             value={fullName}
@@ -82,15 +81,11 @@ export default function RegisterPage() {
             onChange={setPassword}
             type="password"
           />
-
-          {/* Address Textarea */}
           <TextareaField
             label="Address"
             value={address}
             onChange={setAddress}
           />
-
-          {/* Bio Textarea */}
           <TextareaField label="Bio" value={bio} onChange={setBio} />
 
           <button
@@ -139,7 +134,7 @@ function TextareaField({ label, value, onChange }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
-        rows="4" // Default height
+        rows="4"
       />
     </div>
   )

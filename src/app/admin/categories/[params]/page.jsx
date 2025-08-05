@@ -177,10 +177,9 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
     formData.append('slug', slug)
     formData.append('description', description)
     subCategoryIds.forEach((id) => formData.append('sub_category_ids', id))
-    // Add features to form data
-    if (selectedFeature) {
-      formData.append('feature', selectedFeature)
-    }
+
+    // Always append feature - send empty string when selectedFeature is null
+    formData.append('feature', selectedFeature || '')
 
     if (image) {
       formData.append('image', image)
@@ -279,10 +278,21 @@ const EditCategoryModal = ({ isOpen, onClose, category, onUpdate }) => {
             </div>
           </div>
 
-          {/* Add Feature Checkboxes Section */}
+          {/* Add Feature Radio Buttons Section */}
           <div className="form-group">
             <label>Features</label>
             <div className="feature-checkboxes">
+              <div className="feature-item">
+                <label>
+                  <input
+                    type="radio"
+                    name="feature"
+                    checked={selectedFeature === null}
+                    onChange={() => setSelectedFeature(null)}
+                  />
+                  <span>None</span>
+                </label>
+              </div>
               <div className="feature-item">
                 <label>
                   <input

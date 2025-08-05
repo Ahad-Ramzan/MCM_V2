@@ -288,6 +288,7 @@ const OrdersPage = () => {
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
+        width={800}
       >
         <form className="ps-form" onSubmit={handleSubmit}>
           <div className="ps-form__content">
