@@ -32,7 +32,14 @@ const WidgetUserWelcome = () => {
         </p>
       </div>
       <div className="ps-block__action">
-        <a href="#">
+        <a
+          href="#"
+          onClick={() => {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('user_role')
+            window.location.href = '/'
+          }}
+        >
           <i className="icon-exit"></i>
         </a>
       </div>

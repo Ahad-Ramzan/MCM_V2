@@ -104,7 +104,7 @@ const ProductDetails = ({ productData }) => {
 
         {/* Features */}
         <ul className="text-sm text-gray-500 mt-4 space-y-3 border-b border-gray-300 pb-4">
-          <li>• Em estoque: {stock}</li>
+          <li>• Stock: {stock}</li>
           <li>• Vendidos: {sold_items}</li>
         </ul>
 
@@ -141,21 +141,21 @@ const ProductDetails = ({ productData }) => {
           <div className="flex gap-3 flex-wrap mt-3">
             <button
               onClick={handleAddToCart}
-              className="bg-[var(--primary)] text-white px-6 py-2 rounded font-medium"
+              className="bg-[var(--primary)] text-white px-6 py-2 rounded font-medium cursor-pointer"
             >
               Adicionar
             </button>
             <button
               onClick={handleGoToCheckout}
-              className="bg-[var(--secondary)] text-white px-6 py-2 rounded font-medium"
+              className="bg-[var(--secondary)] text-white px-6 py-2 rounded font-medium cursor-pointer"
             >
               {/* Comprar Agora */}
               Checkout
             </button>
-            <button className="text-gray-600 text-xl">
+            <button className="text-gray-600 text-xl cursor-pointer">
               <FaRegHeart />
             </button>
-            <button className="text-gray-500 text-xl">
+            <button className="text-gray-500 text-xl cursor-pointer">
               <FaChartBar />
             </button>
           </div>
@@ -184,16 +184,16 @@ const ProductDetails = ({ productData }) => {
 
         {/* Social Share */}
         <div className="flex gap-3 mt-4">
-          <a className="bg-blue-600 text-white p-2 rounded">
+          <a className="bg-blue-600 text-white p-2 rounded cursor-pointer">
             <FaFacebookF size={16} />
           </a>
-          <a className="bg-sky-400 text-white p-2 rounded">
+          <a className="bg-sky-400 text-white p-2 rounded cursor-pointer">
             <FaTwitter size={16} />
           </a>
-          <a className="bg-red-600 text-white p-2 rounded">
+          <a className="bg-red-600 text-white p-2 rounded cursor-pointer">
             <FaGooglePlusG size={16} />
           </a>
-          <a className="bg-blue-700 text-white p-2 rounded">
+          <a className="bg-blue-700 text-white p-2 rounded cursor-pointer">
             <FaLinkedinIn size={16} />
           </a>
         </div>

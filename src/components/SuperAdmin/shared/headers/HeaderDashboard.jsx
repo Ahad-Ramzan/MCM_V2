@@ -18,9 +18,7 @@ const HeaderDashboard = ({
         <button
           className="header__site-link flex items-center gap-2"
           onClick={() => {
-            localStorage.removeItem('access_token')
-            localStorage.removeItem('user_role')
-            window.location.href = '/'
+            window.open('/', '_blank') // Opens in new tab
           }}
         >
           <span>VER LOJA</span>
