@@ -36,13 +36,10 @@ const MenuSidebar = () => {
           </li>
         )
       })}
-      <div
-        style={{
-          padding: '1rem',
-          textAlign: 'left',
-          marginTop: '0.5rem',
-          marginLeft: '1rem',
-        }}
+      {/* Bitrix Image as a List Item */}
+      <li
+        className="menu-item bitrix-logo"
+        style={{ padding: '1rem 0 0 1rem', border: 'none', background: 'none' }}
       >
         <img
           src="/img/admin/Bitrix.png"
@@ -52,7 +49,7 @@ const MenuSidebar = () => {
             height: 'auto',
           }}
         />
-      </div>
+      </li>
     </ul>
   )
 }

@@ -53,6 +53,8 @@ const ProductListPage = () => {
   }
 
   const totalPages = Math.ceil(productsData.count / 10)
+  const showingCount = products.length
+  const totalCount = productsData.count
 
   return (
     <div className="w-full lg:px-4 py-6 bg-white">
@@ -69,7 +71,14 @@ const ProductListPage = () => {
                   : 'Todos os Produtos'}
           </h2>
           <p className="text-sm text-gray-700">
-            <strong>{productsData.count}</strong> Produtos encontrados
+            Mostrando <strong>{showingCount}</strong>{' '}
+            {showingCount === 1 ? 'produto' : 'produtos'}
+            {totalCount > showingCount && (
+              <>
+                {' '}
+                de <strong>{totalCount}</strong> encontrados
+              </>
+            )}
           </p>
         </div>
 
@@ -121,13 +130,15 @@ const ProductListPage = () => {
           </div>
 
           {/* Pagination */}
-          <div className="ps-section__footer mt-6">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
+          {totalPages > 1 && (
+            <div className="ps-section__footer mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
