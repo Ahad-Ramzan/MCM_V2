@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { Modal } from 'antd'
 import EditProductPage from '@/app/admin/products/[id]/page'
-// import EditProductPage from './EditProductPage' // Adjust the path as necessary
 
 const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -13,9 +12,38 @@ const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
     ? productsData.map((item, index) => {
         const badgeView =
           item.stock > 0 ? (
-            <span className="ps-badge success">Stock</span>
+            <span className="ps-badge success">In Stock</span>
           ) : (
             <span className="ps-badge gray">Out of stock</span>
+          )
+
+        const statusButton =
+          item.status === 'active' ? (
+            <button
+              className="ps-badge success"
+              style={{
+                padding: '3px 10px',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'default',
+              }}
+            >
+              Active
+            </button>
+          ) : (
+            <button
+              className="ps-badge danger"
+              style={{
+                padding: '3px 10px',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'default',
+                backgroundColor: '#dc3545',
+                color: 'white',
+              }}
+            >
+              Inactive
+            </button>
           )
 
         return (
@@ -27,7 +55,7 @@ const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
               </a>
             </td>
             <td>{item.SKU}</td>
-            <td>{item.stock}</td>
+            <td>{badgeView}</td>
             <td>
               <strong>{item.regular_price}€</strong>
             </td>
@@ -36,6 +64,7 @@ const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
                 <a href="#">Categoria ID: {item.category}</a>
               </p>
             </td>
+            <td>{statusButton}</td>
             <td>{new Date(item.date).toLocaleDateString()}</td>
             <td>
               <button
@@ -62,12 +91,11 @@ const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
 
   const handleCloseModal = () => {
     setIsModalVisible(false)
-    // setSelectedCategory(null)
   }
 
   const handleSuccessfulUpdate = () => {
-    if (onUpdate) onUpdate() // Call the parent's update handler
-    handleCloseModal() // Close the modal
+    if (onUpdate) onUpdate()
+    handleCloseModal()
   }
 
   return (
@@ -79,16 +107,16 @@ const TableProjectItems = ({ productsData, onDelete, onUpdate }) => {
             <th>Name</th>
             <th>SKU</th>
             <th>Stock</th>
-            <th>Preço</th>
-            <th>Categorias</th>
-            <th>Data</th>
-            <th></th>
+            <th>Price</th>
+            <th>Categories</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>{tableItems}</tbody>
       </table>
 
-      {/* Edit Product Modal */}
       <Modal
         title="Edit Product"
         visible={isModalVisible}
