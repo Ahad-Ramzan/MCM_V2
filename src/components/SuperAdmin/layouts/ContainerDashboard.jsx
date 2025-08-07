@@ -1,66 +1,45 @@
-'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
+import Head from 'next/head'
 import FooterCopyright from '@/components/SuperAdmin/shared/footers/FooterCopyright'
 import MenuSidebar from '@/components/SuperAdmin/shared/menus/MenuSidebar'
 import WidgetEarningSidebar from '@/components/SuperAdmin/shared/widgets/WidgetEarningSidebar'
 import WidgetUserWelcome from '@/components/SuperAdmin/shared/widgets/WidgetUserWelcome'
-import HeaderDashboard from '@/components/SuperAdmin/shared/headers/HeaderDashboard'
-// import { useDispatch } from 'react-redux';
-// import { toggleDrawerMenu } from '~/redux/features/appSlide';
 
-const ContainerDashboard = ({ children }) => {
-  // const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //     dispatch(toggleDrawerMenu(false));
-  // }, []);
+const ContainerDefault = ({ children, title }) => {
+  let titleView
+  if (title !== undefined) {
+    titleView = process.env.title + ' | ' + title
+  } else {
+    titleView = process.env.title + ' | ' + process.env.titleDescription
+  }
 
   return (
-    <div className="martfury-admin">
-      <main className="ps-main">
-        <div className="ps-main__sidebar">
-          <div className="ps-sidebar">
-            <div className="ps-sidebar__top">
-              <WidgetUserWelcome />
-              <WidgetEarningSidebar />
-            </div>
-            <div className="ps-sidebar__content mb-40">
-              <div className="ps-sidebar__center mb-20">
-                <MenuSidebar />
-                {/* <div
-                  style={{
-                    padding: '1rem',
-                    // textAlign: 'center',
-                    //   position: 'sticky',
-                    // marginBottom: '100px',
-                    display: 'flex',
-                    justifyItems: 'flex-start',
-                  }}
-                >
-                  <img
-                    src="/img/admin/Bitrix.png"
-                    alt="Bitrix Logo"
-                    style={{
-                      maxWidth: '120px',
-                      height: 'auto',
-                      margin: '0 auto',
-                    }}
-                  />
-                </div> */}
-              </div>
-            </div>
-            <div className="ps-sidebar__footer">
-              <FooterCopyright />
-            </div>
+    <div className="martfury-admin bg-gray-50">
+      <Head>
+        <title>{titleView}</title>
+      </Head>
+      <div className="flex min-h-screen">
+        {/* Sidebar - Fixed width */}
+        <div className="w-[280px] fixed h-full bg-white shadow-md z-10 flex flex-col">
+          <div className="p-4 border-b border-gray-200">
+            <WidgetUserWelcome />
+            <WidgetEarningSidebar />
           </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <MenuSidebar />
+          </div>
+
+          {/* <div className="mt-auto">
+            <FooterCopyright />
+          </div> */}
         </div>
-        <div className="ps-main__wrapper">
-          <HeaderDashboard />
-          {children}
-        </div>
-      </main>
+
+        {/* Main Content - Consistent across all pages */}
+        <div className="flex-1 ml-[280px] p-6 bg-white">{children}</div>
+      </div>
     </div>
   )
 }
 
-export default ContainerDashboard
+export default ContainerDefault
